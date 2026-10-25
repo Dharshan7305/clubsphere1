@@ -1,0 +1,80 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/alerts') %>
+
+<main class="container" style="padding-top: 2rem; padding-bottom: 4rem;">
+  <div class="section-header">
+    <div>
+      <h1 class="section-title">Club Membership Requests</h1>
+      <p class="section-subtitle">
+        Review requests for <strong><%= club.name %></strong>. Approved members: <%= club.members.length %> / <%= club.teamLimit %>.
+      </p>
+    </div>
+    <div style="display: flex; gap: 0.5rem;">
+      <a href="/secretary/club" class="btn btn-outline">Manage Member Limit</a>
+      <a href="/secretary/dashboard" class="btn btn-outline">Back to Dashboard</a>
+    </div>
+  </div>
+
+  <% if (membershipRequests.length === 0) { %>
+    <div class="card">
+      <div class="card-body" style="text-align: center; padding: 3rem 1rem;">
+        <h3 style="color: var(--primary); margin-bottom: 0.5rem;">No membership requests yet</h3>
+        <p style="color: var(--text-muted);">Student requests to join your club will appear here.</p>
+      </div>
+    </div>
+  <% } else { %>
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>Department & Year</th>
+            <th>Request Note</th>
+            <th>Requested</th>
+            <th>Status / Decision</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% membershipRequests.forEach(request => { %>
+            <tr>
+              <td>
+                <strong><%= request.student ? request.student.name : 'Student account unavailable' %></strong>
+                <% if (request.student) { %>
+                  <div style="font-size: 0.8rem; color: var(--text-muted);"><%= request.student.rollNo %> · <%= request.student.email %></div>
+                <% } %>
+              </td>
+              <td>
+                <% if (request.student) { %>
+                  <%= request.student.department %> · Year <%= request.student.year %>
+                <% } else { %>
+                  —
+                <% } %>
+              </td>
+              <td style="max-width: 300px; white-space: normal;"><%= request.message || 'No note provided' %></td>
+              <td><%= new Date(request.createdAt).toLocaleDateString() %></td>
+              <td>
+                <% if (request.status === 'Pending') { %>
+                  <div style="display: flex; gap: 0.4rem;">
+                    <form action="/secretary/members/<%= request._id %>/status" method="POST">
+                      <input type="hidden" name="status" value="Approved">
+                      <button type="submit" class="btn btn-sm btn-primary" <%= club.members.length >= club.teamLimit && (!request.student || !club.members.some(id => id.toString() === request.student._id.toString())) ? 'disabled title="Member limit reached"' : '' %>>Approve</button>
+                    </form>
+                    <form action="/secretary/members/<%= request._id %>/status" method="POST">
+                      <input type="hidden" name="status" value="Rejected">
+                      <button type="submit" class="btn btn-sm btn-outline">Reject</button>
+                    </form>
+                  </div>
+                <% } else { %>
+                  <span class="badge <%= request.status === 'Approved' ? 'badge-accepted' : 'badge-rejected' %>"><%= request.status %></span>
+                <% } %>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</main>
+
+<%- include('../partials/footer') %>
