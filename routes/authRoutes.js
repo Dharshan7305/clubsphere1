@@ -1,13 +1,14 @@
-﻿const express = require('express');
+const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 const Club = require('../models/Club');
+const NotificationService = require('../services/notificationService');
 const { ensureGuest } = require('../middleware/auth');
 
 // Render Login Page
 router.get('/login', ensureGuest, (req, res) => {
   res.render('auth/login', {
-    title: 'Login - ClubSphere ',
+    title: 'Login - ClubSphere',
     currentPage: 'login'
   });
 });
@@ -52,6 +53,8 @@ router.post('/login', ensureGuest, async (req, res) => {
     switch (user.role) {
       case 'admin':
         return res.redirect('/admin/dashboard');
+      case 'principal':
+        return res.redirect('/principal/dashboard');
       case 'secretary':
         return res.redirect('/secretary/dashboard');
       case 'core':
@@ -71,7 +74,7 @@ router.post('/login', ensureGuest, async (req, res) => {
 // Render Register Page (for Students)
 router.get('/register', ensureGuest, (req, res) => {
   res.render('auth/register', {
-    title: 'Student Registration - ClubSphere ',
+    title: 'Student Registration - ClubSphere',
     currentPage: 'register'
   });
 });
@@ -114,6 +117,15 @@ router.post('/register', ensureGuest, async (req, res) => {
     });
 
     await newUser.save();
+
+    // Notify Administrators of new student registration
+    await NotificationService.notifyRole('admin', {
+      title: `New Student Registered: ${newUser.name}`,
+      message: `Student ${newUser.name} (${newUser.rollNo}, ${newUser.department}) registered on ClubSphere.`,
+      type: 'admin',
+      relatedId: newUser._id,
+      relatedLink: '/admin/users'
+    });
 
     // Auto-login registered student
     req.session.user = {

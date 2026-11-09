@@ -1,0 +1,172 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/alerts') %>
+
+<main class="container dashboard-wrapper">
+  
+  <div class="section-header" style="margin-bottom: 2rem;">
+    <div>
+      <span class="badge badge-category" style="margin-bottom: 0.35rem; background: #5521B8; color: #fff;">Executive Office</span>
+      <h1 class="section-title">🏛️ Principal Approval Portal</h1>
+      <p class="section-subtitle">Logged in as <%= user.name %> &bull; Executive review of faculty-endorsed event proposals.</p>
+    </div>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="stats-grid" style="margin-bottom: 2.5rem;">
+    <div class="stat-box">
+      <div class="stat-icon stat-icon-yellow">⏳</div>
+      <div class="stat-info">
+        <div class="stat-value"><%= stats.totalPending %></div>
+        <div class="stat-title">Pending Principal Approvals</div>
+      </div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-icon stat-icon-green">✅</div>
+      <div class="stat-info">
+        <div class="stat-value"><%= stats.totalApproved %></div>
+        <div class="stat-title">Approved & Published Events</div>
+      </div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-icon stat-icon-red">⚖️</div>
+      <div class="stat-info">
+        <div class="stat-value"><%= stats.totalRejected %></div>
+        <div class="stat-title">Decisions (Returned/Rejected)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pending Approvals Section -->
+  <div class="dashboard-card" style="margin-bottom: 3rem; background: var(--bg-card); border-radius: 16px; padding: 1.75rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem;">
+      <div>
+        <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--text-main); margin: 0;">📋 Events Awaiting Principal Approval</h2>
+        <p style="font-size: 0.88rem; color: var(--text-muted); margin: 0.25rem 0 0;">These event proposals have been verified by Main Faculty Advisors and await final college sanction.</p>
+      </div>
+      <span class="badge" style="background: #F3EEFF; color: #5521B8; font-weight: 700; padding: 6px 14px; border-radius: 20px;">
+        <%= pendingEvents.length %> Pending Review
+      </span>
+    </div>
+
+    <% if (pendingEvents && pendingEvents.length > 0) { %>
+      <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+        <% pendingEvents.forEach(function(ev) { %>
+          <div style="border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; background: var(--bg-main); transition: transform 0.2s ease;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
+              <div>
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.5rem;">
+                  <span class="badge badge-category" style="font-size: 0.75rem;"><%= ev.club.name %></span>
+                  <span style="font-size: 0.78rem; font-weight: 600; color: #5521B8; background: #EDE9FE; padding: 2px 8px; border-radius: 6px;"><%= ev.category %></span>
+                  <span style="font-size: 0.78rem; font-weight: 600; color: #B45309; background: #FEF3C7; padding: 2px 8px; border-radius: 6px;">● Faculty Endorsed</span>
+                </div>
+                <h3 style="font-size: 1.2rem; font-weight: 700; color: var(--text-main); margin: 0 0 0.5rem;"><%= ev.title %></h3>
+                <p style="font-size: 0.92rem; color: var(--text-muted); margin: 0; line-height: 1.5;"><%= ev.description %></p>
+              </div>
+
+              <!-- Quick Meta -->
+              <div style="text-align: right; min-width: 180px;">
+                <div style="font-size: 0.85rem; color: var(--text-muted);">Event Date</div>
+                <div style="font-size: 1rem; font-weight: 700; color: var(--text-main);"><%= new Date(ev.eventDate).toLocaleDateString() %></div>
+                <div style="font-size: 0.82rem; color: var(--text-muted);"><%= ev.startTime %> - <%= ev.endTime %></div>
+                <div style="font-size: 0.82rem; color: #5521B8; font-weight: 600; margin-top: 4px;">📍 <%= ev.venue %></div>
+              </div>
+            </div>
+
+            <!-- Faculty Endorsement Quote -->
+            <div style="background: #F8FAFC; border-left: 4px solid #5521B8; padding: 0.85rem 1rem; border-radius: 0 8px 8px 0; margin-bottom: 1.25rem; font-size: 0.88rem;">
+              <span style="font-weight: 700; color: #334155;">Faculty Advisor Endorsement:</span>
+              <span style="color: #475569; font-style: italic;">
+                "<%= (ev.facultyApproval && ev.facultyApproval.remarks) || 'Recommended for college approval.' %>"
+              </span>
+              <% if (ev.facultyApproval && ev.facultyApproval.reviewedBy) { %>
+                <span style="display: block; font-size: 0.78rem; color: #64748B; margin-top: 4px;">
+                  — Verified by <%= ev.facultyApproval.reviewedBy.name %> (<%= ev.facultyApproval.reviewedBy.department || 'Faculty' %>)
+                </span>
+              <% } %>
+            </div>
+
+            <!-- Action Forms -->
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; justify-content: flex-end; border-top: 1px solid var(--border-color); padding-top: 1rem;">
+              <!-- Approve Form -->
+              <form action="/principal/events/<%= ev._id %>/review" method="POST" style="margin: 0; display: inline-flex; gap: 8px;">
+                <input type="hidden" name="action" value="approve">
+                <input type="text" name="remarks" placeholder="Optional approval remarks..." style="font-size: 0.82rem; padding: 6px 12px; border: 1px solid var(--border-color); border-radius: 6px; min-width: 220px;">
+                <button type="submit" class="btn" style="background: #16A34A; color: #fff; font-weight: 600; font-size: 0.85rem; padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer;">
+                  ✓ Approve & Publish Event
+                </button>
+              </form>
+
+              <!-- Request Changes Form -->
+              <form action="/principal/events/<%= ev._id %>/review" method="POST" style="margin: 0; display: inline-flex; gap: 8px;">
+                <input type="hidden" name="action" value="request_changes">
+                <input type="text" name="remarks" required placeholder="Specify revisions required..." style="font-size: 0.82rem; padding: 6px 12px; border: 1px solid var(--border-color); border-radius: 6px; min-width: 180px;">
+                <button type="submit" class="btn" style="background: #D97706; color: #fff; font-weight: 600; font-size: 0.85rem; padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer;">
+                  ✎ Request Changes
+                </button>
+              </form>
+
+              <!-- Reject Form -->
+              <form action="/principal/events/<%= ev._id %>/review" method="POST" style="margin: 0; display: inline-flex; gap: 8px;" onsubmit="return confirm('Are you sure you want to reject this event proposal?');">
+                <input type="hidden" name="action" value="reject">
+                <input type="text" name="remarks" placeholder="Reason for rejection..." style="font-size: 0.82rem; padding: 6px 12px; border: 1px solid var(--border-color); border-radius: 6px; min-width: 160px;">
+                <button type="submit" class="btn" style="background: #DC2626; color: #fff; font-weight: 600; font-size: 0.85rem; padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer;">
+                  ✕ Reject Proposal
+                </button>
+              </form>
+            </div>
+
+          </div>
+        <% }); %>
+      </div>
+    <% } else { %>
+      <div style="text-align: center; padding: 3rem 1rem; color: var(--text-muted);">
+        <div style="font-size: 3rem; margin-bottom: 0.5rem;">🎉</div>
+        <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.25rem;">No Pending Event Approvals</h3>
+        <p style="font-size: 0.88rem; max-width: 420px; margin: 0 auto;">All event proposals submitted by club secretaries and endorsed by faculty advisors have been reviewed.</p>
+      </div>
+    <% } %>
+  </div>
+
+  <!-- Recent Decisions Section -->
+  <% if (recentDecisions && recentDecisions.length > 0) { %>
+    <div class="dashboard-card" style="background: var(--bg-card); border-radius: 16px; padding: 1.75rem; border: 1px solid var(--border-color);">
+      <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin-bottom: 1rem;">📜 Recent Principal Decisions</h3>
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.88rem;">
+          <thead>
+            <tr style="border-bottom: 2px solid var(--border-color); text-align: left; color: var(--text-muted);">
+              <th style="padding: 10px 12px;">Event Title</th>
+              <th style="padding: 10px 12px;">Club</th>
+              <th style="padding: 10px 12px;">Date</th>
+              <th style="padding: 10px 12px;">Principal Decision</th>
+              <th style="padding: 10px 12px;">Remarks</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% recentDecisions.forEach(function(item) { %>
+              <tr style="border-bottom: 1px solid var(--border-color);">
+                <td style="padding: 12px; font-weight: 600; color: var(--text-main);"><%= item.title %></td>
+                <td style="padding: 12px; color: var(--text-muted);"><%= item.club.name %></td>
+                <td style="padding: 12px; color: var(--text-muted);"><%= new Date(item.eventDate).toLocaleDateString() %></td>
+                <td style="padding: 12px;">
+                  <% if (item.approvalStatus === 'Approved') { %>
+                    <span style="color: #16A34A; background: #DCFCE7; font-weight: 700; padding: 3px 10px; border-radius: 12px; font-size: 0.78rem;">✓ Approved</span>
+                  <% } else if (item.approvalStatus === 'Changes Requested') { %>
+                    <span style="color: #D97706; background: #FEF3C7; font-weight: 700; padding: 3px 10px; border-radius: 12px; font-size: 0.78rem;">✎ Revisions Needed</span>
+                  <% } else { %>
+                    <span style="color: #DC2626; background: #FEE2E2; font-weight: 700; padding: 3px 10px; border-radius: 12px; font-size: 0.78rem;">✕ Rejected</span>
+                  <% } %>
+                </td>
+                <td style="padding: 12px; color: var(--text-muted); font-style: italic;"><%= (item.principalApproval && item.principalApproval.remarks) || '-' %></td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  <% } %>
+
+</main>
+
+<%- include('../partials/footer') %>

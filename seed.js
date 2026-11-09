@@ -10,6 +10,7 @@ const Recruitment = require('./models/Recruitment');
 const Application = require('./models/Application');
 const Event = require('./models/Event');
 const Notification = require('./models/Notification');
+const { clubs30 } = require('./config/clubsData');
 
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/clubsphere';
 
@@ -85,158 +86,28 @@ async function seedDatabase() {
 
     console.log('[Seed] Created default users for all 5 roles.');
 
-    // 2. Create College Clubs
-    const clubsData = [
-      {
-        name: 'Coding Club ClubSphere',
-        code: 'CC',
-        category: 'Technical',
-        tagline: 'Fostering competitive programming, web development, and algorithmic brilliance.',
-        description: 'The official Coding Club of College of Technology is a vibrant student body dedicated to nurturing software engineering, algorithmic thinking, open-source development, and hackathons.',
-        objectives: [
-          'Conduct weekly competitive programming bootcamps and ICPC prep',
-          'Organize 24-hour national level hackathons like CodeStorm',
-          'Mentor junior students in Data Structures, Web, and Cloud Development',
-          'Facilitate industry tech talks and collaborative student projects'
-        ],
-        facultyAdvisor: {
-          name: 'Dr. R. Venkatesh',
-          designation: 'Associate Professor, CSE',
-          department: 'CSE',
-          email: 'faculty@college.ac.in',
-          user: facultyUser._id
+    // 2. Create All 30 Official College Clubs
+    const clubsData = clubs30.map((c, idx) => {
+      return {
+        name: c.name,
+        code: c.code,
+        category: c.category,
+        tagline: c.tagline,
+        description: c.description,
+        objectives: c.objectives || [],
+        facultyAdvisor: c.facultyAdvisor || {
+          name: (c.facultyAdvisors && c.facultyAdvisors[0] && c.facultyAdvisors[0].name) || 'Faculty Advisor',
+          department: (c.facultyAdvisors && c.facultyAdvisors[0] && c.facultyAdvisors[0].department) || 'Faculty',
+          designation: (c.facultyAdvisors && c.facultyAdvisors[0] && c.facultyAdvisors[0].designation) || 'Faculty Advisor'
         },
-        secretary: {
-          name: 'Arun Kumar S',
-          rollNo: '22CS102',
-          email: 'secretary@college.ac.in',
-          user: secretaryUser._id
-        },
-        coreTeam: [
-          {
-            name: 'Kavitha M',
-            designation: 'Technical Lead',
-            rollNo: '23MX115',
-            user: coreUser._id
-          },
-          {
-            name: 'Sanjay Krishnan',
-            designation: 'Events Lead',
-            rollNo: '22IT144'
-          }
-        ],
-        recruitmentStatus: 'Open',
-        contactEmail: 'codingclub@college.ac.in',
-        instagram: 'https://instagram.com/codingclub_clubsphere',
-        linkedin: 'https://linkedin.com/company/codingclub-clubsphere',
-        foundedYear: 2012,
+        facultyAdvisors: c.facultyAdvisors || [],
+        banner: c.banner || '/images/banner-default.jpg',
+        recruitmentStatus: c.recruitmentStatus || (idx % 3 === 0 ? 'Open' : (idx % 3 === 1 ? 'Closed' : 'Coming Soon')),
+        contactEmail: c.contactEmail || (c.code.toLowerCase() + '@college.ac.in'),
+        foundedYear: c.foundedYear || 2010,
         isActive: true
-      },
-      {
-        name: 'Robotics & Automation Club',
-        code: 'RAC',
-        category: 'Technical',
-        tagline: 'Designing tomorrow’s intelligent autonomous machines and robotics.',
-        description: 'ClubSphere Robotics and Automation Club builds robotic platforms, autonomous rovers, and mechatronic systems for national and international robotics competitions.',
-        objectives: [
-          'Hands-on training on ROS, Arduino, Raspberry Pi, and Embedded C',
-          'Develop autonomous line followers, drones, and combat bots',
-          'Participate in IIT Techfests and international Robocon'
-        ],
-        facultyAdvisor: {
-          name: 'Dr. K. Senthil Kumar',
-          designation: 'Professor, Robotics & Automation',
-          department: 'Robotics',
-          email: 'ksk@college.ac.in'
-        },
-        secretary: {
-          name: 'Pradeep Raj',
-          rollNo: '22RA118',
-          email: 'pradeep@college.ac.in'
-        },
-        coreTeam: [
-          { name: 'Naveen Kumar', designation: 'Hardware Lead', rollNo: '23RA120' }
-        ],
-        recruitmentStatus: 'Open',
-        contactEmail: 'robotics@college.ac.in',
-        foundedYear: 2008,
-        isActive: true
-      },
-      {
-        name: 'Rotaract Club of ClubSphere',
-        code: 'RCC',
-        category: 'Social & NSS',
-        tagline: 'Self-Development - Fellowship Through Service.',
-        description: 'Chartered under Rotary International, Rotaract Club of ClubSphere is one of the oldest and most impactful youth service organizations focusing on community welfare and leadership.',
-        objectives: [
-          'Organize regular blood donation drives and health screening camps',
-          'Educational support for government school children',
-          'Environmental preservation, tree planting, and sustainability workshops'
-        ],
-        facultyAdvisor: {
-          name: 'Dr. G. Radhakrishnan',
-          designation: 'Associate Professor, Mechanical',
-          email: 'grk@college.ac.in'
-        },
-        secretary: {
-          name: 'Deepika S',
-          rollNo: '22EC135',
-          email: 'deepika@college.ac.in'
-        },
-        recruitmentStatus: 'Open',
-        contactEmail: 'rotaract@college.ac.in',
-        foundedYear: 1985,
-        isActive: true
-      },
-      {
-        name: 'Dramatix - English Drama Club',
-        code: 'DRAMA',
-        category: 'Cultural',
-        tagline: 'Where emotions meet stagecraft and theatrical passion.',
-        description: 'ClubSphere Dramatix is the premier theatre and performing arts club, staging annual theatrical productions, street plays, mime, and comedy sketches.',
-        objectives: [
-          'Produce high quality plays and street performances',
-          'Train students in scriptwriting, voice modulation, and stage production',
-          'Represent ClubSphere in national cultural festivals'
-        ],
-        recruitmentStatus: 'Closed',
-        contactEmail: 'dramatix@college.ac.in',
-        foundedYear: 1998,
-        isActive: true
-      },
-      {
-        name: 'Entrepreneurs Club (E-Cell)',
-        code: 'ECELL',
-        category: 'Entrepreneurship',
-        tagline: 'Igniting student startups and entrepreneurial ventures.',
-        description: 'E-Cell ClubSphere is dedicated to building a thriving startup ecosystem, connecting student founders with venture capitalists, alumni angels, and incubators.',
-        objectives: [
-          'Host startup pitching competitions and Angel Investor summits',
-          'Seed funding guidance with college incubation centre',
-          'Startup founder fireside chats and case study sessions'
-        ],
-        recruitmentStatus: 'Open',
-        contactEmail: 'ecell@college.ac.in',
-        foundedYear: 2011,
-        isActive: true
-      },
-      {
-        name: 'Literary & Debating Society',
-        code: 'LDS',
-        category: 'Literary & Media',
-        tagline: 'The art of eloquent argument, critical discourse, and journalism.',
-        description: 'LDS is the intellectual hub of ClubSphere fostering parliamentary debates, model United Nations, creative writing, and campus newsletters.',
-        objectives: [
-          'Parliamentary and Asian parliamentary debate training',
-          'Publish college magazines and student literary journals',
-          'Conduct national inter-collegiate debate competitions'
-        ],
-        recruitmentStatus: 'Coming Soon',
-        contactEmail: 'lds@college.ac.in',
-        foundedYear: 1975,
-        isActive: true
-      }
-    ];
+      };
+    });
 
     const createdClubs = await Club.insertMany(clubsData);
     console.log(`[Seed] Created ${createdClubs.length} college clubs.`);

@@ -7,6 +7,7 @@ const Application = require('../models/Application');
 const Membership = require('../models/Membership');
 const Event = require('../models/Event');
 const Notification = require('../models/Notification');
+const NotificationService = require('../services/notificationService');
 const { ensureAuthenticated, authorizeRoles } = require('../middleware/auth');
 
 // All student routes require 'student' role (or allow general logged-in student)
@@ -217,7 +218,8 @@ router.get('/applications', async (req, res) => {
 });
 
 // GET /student/notifications - Notification Module
-router.get('/notifications', async (req, res) => {
+router.get('/notifications', (req, res) => res.redirect('/notifications'));
+router.get('/notifications-legacy', async (req, res) => {
   try {
     const notifications = await Notification.find({
       $or: [{ recipient: req.session.user._id }, { recipient: null }]

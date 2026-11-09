@@ -2,260 +2,556 @@
 <%- include('partials/navbar') %>
 <%- include('partials/alerts') %>
 
-<main class="home-page">
-  <section class="home-hero">
-    <div class="container home-hero-grid">
-      <div class="home-hero-copy">
-        <span class="home-eyebrow"><span class="home-eyebrow-dot"></span> College of Technology · Student community</span>
-        <h1>Find your people.<br><span>Make things happen.</span></h1>
-        <p>Discover the clubs, people, and opportunities that make campus life yours. Explore communities, join a team, and find your next event—all in one place.</p>
-        <div class="home-hero-actions">
-          <a href="/clubs" class="btn btn-primary btn-lg">Explore clubs <span aria-hidden="true">↗</span></a>
-          <a href="/events" class="home-text-link">See what's happening <span aria-hidden="true">→</span></a>
+<%
+  // Realistic fallback clubs if database has not yet been seeded
+  const sampleClubs = [
+    {
+      _id: '',
+      name: 'Coding Club',
+      code: 'CC',
+      category: 'Technical',
+      tagline: 'Explore programming, develop technical skills and participate in coding activities and competitions.',
+      description: 'Explore programming, develop technical skills and participate in coding activities and competitions.',
+      banner: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=700&q=80',
+      facultyAdvisor: { department: 'Computer Science' }
+    },
+    {
+      _id: '',
+      name: 'Robotics & Automation Club',
+      code: 'RAC',
+      category: 'Technical',
+      tagline: 'Hands-on robotics, ROS, microcontrollers, autonomous drones and hardware design.',
+      description: 'Hands-on robotics, ROS, microcontrollers, autonomous drones and hardware design.',
+      banner: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=700&q=80',
+      facultyAdvisor: { department: 'Robotics & Mechanical' }
+    },
+    {
+      _id: '',
+      name: 'Rotaract & Social Welfare',
+      code: 'RSC',
+      category: 'Social & NSS',
+      tagline: 'Community development, environmental action, social drives and youth leadership.',
+      description: 'Community development, environmental action, social drives and youth leadership.',
+      banner: 'https://images.unsplash.com/photo-1559027615-cd4628902d4a?auto=format&fit=crop&w=700&q=80',
+      facultyAdvisor: { department: 'Student Affairs' }
+    },
+    {
+      _id: '',
+      name: 'Music & Cultural Arts Society',
+      code: 'CAS',
+      category: 'Cultural',
+      tagline: 'Live bands, instrumental music, theatrical performances, dance and campus fests.',
+      description: 'Live bands, instrumental music, theatrical performances, dance and campus fests.',
+      banner: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=700&q=80',
+      facultyAdvisor: { department: 'Fine Arts' }
+    },
+    {
+      _id: '',
+      name: 'Literary & Debating Society',
+      code: 'LDS',
+      category: 'Literary & Media',
+      tagline: 'Model UN conferences, parliamentary debate tournaments and student journalism.',
+      description: 'Model UN conferences, parliamentary debate tournaments and student journalism.',
+      banner: 'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&w=700&q=80',
+      facultyAdvisor: { department: 'Humanities' }
+    },
+    {
+      _id: '',
+      name: 'E-Cell Entrepreneurship Hub',
+      code: 'ECE',
+      category: 'Entrepreneurship',
+      tagline: 'Startup incubation, founder bootcamps, pitch competitions and industry networking.',
+      description: 'Startup incubation, founder bootcamps, pitch competitions and industry networking.',
+      banner: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=700&q=80',
+      facultyAdvisor: { department: 'Management Studies' }
+    }
+  ];
+
+  const sampleEvents = [
+    {
+      _id: '',
+      title: 'CodeStorm 2026: 24-Hour Campus Hackathon',
+      category: 'Hackathon',
+      eventDate: new Date(Date.now() + 86400000 * 5),
+      venue: 'Innovation & Tech Center, Lab 3',
+      startTime: '09:00 AM',
+      banner: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=700&q=80',
+      club: { name: 'Coding Club' }
+    },
+    {
+      _id: '',
+      title: 'Autonomous Robotics & ROS Bootcamp',
+      category: 'Workshop',
+      eventDate: new Date(Date.now() + 86400000 * 9),
+      venue: 'Robotics Research Lab B',
+      startTime: '10:30 AM',
+      banner: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=700&q=80',
+      club: { name: 'Robotics & Automation Club' }
+    },
+    {
+      _id: '',
+      title: 'Inter-College Parliamentary Debate Championship',
+      category: 'Competition',
+      eventDate: new Date(Date.now() + 86400000 * 14),
+      venue: 'Main Campus Auditorium',
+      startTime: '02:00 PM',
+      banner: 'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&w=700&q=80',
+      club: { name: 'Literary & Debating Society' }
+    }
+  ];
+
+  const clubsList = (featuredClubs && featuredClubs.length > 0) ? featuredClubs : sampleClubs;
+  const eventsList = (upcomingEvents && upcomingEvents.length > 0) ? upcomingEvents : sampleEvents;
+
+  // Clean banner fallback mapping
+  const getClubBanner = (c, idx) => {
+    if (c.banner && !c.banner.includes('banner-default') && c.banner.startsWith('http')) return c.banner;
+    const pool = [
+      'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=700&q=80',
+      'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=700&q=80',
+      'https://images.unsplash.com/photo-1559027615-cd4628902d4a?auto=format&fit=crop&w=700&q=80',
+      'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=700&q=80',
+      'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&w=700&q=80',
+      'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=700&q=80'
+    ];
+    return pool[idx % pool.length];
+  };
+
+  const getEventBanner = (e, idx) => {
+    if (e.banner && !e.banner.includes('event-default') && e.banner.startsWith('http')) return e.banner;
+    const pool = [
+      'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=700&q=80',
+      'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=700&q=80',
+      'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&w=700&q=80'
+    ];
+    return pool[idx % pool.length];
+  };
+%>
+
+<main class="home-main">
+  <!-- ========================================================
+       1. HERO SECTION (Spacious Two-Column Layout)
+       ======================================================== -->
+  <section class="hero-section">
+    <div class="container hero-grid">
+      <!-- LEFT SIDE -->
+      <div class="hero-left">
+        <div class="hero-badge">
+          <span class="hero-badge-dot"></span>
+          <span class="hero-badge-text">DISCOVER · CONNECT · PARTICIPATE</span>
         </div>
-        <div class="home-hero-note">
-          <span class="home-note-avatars" aria-hidden="true"><i>C</i><i>R</i><i>A</i></span>
-          <span>A campus full of ways to get involved</span>
+
+        <h1 class="hero-title">
+          <span class="hero-title-dark">Find Your People.</span>
+          <span class="hero-title-purple">Make College Count.</span>
+        </h1>
+
+        <p class="hero-description">
+          Discover college clubs, connect with students, explore campus events and find opportunities to learn, participate and grow.
+        </p>
+
+        <div class="hero-buttons">
+          <a href="/clubs" class="btn-hero-primary">
+            <span>Explore Clubs</span>
+            <svg class="btn-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </a>
+          <a href="/events" class="btn-hero-secondary">
+            <span>View Events</span>
+            <svg class="btn-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+          </a>
         </div>
       </div>
 
-      <div class="home-hero-art" aria-label="A preview of campus clubs and events">
-        <div class="home-art-orbit home-art-orbit-one"></div>
-        <div class="home-art-orbit home-art-orbit-two"></div>
-        <div class="home-art-spark home-art-spark-one">✳</div>
-        <div class="home-art-spark home-art-spark-two">✦</div>
-        <div class="home-art-tile home-art-tile-back">
-          <span class="home-art-tile-icon">✳</span>
-          <span>Find your community</span>
-        </div>
-        <div class="home-art-main-card">
-          <div class="home-art-card-top">
-            <span class="home-art-mark">CS</span>
-            <span class="home-art-status"><i></i> Your next chapter</span>
+      <!-- RIGHT SIDE: Realistic College Club Information Card & Mini Info Cards -->
+      <div class="hero-right">
+        <div class="hero-card-stack">
+          <!-- Main Realistic College Club Card -->
+          <article class="hero-club-card">
+            <div class="hero-club-card-header">
+              <div class="hero-club-icon-box">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="16 18 22 12 16 6"></polyline>
+                  <polyline points="8 6 2 12 8 18"></polyline>
+                </svg>
+              </div>
+              <div class="hero-club-meta">
+                <span class="hero-club-category">TECHNICAL COMMUNITY</span>
+                <h2 class="hero-club-name">Coding Club</h2>
+              </div>
+              <span class="hero-club-badge">Official</span>
+            </div>
+
+            <p class="hero-club-description">
+              Explore programming, develop technical skills and participate in coding activities and competitions.
+            </p>
+
+            <div class="hero-club-card-footer">
+              <a href="/clubs" class="hero-club-link">
+                <span>Explore Club</span>
+                <span class="hero-club-arrow" aria-hidden="true">&rarr;</span>
+              </a>
+              <span class="hero-club-stat">Student Community</span>
+            </div>
+          </article>
+
+          <!-- Two Small Naturally Arranged Information Cards -->
+          <div class="hero-subcards">
+            <!-- Upcoming Events Card -->
+            <a href="/events" class="hero-mini-card">
+              <div class="hero-mini-icon events-mini-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                  <line x1="16" y1="2" x2="16" y2="6"/>
+                  <line x1="8" y1="2" x2="8" y2="6"/>
+                  <line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+              </div>
+              <div class="hero-mini-text">
+                <span class="hero-mini-title">Upcoming Events</span>
+                <span class="hero-mini-desc">Browse scheduled campus events</span>
+              </div>
+              <span class="hero-mini-arrow" aria-hidden="true">&rarr;</span>
+            </a>
+
+            <!-- Club Opportunities Card -->
+            <a href="/clubs" class="hero-mini-card">
+              <div class="hero-mini-icon opps-mini-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                  <circle cx="8.5" cy="7" r="4"/>
+                  <line x1="20" y1="8" x2="20" y2="14"/>
+                  <line x1="23" y1="11" x2="17" y2="11"/>
+                </svg>
+              </div>
+              <div class="hero-mini-text">
+                <span class="hero-mini-title">Club Opportunities</span>
+                <span class="hero-mini-desc">Apply for student recruitment drives</span>
+              </div>
+              <span class="hero-mini-arrow" aria-hidden="true">&rarr;</span>
+            </a>
           </div>
-          <% if (featuredClubs && featuredClubs.length > 0) { %>
-            <div class="home-art-club-icon"><%= featuredClubs[0].name.substring(0, 1) %></div>
-            <span class="home-art-kicker"><%= featuredClubs[0].category %> COMMUNITY</span>
-            <h2><%= featuredClubs[0].name %></h2>
-            <p><%= featuredClubs[0].tagline %></p>
-            <a href="/clubs/<%= featuredClubs[0]._id %>" class="home-art-card-link">Get to know the club <span aria-hidden="true">↗</span></a>
-          <% } else { %>
-            <div class="home-art-club-icon">✦</div>
-            <span class="home-art-kicker">CAMPUS COMMUNITY</span>
-            <h2>Your people are here.</h2>
-            <p>Explore new interests, meet collaborators, and make campus yours.</p>
-            <a href="/clubs" class="home-art-card-link">Find your community <span aria-hidden="true">↗</span></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================
+       2. EXPLORE OUR CLUBS SECTION
+       ======================================================== -->
+  <section class="section clubs-section" id="explore-clubs">
+    <div class="container">
+      <div class="section-header-row">
+        <div>
+          <span class="section-kicker">CAMPUS COMMUNITIES</span>
+          <h2 class="section-title">Explore Our Clubs</h2>
+          <p class="section-lead">Discover clubs across technical, cultural, social impact, literary and athletic domains.</p>
+        </div>
+        <a href="/clubs" class="section-view-all">
+          <span>View All Clubs</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </a>
+      </div>
+
+      <div class="club-cards-grid">
+        <% clubsList.slice(0, 6).forEach((club, idx) => { %>
+          <article class="modern-club-card">
+            <div class="club-card-image-wrap">
+              <img 
+                src="<%= getClubBanner(club, idx) %>" 
+                alt="<%= club.name %> cover" 
+                class="club-card-img"
+                loading="lazy"
+                onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=700&q=80';"
+              >
+              <span class="club-card-category-badge"><%= club.category %></span>
+            </div>
+
+            <div class="club-card-body">
+              <div class="club-card-title-row">
+                <h3 class="club-card-title"><%= club.name %></h3>
+                <% if (club.code) { %>
+                  <span class="club-card-code"><%= club.code %></span>
+                <% } %>
+              </div>
+
+              <p class="club-card-desc">
+                <%= club.tagline || club.description %>
+              </p>
+
+              <div class="club-card-footer">
+                <a href="<%= club._id ? '/clubs/' + club._id : '/clubs' %>" class="btn-card-explore">
+                  <span>Explore</span>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                  </svg>
+                </a>
+                <span class="club-card-meta"><%= (club.facultyAdvisor && club.facultyAdvisor.department) ? club.facultyAdvisor.department : 'Campus Club' %></span>
+              </div>
+            </div>
+          </article>
+        <% }) %>
+      </div>
+
+      <div class="section-footer-cta">
+        <a href="/clubs" class="btn-outline-purple">
+          <span>Discover All Clubs</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================
+       3. WHAT'S HAPPENING ON CAMPUS? (Events Section)
+       ======================================================== -->
+  <section class="section events-section" id="campus-events">
+    <div class="container">
+      <div class="section-header-row">
+        <div>
+          <span class="section-kicker">CAMPUS CALENDAR</span>
+          <h2 class="section-title">What's Happening on Campus?</h2>
+          <p class="section-lead">Find upcoming workshops, hackathons, guest lectures, cultural fests and competitions.</p>
+        </div>
+        <a href="/events" class="section-view-all">
+          <span>All Events</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </a>
+      </div>
+
+      <div class="event-cards-grid">
+        <% eventsList.slice(0, 3).forEach((evt, idx) => { %>
+          <% 
+            const d = new Date(evt.eventDate);
+            const monthStr = d.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
+            const dayStr = d.toLocaleDateString('en-US', { day: '2-digit' });
+          %>
+          <article class="modern-event-card">
+            <div class="event-card-image-wrap">
+              <img 
+                src="<%= getEventBanner(evt, idx) %>" 
+                alt="<%= evt.title %>" 
+                class="event-card-img"
+                loading="lazy"
+                onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=700&q=80';"
+              >
+              <div class="event-calendar-badge">
+                <span class="event-cal-month"><%= monthStr %></span>
+                <span class="event-cal-day"><%= dayStr %></span>
+              </div>
+              <span class="event-category-pill"><%= evt.category || 'Event' %></span>
+            </div>
+
+            <div class="event-card-body">
+              <span class="event-card-club"><%= (evt.club && evt.club.name) ? evt.club.name : 'Campus Club' %></span>
+              <h3 class="event-card-title"><%= evt.title %></h3>
+
+              <div class="event-meta-list">
+                <div class="event-meta-row">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                    <circle cx="12" cy="10" r="3"/>
+                  </svg>
+                  <span><%= evt.venue || 'Campus Auditorium' %></span>
+                </div>
+                <div class="event-meta-row">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                  </svg>
+                  <span><%= evt.startTime || '10:00 AM' %></span>
+                </div>
+              </div>
+
+              <div class="event-card-action">
+                <a href="<%= evt._id ? '/events/' + evt._id : '/events' %>" class="btn-event-register">
+                  <span>View Details</span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                  </svg>
+                </a>
+              </div>
+            </div>
+          </article>
+        <% }) %>
+      </div>
+
+      <div class="section-footer-cta">
+        <a href="/events" class="btn-outline-purple">
+          <span>View All Campus Events</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================
+       4. BE PART OF SOMETHING BIGGER
+       ======================================================== -->
+  <section class="section bigger-section">
+    <div class="container">
+      <div class="bigger-intro">
+        <span class="section-kicker">STUDENT COMMUNITY</span>
+        <h2 class="section-title">Be Part of Something Bigger</h2>
+        <p class="section-lead">
+          Get involved in college clubs to collaborate with peers, develop practical skills and participate in campus activities.
+        </p>
+      </div>
+
+      <div class="bigger-cards-grid">
+        <div class="bigger-card">
+          <div class="bigger-icon-box">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+          </div>
+          <h3>Connect with Peers</h3>
+          <p>Meet students across departments who share your interests in technical projects, arts, sports and social service.</p>
+        </div>
+
+        <div class="bigger-card">
+          <div class="bigger-icon-box">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+          </div>
+          <h3>Learn by Doing</h3>
+          <p>Gain hands-on experience through student workshops, hackathons, club projects and college event organization.</p>
+        </div>
+
+        <div class="bigger-card">
+          <div class="bigger-icon-box">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+              <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+          </div>
+          <h3>Participate & Compete</h3>
+          <p>Represent your clubs in inter-college competitions, technical challenges and cultural fests.</p>
+        </div>
+
+        <div class="bigger-card">
+          <div class="bigger-icon-box">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+            </svg>
+          </div>
+          <h3>Collaborate & Grow</h3>
+          <p>Learn from senior students, share knowledge and build lasting connections during your college journey.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================
+       5. JOIN OUR COMMUNITY (Registration Call to Action)
+       ======================================================== -->
+  <section class="section join-section" id="join-community">
+    <div class="container">
+      <div class="join-card">
+        <div class="join-content">
+          <span class="join-kicker">GET STARTED</span>
+          <h2 class="join-title">Join Our Community</h2>
+          <p class="join-desc">
+            Create your student account to discover clubs, submit recruitment applications and register for campus events.
+          </p>
+
+          <div class="join-actions">
+            <% if (!user) { %>
+              <a href="/auth/register" class="btn-join-primary">
+                <span>Student Register</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+              </a>
+              <a href="/clubs" class="btn-join-secondary">
+                <span>Explore Clubs</span>
+              </a>
+            <% } else { %>
+              <a href="/student/dashboard" class="btn-join-primary">
+                <span>Go to Dashboard</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+              </a>
+              <a href="/clubs" class="btn-join-secondary">
+                <span>Explore Clubs</span>
+              </a>
+            <% } %>
+          </div>
+
+          <% if (!user) { %>
+            <div class="join-sublink">
+              <span>Already registered?</span>
+              <a href="/auth/login">Login to your account &rarr;</a>
+            </div>
           <% } %>
         </div>
-        <div class="home-art-floating">
-          <span class="home-floating-icon">↗</span>
-          <span><strong><%= stats.openRecruitmentsCount %> opportunities</strong><small>open to explore</small></span>
-        </div>
-        <div class="home-art-caption">A little curiosity goes a long way.</div>
       </div>
     </div>
   </section>
 
-  <section class="home-proof">
-    <div class="container home-proof-inner">
-      <span class="home-proof-label">A campus that comes together</span>
-      <div class="home-proof-stats">
-        <div><strong><%= stats.clubsCount %></strong><span>communities</span></div>
-        <i></i>
-        <div><strong><%= stats.openRecruitmentsCount %></strong><span>open opportunities</span></div>
-        <i></i>
-        <div><strong><%= stats.eventsCount %></strong><span>upcoming events</span></div>
-      </div>
-      <a href="/clubs" class="home-proof-link">Find your starting point <span aria-hidden="true">→</span></a>
-    </div>
-  </section>
-
-  <section class="home-intro home-section">
-    <div class="container home-intro-grid">
-      <div>
-        <span class="home-section-index">01 / A CAMPUS, CONNECTED</span>
-        <h2>More than a list of clubs.<br><span>A place to belong.</span></h2>
-      </div>
-      <div class="home-intro-copy">
-        <p>Finding your community shouldn't mean chasing links across group chats. ClubSphere brings campus activities together, so you can spend less time searching and more time doing.</p>
-        <a href="/clubs" class="home-underlined-link">A better way to get involved <span aria-hidden="true">↗</span></a>
-      </div>
-    </div>
-    <div class="container home-benefits">
-      <article>
-        <span class="home-benefit-number">01</span>
-        <div><h3>Discover with purpose</h3><p>Find communities by interest, browse what they do, and meet the people behind them.</p></div>
-      </article>
-      <article>
-        <span class="home-benefit-number">02</span>
-        <div><h3>Take your next step</h3><p>Request to join a club or apply for an open role, with every update in one place.</p></div>
-      </article>
-      <article>
-        <span class="home-benefit-number">03</span>
-        <div><h3>Show up for more</h3><p>Keep up with campus events and register for the experiences that interest you.</p></div>
-      </article>
-    </div>
-  </section>
-
-  <section class="home-communities home-section">
-    <div class="container">
-      <div class="home-section-heading">
-        <div>
-          <span class="home-section-index">02 / FIND YOUR INTEREST</span>
-          <h2>There’s a place for <span>your kind of curious.</span></h2>
-        </div>
-        <a href="/clubs" class="home-underlined-link">Explore every club <span aria-hidden="true">↗</span></a>
-      </div>
-
-      <div class="home-category-grid">
-        <a class="home-category-card home-category-tech" href="/clubs?category=Technical">
-          <span class="home-category-symbol" aria-hidden="true">⌘</span>
-          <span class="home-category-number">01</span>
-          <div><span>Build what’s next</span><h3>Technology</h3><span class="home-category-arrow" aria-hidden="true">↗</span></div>
-        </a>
-        <a class="home-category-card home-category-culture" href="/clubs?category=Cultural">
-          <span class="home-category-symbol" aria-hidden="true">✳</span>
-          <span class="home-category-number">02</span>
-          <div><span>Make room for expression</span><h3>Culture & arts</h3><span class="home-category-arrow" aria-hidden="true">↗</span></div>
-        </a>
-        <a class="home-category-card home-category-sport" href="/clubs?category=Sports">
-          <span class="home-category-symbol" aria-hidden="true">↗</span>
-          <span class="home-category-number">03</span>
-          <div><span>Find your team</span><h3>Sports & wellness</h3><span class="home-category-arrow" aria-hidden="true">↗</span></div>
-        </a>
-        <a class="home-category-card home-category-social" href="/clubs?category=Social%20%26%20NSS">
-          <span class="home-category-symbol" aria-hidden="true">♡</span>
-          <span class="home-category-number">04</span>
-          <div><span>Make a difference</span><h3>People & impact</h3><span class="home-category-arrow" aria-hidden="true">↗</span></div>
-        </a>
-      </div>
-    </div>
-  </section>
-
-  <% if (activeRecruitments && activeRecruitments.length > 0) { %>
-    <section class="home-opportunities home-section">
-      <div class="container home-opportunities-grid">
-        <div class="home-opportunities-intro">
-          <span class="home-section-index">03 / YOUR NEXT MOVE</span>
-          <h2>Good things happen when you <span>put yourself out there.</span></h2>
-          <p>Clubs are looking for new ideas and new teammates. Find an open role that feels like you.</p>
-          <a href="/clubs" class="btn btn-light">See all opportunities <span aria-hidden="true">↗</span></a>
-          <div class="home-opportunity-count"><strong><%= stats.openRecruitmentsCount %></strong><span>open drives across campus</span></div>
-        </div>
-        <div class="home-opportunity-list">
-          <% activeRecruitments.slice(0, 3).forEach((rec, index) => { %>
-            <article class="home-opportunity-item">
-              <span class="home-opportunity-index">0<%= index + 1 %></span>
-              <div class="home-opportunity-copy">
-                <span><%= rec.club ? rec.club.name : 'Campus club' %> · <%= rec.club ? rec.club.category : 'Community' %></span>
-                <h3><%= rec.title %></h3>
-                <small><%= rec.roles.length %> open <%= rec.roles.length === 1 ? 'role' : 'roles' %> <span aria-hidden="true">·</span> Apply by <%= new Date(rec.deadline).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) %></small>
-              </div>
-              <% if (user && user.role === 'student') { %>
-                <a href="/student/recruitments/<%= rec._id %>/apply" aria-label="Apply for <%= rec.title %>">↗</a>
-              <% } else { %>
-                <a href="<%= rec.club ? '/clubs/' + rec.club._id : '/clubs' %>" aria-label="View <%= rec.title %>">↗</a>
-              <% } %>
-            </article>
-          <% }) %>
-        </div>
-      </div>
-    </section>
-  <% } %>
-
-  <% if (featuredClubs && featuredClubs.length > 0) { %>
-    <section class="home-clubs home-section">
-      <div class="container">
-        <div class="home-section-heading">
-          <div>
-            <span class="home-section-index">04 / PEOPLE TO MEET</span>
-            <h2>Meet the communities <span>making campus.</span></h2>
-          </div>
-          <a href="/clubs" class="home-underlined-link">All clubs <span aria-hidden="true">↗</span></a>
-        </div>
-        <div class="home-club-grid">
-          <% featuredClubs.slice(0, 3).forEach((club, index) => { %>
-            <a href="/clubs/<%= club._id %>" class="home-club-card">
-              <div class="home-club-art home-club-art-<%= index + 1 %>">
-                <span><%= club.name.substring(0, 1) %></span>
-                <small><%= club.code %></small>
-              </div>
-              <div class="home-club-details">
-                <span class="home-club-category"><%= club.category %></span>
-                <h3><%= club.name %></h3>
-                <p><%= club.tagline %></p>
-                <span class="home-club-link">Discover the club <span aria-hidden="true">↗</span></span>
-              </div>
-            </a>
-          <% }) %>
-        </div>
-      </div>
-    </section>
-  <% } %>
-
-  <% if (upcomingEvents && upcomingEvents.length > 0) { %>
-    <section class="home-events home-section">
-      <div class="container home-events-grid">
-        <div class="home-events-intro">
-          <span class="home-section-index">05 / ON THE CALENDAR</span>
-          <h2>Make a little room for <span>something new.</span></h2>
-          <p>From hands-on workshops to campus-wide celebrations, there’s always something worth showing up for.</p>
-          <a href="/events" class="home-underlined-link">See all campus events <span aria-hidden="true">↗</span></a>
-        </div>
-        <div class="home-event-list">
-          <% upcomingEvents.slice(0, 3).forEach(evt => { %>
-            <a href="/events/<%= evt._id %>" class="home-event-item">
-              <div class="home-event-date">
-                <strong><%= new Date(evt.eventDate).toLocaleDateString('en-IN', { day: '2-digit' }) %></strong>
-                <span><%= new Date(evt.eventDate).toLocaleDateString('en-IN', { month: 'short' }) %></span>
-              </div>
-              <div>
-                <span><%= evt.club ? evt.club.name : 'Campus event' %></span>
-                <h3><%= evt.title %></h3>
-                <small><%= evt.venue %> <span aria-hidden="true">·</span> <%= evt.startTime %></small>
-              </div>
-              <span class="home-event-arrow" aria-hidden="true">↗</span>
-            </a>
-          <% }) %>
-        </div>
-      </div>
-    </section>
-  <% } %>
-
-  <section class="home-cta">
-    <div class="container home-cta-inner">
-      <span class="home-section-index">YOUR CAMPUS. YOUR PEOPLE.</span>
-      <h2>It all starts with <span>showing up.</span></h2>
-      <p>Explore what’s happening at College of Technology and find your place in it.</p>
-      <div class="home-hero-actions">
-        <a href="/clubs" class="btn btn-light btn-lg">Find your community <span aria-hidden="true">↗</span></a>
-        <% if (!user) { %>
-          <a href="/auth/register" class="home-cta-link">Create your student account <span aria-hidden="true">→</span></a>
-        <% } %>
-      </div>
-    </div>
-  </section>
-
-  <section class="container demo-switcher">
+  <!-- ========================================================
+       VIVA EVALUATION DEMO PANEL (DISCREET)
+       ======================================================== -->
+  <section class="container demo-switcher-section">
     <button
       type="button"
       class="demo-access-toggle"
       id="homeDemoAccessToggle"
       aria-expanded="false"
       aria-controls="homeDemoPanel"
-    >Demo access</button>
+    >
+      <span>⚙️ Demo Test Accounts (Viva Evaluation)</span>
+    </button>
     <div id="homeDemoPanel" hidden>
       <div class="viva-banner">
-        <div class="viva-banner-title"><span>🎓</span><span>Viva Examiner & Demo Switcher (Instant Test Accounts)</span></div>
-        <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 0.75rem;">
-          Use these pre-seeded credentials to demonstrate any of the 5 user roles. The common password is <code>password123</code>.
+        <div class="viva-banner-title">
+          <span>🎓</span>
+          <strong>Pre-configured Accounts (Password: <code>password123</code>)</strong>
+        </div>
+        <p style="font-size: 0.85rem; color: #64748b; margin: 0.5rem 0 1rem;">
+          One-click login for demonstration across all 5 access roles.
         </p>
         <div class="viva-roles-grid">
-          <div class="viva-role-card"><div><strong>🎓 Student</strong><div><code>student@college.ac.in</code></div></div><a href="/auth/login?role=student" class="btn btn-sm btn-outline" style="margin-top: 8px;">Login as Student</a></div>
-          <div class="viva-role-card"><div><strong>⚡ Club Secretary</strong><div><code>secretary@college.ac.in</code></div></div><a href="/auth/login?role=secretary" class="btn btn-sm btn-outline" style="margin-top: 8px;">Login as Secretary</a></div>
-          <div class="viva-role-card"><div><strong>🛡️ Core Member</strong><div><code>core@college.ac.in</code></div></div><a href="/auth/login?role=core" class="btn btn-sm btn-outline" style="margin-top: 8px;">Login as Core</a></div>
-          <div class="viva-role-card"><div><strong>👨‍🏫 Faculty Advisor</strong><div><code>faculty@college.ac.in</code></div></div><a href="/auth/login?role=faculty" class="btn btn-sm btn-outline" style="margin-top: 8px;">Login as Faculty</a></div>
-          <div class="viva-role-card"><div><strong>👑 Admin (Dean)</strong><div><code>admin@college.ac.in</code></div></div><a href="/auth/login?role=admin" class="btn btn-sm btn-outline" style="margin-top: 8px;">Login as Admin</a></div>
+          <div class="viva-role-card">
+            <div><strong>🎓 Student</strong><div><code>student@college.ac.in</code></div></div>
+            <a href="/auth/login?role=student" class="btn btn-sm btn-outline" style="margin-top: 8px;">Login Student</a>
+          </div>
+          <div class="viva-role-card">
+            <div><strong>⚡ Club Secretary</strong><div><code>secretary@college.ac.in</code></div></div>
+            <a href="/auth/login?role=secretary" class="btn btn-sm btn-outline" style="margin-top: 8px;">Login Secretary</a>
+          </div>
+          <div class="viva-role-card">
+            <div><strong>🛡️ Core Member</strong><div><code>core@college.ac.in</code></div></div>
+            <a href="/auth/login?role=core" class="btn btn-sm btn-outline" style="margin-top: 8px;">Login Core</a>
+          </div>
+          <div class="viva-role-card">
+            <div><strong>👨‍🏫 Faculty Advisor</strong><div><code>faculty@college.ac.in</code></div></div>
+            <a href="/auth/login?role=faculty" class="btn btn-sm btn-outline" style="margin-top: 8px;">Login Faculty</a>
+          </div>
+          <div class="viva-role-card">
+            <div><strong>👑 Admin (Dean)</strong><div><code>admin@college.ac.in</code></div></div>
+            <a href="/auth/login?role=admin" class="btn btn-sm btn-outline" style="margin-top: 8px;">Login Admin</a>
+          </div>
         </div>
       </div>
     </div>

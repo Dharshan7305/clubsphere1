@@ -17,7 +17,12 @@ const ClubSchema = new mongoose.Schema({
   category: {
     type: String,
     required: true,
-    enum: ['Technical', 'Cultural', 'Social & NSS', 'Sports', 'Literary & Media', 'Entrepreneurship'],
+    enum: [
+      'Technical', 'Cultural', 'Social & NSS', 'Sports', 'Literary & Media', 'Entrepreneurship',
+      'Social & Community', 'Music & Performing Arts', 'Dance & Cultural Activities',
+      'Technical & Innovation', 'Literary & Knowledge', 'Leadership & Entrepreneurship',
+      'Sports & Personal Development', 'Environment & Social Welfare'
+    ],
     default: 'Technical'
   },
   tagline: {
@@ -39,6 +44,12 @@ const ClubSchema = new mongoose.Schema({
     type: String,
     default: '/images/banner-default.jpg'
   },
+  facultyAdvisors: [{
+    name: { type: String },
+    designation: { type: String, default: 'Faculty Advisor' },
+    department: { type: String },
+    email: { type: String }
+  }],
   facultyAdvisor: {
     name: { type: String, default: 'Dr. Faculty Advisor' },
     designation: { type: String, default: 'Associate Professor' },

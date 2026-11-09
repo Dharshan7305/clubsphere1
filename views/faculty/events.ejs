@@ -1,0 +1,87 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/alerts') %>
+
+<main class="container dashboard-wrapper">
+  <div class="section-header" style="margin-bottom: 2rem;">
+    <div>
+      <span class="badge badge-category" style="margin-bottom: 0.25rem;"><%= club.category %></span>
+      <h1 class="section-title">👨‍🏫 Event Proposals & Approvals</h1>
+      <p class="section-subtitle">Review event proposals submitted by <%= club.name %> Secretary before forwarding to Principal.</p>
+    </div>
+    <a href="/faculty/dashboard" class="btn btn-outline-purple">&larr; Back to Dashboard</a>
+  </div>
+
+  <div class="dashboard-card" style="background: var(--bg-card); border-radius: 16px; padding: 1.75rem; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm);">
+    <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--text-main); margin-bottom: 1.25rem;">Events & Proposals for <%= club.name %></h2>
+
+    <% if (events && events.length > 0) { %>
+      <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+        <% events.forEach(function(ev) { %>
+          <div style="border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; background: var(--bg-main);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 0.75rem;">
+              <div>
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.4rem;">
+                  <span style="font-size: 0.75rem; font-weight: 700; background: #EDE9FE; color: #5521B8; padding: 2px 8px; border-radius: 6px;"><%= ev.category %></span>
+                  
+                  <!-- Approval Status Badge -->
+                  <% if (ev.approvalStatus === 'Pending Faculty') { %>
+                    <span style="font-size: 0.78rem; font-weight: 700; background: #FEF3C7; color: #B45309; padding: 2px 8px; border-radius: 6px;">⏳ Pending Faculty Review</span>
+                  <% } else if (ev.approvalStatus === 'Pending Principal') { %>
+                    <span style="font-size: 0.78rem; font-weight: 700; background: #E0E7FF; color: #3730A3; padding: 2px 8px; border-radius: 6px;">🏛️ Forwarded to Principal</span>
+                  <% } else if (ev.approvalStatus === 'Approved') { %>
+                    <span style="font-size: 0.78rem; font-weight: 700; background: #DCFCE7; color: #16A34A; padding: 2px 8px; border-radius: 6px;">✓ Officially Approved & Live</span>
+                  <% } else if (ev.approvalStatus === 'Changes Requested') { %>
+                    <span style="font-size: 0.78rem; font-weight: 700; background: #FEF3C7; color: #D97706; padding: 2px 8px; border-radius: 6px;">✎ Revisions Requested</span>
+                  <% } else { %>
+                    <span style="font-size: 0.78rem; font-weight: 700; background: #FEE2E2; color: #DC2626; padding: 2px 8px; border-radius: 6px;">✕ Rejected</span>
+                  <% } %>
+                </div>
+                <h3 style="font-size: 1.2rem; font-weight: 700; color: var(--text-main); margin: 0 0 0.5rem;"><%= ev.title %></h3>
+                <p style="font-size: 0.92rem; color: var(--text-muted); margin: 0;"><%= ev.description %></p>
+              </div>
+
+              <div style="text-align: right; min-width: 160px;">
+                <div style="font-size: 0.85rem; color: var(--text-muted);">Proposed Date</div>
+                <div style="font-size: 1rem; font-weight: 700; color: var(--text-main);"><%= new Date(ev.eventDate).toLocaleDateString() %></div>
+                <div style="font-size: 0.82rem; color: var(--text-muted);"><%= ev.startTime %> - <%= ev.endTime %></div>
+                <div style="font-size: 0.82rem; color: #5521B8; font-weight: 600; margin-top: 4px;">📍 <%= ev.venue %></div>
+              </div>
+            </div>
+
+            <% if (ev.approvalStatus === 'Pending Faculty') { %>
+              <div style="display: flex; gap: 10px; justify-content: flex-end; align-items: center; border-top: 1px solid var(--border-color); padding-top: 1rem; margin-top: 1rem;">
+                <form action="/faculty/events/<%= ev._id %>/review" method="POST" style="margin: 0; display: inline-flex; gap: 8px;">
+                  <input type="hidden" name="action" value="approve">
+                  <input type="text" name="remarks" placeholder="Endorsement note for Principal..." style="font-size: 0.82rem; padding: 6px 12px; border: 1px solid var(--border-color); border-radius: 6px; min-width: 200px;">
+                  <button type="submit" class="btn" style="background: #16A34A; color: #fff; font-weight: 600; font-size: 0.85rem; padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer;">
+                    ✓ Endorse & Forward to Principal
+                  </button>
+                </form>
+
+                <form action="/faculty/events/<%= ev._id %>/review" method="POST" style="margin: 0; display: inline-flex; gap: 8px;" onsubmit="return confirm('Reject this proposal?');">
+                  <input type="hidden" name="action" value="reject">
+                  <input type="text" name="remarks" placeholder="Reason for rejection..." style="font-size: 0.82rem; padding: 6px 12px; border: 1px solid var(--border-color); border-radius: 6px; min-width: 160px;">
+                  <button type="submit" class="btn" style="background: #DC2626; color: #fff; font-weight: 600; font-size: 0.85rem; padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer;">
+                    ✕ Reject Proposal
+                  </button>
+                </form>
+              </div>
+            <% } else if (ev.facultyApproval && ev.facultyApproval.remarks) { %>
+              <div style="font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid var(--border-color); padding-top: 0.75rem; margin-top: 0.75rem;">
+                <strong>Faculty Remarks:</strong> "<%= ev.facultyApproval.remarks %>"
+              </div>
+            <% } %>
+
+          </div>
+        <% }); %>
+      </div>
+    <% } else { %>
+      <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+        No events or proposals found for this club.
+      </div>
+    <% } %>
+  </div>
+</main>
+
+<%- include('../partials/footer') %>

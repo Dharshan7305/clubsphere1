@@ -1,15 +1,18 @@
-﻿const express = require('express');
+const express = require('express');
 const router = express.Router();
 const Event = require('../models/Event');
 const Club = require('../models/Club');
-const Notification = require('../models/Notification');
+const NotificationService = require('../services/notificationService');
 const { ensureAuthenticated } = require('../middleware/auth');
 
-// GET /events - Browse all campus events
+// GET /events - Browse all published campus events
 router.get('/', async (req, res) => {
   try {
     const { category, search } = req.query;
-    let query = {};
+    let query = {
+      isPublished: { $ne: false },
+      approvalStatus: { $nin: ['Rejected by Principal', 'Rejected by Faculty', 'Changes Requested'] }
+    };
 
     if (category && category !== 'All') {
       query.category = category;
@@ -17,10 +20,14 @@ router.get('/', async (req, res) => {
 
     if (search && search.trim() !== '') {
       const searchRegex = new RegExp(search.trim(), 'i');
-      query.$or = [
-        { title: searchRegex },
-        { description: searchRegex },
-        { venue: searchRegex }
+      query.$and = [
+        {
+          $or: [
+            { title: searchRegex },
+            { description: searchRegex },
+            { venue: searchRegex }
+          ]
+        }
       ];
     }
 
@@ -79,7 +86,7 @@ router.get('/:id', async (req, res) => {
 // POST /events/:id/register - Student Register for Event
 router.post('/:id/register', ensureAuthenticated, async (req, res) => {
   try {
-    const event = await Event.findById(req.params.id).populate('club', 'name');
+    const event = await Event.findById(req.params.id).populate('club');
     if (!event) {
       req.flash('error_msg', 'Event not found.');
       return res.redirect('/events');
@@ -118,15 +125,29 @@ router.post('/:id/register', ensureAuthenticated, async (req, res) => {
 
     await event.save();
 
-    // Create confirmation notification for student
-    await Notification.create({
+    // 1. Create confirmation notification for student
+    await NotificationService.createNotification({
       recipient: req.session.user._id,
       club: event.club._id,
       title: `Event Registration Confirmed: ${event.title}`,
       message: `Your registration for "${event.title}" hosted by ${event.club.name} is confirmed. Venue: ${event.venue} on ${new Date(event.eventDate).toLocaleDateString()}.`,
       type: 'event',
+      relatedId: event._id,
       relatedLink: `/events/${event._id}`
     });
+
+    // 2. Notify Club Secretary that a new registration was received
+    if (event.club.secretary && event.club.secretary.user) {
+      await NotificationService.createNotification({
+        recipient: event.club.secretary.user,
+        club: event.club._id,
+        title: `New Event Registration: ${event.title}`,
+        message: `${req.session.user.name} (${req.session.user.rollNo || req.session.user.department}) registered for "${event.title}". (${event.participants.length}/${event.maxParticipants} spots filled).`,
+        type: 'event',
+        relatedId: event._id,
+        relatedLink: '/secretary/events'
+      });
+    }
 
     req.flash('success_msg', 'Registration successful! You have secured your spot.');
     res.redirect(`/events/${event._id}`);

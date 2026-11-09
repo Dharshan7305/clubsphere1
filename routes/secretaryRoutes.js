@@ -6,6 +6,8 @@ const Application = require('../models/Application');
 const Membership = require('../models/Membership');
 const Event = require('../models/Event');
 const Notification = require('../models/Notification');
+const NotificationService = require('../services/notificationService');
+const User = require('../models/User');
 const { ensureAuthenticated, authorizeRoles } = require('../middleware/auth');
 
 // Protect all secretary routes
@@ -612,6 +614,80 @@ router.post('/announcement', async (req, res) => {
     console.error('Announcement Error:', error);
     req.flash('error_msg', 'Failed to send announcement.');
     res.redirect('/secretary/dashboard');
+  }
+});
+
+
+// POST /secretary/events/:id/revise - Resubmit Revised Event Proposal
+router.post('/events/:id/revise', async (req, res) => {
+  try {
+    const club = await getSecretaryClub(req);
+    const event = await Event.findOne({ _id: req.params.id, club: club._id });
+
+    if (!event) {
+      req.flash('error_msg', 'Event not found.');
+      return res.redirect('/secretary/events');
+    }
+
+    const { title, category, description, venue, eventDate, startTime, endTime, registrationDeadline, maxParticipants } = req.body;
+
+    if (title) event.title = title.trim();
+    if (category) event.category = category;
+    if (description) event.description = description;
+    if (venue) event.venue = venue;
+    if (eventDate) event.eventDate = new Date(eventDate);
+    if (startTime) event.startTime = startTime;
+    if (endTime) event.endTime = endTime;
+    if (registrationDeadline) event.registrationDeadline = new Date(registrationDeadline);
+    if (maxParticipants) event.maxParticipants = parseInt(maxParticipants, 10);
+
+    event.approvalStatus = 'Pending Faculty';
+    event.isPublished = false;
+    event.facultyApproval = { status: 'Pending', remarks: 'Revised by Secretary' };
+    event.principalApproval = { status: 'Pending' };
+
+    await event.save();
+
+    // Notify Secretary
+    await NotificationService.createNotification({
+      recipient: req.session.user._id,
+      club: club._id,
+      title: `Revised Proposal Resubmitted: ${event.title}`,
+      message: `Your revised proposal for "${event.title}" has been resubmitted to Main Faculty.`,
+      type: 'event',
+      relatedId: event._id,
+      relatedLink: '/secretary/events'
+    });
+
+    // Notify Main Faculty
+    let facultyUser = null;
+    if (club.facultyAdvisor && club.facultyAdvisor.user) {
+      facultyUser = await User.findById(club.facultyAdvisor.user);
+    } else if (club.facultyAdvisor && club.facultyAdvisor.email) {
+      facultyUser = await User.findOne({ email: club.facultyAdvisor.email });
+    }
+    if (!facultyUser) {
+      facultyUser = await User.findOne({ role: 'faculty' });
+    }
+
+    if (facultyUser) {
+      await NotificationService.createNotification({
+        recipient: facultyUser._id,
+        club: club._id,
+        title: `Revised Event Proposal Resubmitted: ${event.title}`,
+        message: `Secretary of ${club.name} has resubmitted revised proposal for "${event.title}". Please review.`,
+        type: 'approval',
+        relatedId: event._id,
+        relatedLink: '/faculty/dashboard'
+      });
+    }
+
+    req.flash('success_msg', 'Revised event proposal successfully resubmitted to Main Faculty!');
+    res.redirect('/secretary/events');
+  } catch (error) {
+    console.error('Revise Event Error:', error);
+    req.flash('error_msg', 'Failed to resubmit event proposal: ' + error.message);
+    res.redirect('/secretary/events');
   }
 });
 
