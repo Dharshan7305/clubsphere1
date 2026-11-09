@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ClubSphere | Club Discovery & Recruitment Platform - Express.js Demo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- Exact original stylesheet from the project -->
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    /* Review Demo Interactive Section Styling */
+    .review-demo-bar {
+      background: linear-gradient(135deg, #4338ca, #3b82f6);
+      color: #ffffff;
+      padding: 0.65rem 1.25rem;
+      font-size: 0.85rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .review-demo-pill {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 0.2rem 0.6rem;
+      border-radius: 9999px;
+      font-size: 0.78rem;
+    }
+    .server-status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(16, 185, 129, 0.25);
+      border: 1px solid rgba(16, 185, 129, 0.5);
+      color: #ffffff;
+      padding: 0.25rem 0.7rem;
+      border-radius: 9999px;
+      font-size: 0.8rem;
+    }
+    .status-dot-pulse {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981;
+      animation: statusPulse 1.8s infinite;
+    }
+    @keyframes statusPulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+    .live-tester-section {
+      background: var(--card-bg, #ffffff);
+      border: 2px solid var(--primary, #4338ca);
+      border-radius: 16px;
+      padding: 2rem;
+      margin: 3rem auto;
+      box-shadow: 0 10px 30px rgba(67, 56, 202, 0.08);
+    }
+    .live-terminal {
+      background: #0f172a;
+      color: #38bdf8;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 1.2rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      max-height: 200px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      margin-top: 1rem;
+    }
+    #reviewToast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: #1e293b;
+      color: white;
+      padding: 0.85rem 1.3rem;
+      border-radius: 8px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      font-size: 0.9rem;
+      display: none;
+      z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Viva Demo Notification Banner -->
+  <div class="review-demo-bar">
+    <div style="display: flex; align-items: center; gap: 0.5rem;">
+      <span class="review-demo-pill">Project Review Demo</span>
+      <span>Express.js connected to Original HTML & CSS (No DB required)</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 0.75rem;">
+      <div id="liveServerStatus" class="server-status-pill">
+        <span class="status-dot-pulse"></span>
+        <span id="serverStatusText">Express Server: Connected</span>
+      </div>
+      <button id="quickPingBtn" class="btn btn-sm btn-light" style="padding: 0.2rem 0.6rem; font-size: 0.75rem; border-radius: 4px;">
+        ⚡ Ping Express
+      </button>
+    </div>
+  </div>
+
+  <!-- Original Project Navbar -->
+  <nav class="navbar">
+    <div class="container nav-container">
+      <a href="/" class="brand">
+        <span class="brand-icon">CS</span>
+        <span>ClubSphere</span>
+      </a>
+
+      <div class="nav-right-actions">
+        <ul class="nav-links">
+          <li><a href="#featuredClubs" class="nav-link active">Discover Clubs</a></li>
+          <li><a href="#campusEvents" class="nav-link">Campus Events</a></li>
+          <li><a href="#serverInspection" class="nav-link" style="color: var(--primary); font-weight: 700;">Express Connection</a></li>
+          <li><a href="#vivaSummary" class="btn btn-sm btn-primary">Viva Reference</a></li>
+        </ul>
+
+        <button id="themeToggle" class="theme-toggle-btn" aria-label="Toggle Theme" title="Toggle Light/Dark Theme">
+          <span class="theme-icon">🌙</span>
+        </button>
+
+        <button class="mobile-menu-btn" aria-label="Toggle navigation">☰</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content - Exact Original Home Page Structure -->
+  <main class="home-page">
+    
+    <!-- 1. Hero Section -->
+    <section class="home-hero">
+      <div class="container home-hero-grid">
+        <div class="home-hero-copy">
+          <span class="home-eyebrow"><span class="home-eyebrow-dot"></span> College of Technology · Student community</span>
+          <h1>Find your people.<br><span>Make things happen.</span></h1>
+          <p>Discover the clubs, people, and opportunities that make campus life yours. Explore communities, join a team, and find your next event—all in one place.</p>
+          <div class="home-hero-actions">
+            <a href="#featuredClubs" class="btn btn-primary btn-lg">Explore clubs <span aria-hidden="true">↗</span></a>
+            <a href="#campusEvents" class="home-text-link">See what's happening <span aria-hidden="true">→</span></a>
+          </div>
+          <div class="home-hero-note">
+            <span class="home-note-avatars" aria-hidden="true"><i>C</i><i>R</i><i>A</i></span>
+            <span>A campus full of ways to get involved</span>
+          </div>
+        </div>
+
+        <div class="home-hero-art" aria-label="A preview of campus clubs and events">
+          <div class="home-art-orbit home-art-orbit-one"></div>
+          <div class="home-art-orbit home-art-orbit-two"></div>
+          <div class="home-art-spark home-art-spark-one">✳</div>
+          <div class="home-art-spark home-art-spark-two">✦</div>
+          <div class="home-art-tile home-art-tile-back">
+            <span class="home-art-tile-icon">✳</span>
+            <span>Find your community</span>
+          </div>
+          <div class="home-art-main-card">
+            <div class="home-art-card-top">
+              <span class="home-art-mark">CS</span>
+              <span class="home-art-status"><i></i> Your next chapter</span>
+            </div>
+            <div class="home-art-club-icon">C</div>
+            <span class="home-art-kicker">TECHNICAL COMMUNITY</span>
+            <h2>Coding Club ClubSphere</h2>
+            <p>Fostering competitive programming, web development, and algorithmic brilliance.</p>
+            <a href="#featuredClubs" class="home-art-card-link">Get to know the club <span aria-hidden="true">↗</span></a>
+          </div>
+          <div class="home-art-floating">
+            <span class="home-floating-icon">↗</span>
+            <span><strong>3 opportunities</strong><small>open to explore</small></span>
+          </div>
+          <div class="home-art-caption">A little curiosity goes a long way.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Proof Section with Stats -->
+    <section class="home-proof">
+      <div class="container home-proof-inner">
+        <span class="home-proof-label">A campus that comes together</span>
+        <div class="home-proof-stats">
+          <div><strong id="statClubs">6</strong><span>communities</span></div>
+          <i></i>
+          <div><strong id="statRecs">3</strong><span>open opportunities</span></div>
+          <i></i>
+          <div><strong id="statEvents">3</strong><span>upcoming events</span></div>
+        </div>
+        <a href="#featuredClubs" class="home-proof-link">Find your starting point <span aria-hidden="true">→</span></a>
+      </div>
+    </section>
+
+    <!-- 3. Connected Express Connection Inspector Section -->
+    <section id="serverInspection" class="container">
+      <div class="live-tester-section">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.5rem;">
+          <div>
+            <span class="badge badge-category" style="margin-bottom: 0.35rem;">Express.js Connection Showcase</span>
+            <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--primary);">
+              Client (HTML/CSS) <span style="color: var(--secondary);">&harr;</span> Express Server Demonstrator
+            </h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">
+              Demonstrates serving static assets via <code>express.static('public')</code> and exchanging JSON via REST routes without page reloads.
+            </p>
+          </div>
+          <div style="display: flex; gap: 0.5rem;">
+            <button id="fetchClubsApiBtn" class="btn btn-outline">
+              🔄 Fetch Data from Express (GET /api/clubs)
+            </button>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+          <!-- Live Form POST Demonstration -->
+          <div>
+            <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--primary); margin-bottom: 0.5rem;">
+              ➕ Quick Register Club (POST to Express)
+            </h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+              Submits form values as JSON to Express backend via <code>POST /api/clubs</code>.
+            </p>
+
+            <form id="expressDemoForm">
+              <div class="form-group" style="margin-bottom: 0.75rem;">
+                <label for="demoClubName" style="font-size: 0.825rem; font-weight: 600;">Club Name</label>
+                <input type="text" id="demoClubName" class="form-control" placeholder="e.g. AI & Data Science Club" required>
+              </div>
+
+              <div class="form-row" style="display: flex; gap: 0.75rem; margin-bottom: 0.75rem;">
+                <div style="flex: 1;">
+                  <label for="demoClubCategory" style="font-size: 0.825rem; font-weight: 600;">Category</label>
+                  <select id="demoClubCategory" class="form-control">
+                    <option value="Technical">Technical</option>
+                    <option value="Cultural">Cultural</option>
+                    <option value="Social & NSS">Social & NSS</option>
+                    <option value="Entrepreneurship">Entrepreneurship</option>
+                  </select>
+                </div>
+                <div style="flex: 1;">
+                  <label for="demoClubLead" style="font-size: 0.825rem; font-weight: 600;">Student Lead</label>
+                  <input type="text" id="demoClubLead" class="form-control" placeholder="Rahul S" required>
+                </div>
+              </div>
+
+              <button type="submit" id="submitClubBtn" class="btn btn-primary" style="width: 100%;">
+                Submit to Express Server (POST)
+              </button>
+            </form>
+          </div>
+
+          <!-- Live Terminal Output -->
+          <div>
+            <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--primary); margin-bottom: 0.5rem;">
+              🖥️ Live Express Response Inspector
+            </h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+              Captures live response packets returned by Express.js endpoints:
+            </p>
+            <div id="expressTerminal" class="live-terminal">Ready. Waiting for user interaction...</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Intro Section: Benefits -->
+    <section class="home-intro home-section">
+      <div class="container home-intro-grid">
+        <div>
+          <span class="home-section-index">01 / A CAMPUS, CONNECTED</span>
+          <h2>More than a list of clubs.<br><span>A place to belong.</span></h2>
+        </div>
+        <div class="home-intro-copy">
+          <p>Finding your community shouldn't mean chasing links across group chats. ClubSphere brings campus activities together, so you can spend less time searching and more time doing.</p>
+          <a href="#featuredClubs" class="home-underlined-link">A better way to get involved <span aria-hidden="true">↗</span></a>
+        </div>
+      </div>
+      <div class="container home-benefits">
+        <article>
+          <span class="home-benefit-number">01</span>
+          <div><h3>Discover with purpose</h3><p>Find communities by interest, browse what they do, and meet the people behind them.</p></div>
+        </article>
+        <article>
+          <span class="home-benefit-number">02</span>
+          <div><h3>Take your next step</h3><p>Request to join a club or apply for an open role, with every update in one place.</p></div>
+        </article>
+        <article>
+          <span class="home-benefit-number">03</span>
+          <div><h3>Show up for more</h3><p>Keep up with campus events and register for the experiences that interest you.</p></div>
+        </article>
+      </div>
+    </section>
+
+    <!-- 5. Categories Section -->
+    <section class="home-communities home-section">
+      <div class="container">
+        <div class="home-section-heading">
+          <div>
+            <span class="home-section-index">02 / FIND YOUR INTEREST</span>
+            <h2>There’s a place for <span>your kind of curious.</span></h2>
+          </div>
+          <a href="#featuredClubs" class="home-underlined-link">Explore every club <span aria-hidden="true">↗</span></a>
+        </div>
+
+        <div class="home-category-grid">
+          <div class="home-category-card home-category-tech">
+            <span class="home-category-symbol" aria-hidden="true">⌘</span>
+            <span class="home-category-number">01</span>
+            <div><span>Build what’s next</span><h3>Technology</h3><span class="home-category-arrow" aria-hidden="true">↗</span></div>
+          </div>
+          <div class="home-category-card home-category-culture">
+            <span class="home-category-symbol" aria-hidden="true">✳</span>
+            <span class="home-category-number">02</span>
+            <div><span>Make room for expression</span><h3>Culture & arts</h3><span class="home-category-arrow" aria-hidden="true">↗</span></div>
+          </div>
+          <div class="home-category-card home-category-sport">
+            <span class="home-category-symbol" aria-hidden="true">↗</span>
+            <span class="home-category-number">03</span>
+            <div><span>Find your team</span><h3>Sports & wellness</h3><span class="home-category-arrow" aria-hidden="true">↗</span></div>
+          </div>
+          <div class="home-category-card home-category-social">
+            <span class="home-category-symbol" aria-hidden="true">♡</span>
+            <span class="home-category-number">04</span>
+            <div><span>Make a difference</span><h3>People & impact</h3><span class="home-category-arrow" aria-hidden="true">↗</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. Opportunities Section -->
+    <section class="home-opportunities home-section">
+      <div class="container home-opportunities-grid">
+        <div class="home-opportunities-intro">
+          <span class="home-section-index">03 / YOUR NEXT MOVE</span>
+          <h2>Good things happen when you <span>put yourself out there.</span></h2>
+          <p>Clubs are looking for new ideas and new teammates. Find an open role that feels like you.</p>
+          <a href="#featuredClubs" class="btn btn-light">See all opportunities <span aria-hidden="true">↗</span></a>
+          <div class="home-opportunity-count"><strong>3</strong><span>open drives across campus</span></div>
+        </div>
+        <div class="home-opportunity-list">
+          <article class="home-opportunity-item">
+            <span class="home-opportunity-index">01</span>
+            <div class="home-opportunity-copy">
+              <span>Coding Club ClubSphere · Technical</span>
+              <h3>Coding Club Core & Executive Team Recruitment 2026</h3>
+              <small>3 open roles · Apply by 10 Nov</small>
+            </div>
+            <a href="#serverInspection" aria-label="Apply">↗</a>
+          </article>
+          <article class="home-opportunity-item">
+            <span class="home-opportunity-index">02</span>
+            <div class="home-opportunity-copy">
+              <span>Robotics & Automation Club · Technical</span>
+              <h3>Robotics Club Project Crew Recruitment 2026</h3>
+              <small>2 open roles · Apply by 15 Nov</small>
+            </div>
+            <a href="#serverInspection" aria-label="Apply">↗</a>
+          </article>
+          <article class="home-opportunity-item">
+            <span class="home-opportunity-index">03</span>
+            <div class="home-opportunity-copy">
+              <span>Coding Club ClubSphere · Technical</span>
+              <h3>AI/ML Special Interest Group Lead Recruitment</h3>
+              <small>1 open role · Apply by 20 Nov</small>
+            </div>
+            <a href="#serverInspection" aria-label="Apply">↗</a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. Featured Clubs Section -->
+    <section id="featuredClubs" class="home-clubs home-section">
+      <div class="container">
+        <div class="home-section-heading">
+          <div>
+            <span class="home-section-index">04 / PEOPLE TO MEET</span>
+            <h2>Meet the communities <span>making campus.</span></h2>
+          </div>
+          <span class="badge badge-category" id="dynamicClubCount">6 Registered Clubs</span>
+        </div>
+        <div id="featuredClubsGrid" class="home-club-grid">
+          <!-- Club Card 1 -->
+          <div class="home-club-card">
+            <div class="home-club-art home-club-art-1">
+              <span>C</span>
+              <small>CC</small>
+            </div>
+            <div class="home-club-details">
+              <span class="home-club-category">Technical</span>
+              <h3>Coding Club ClubSphere</h3>
+              <p>Fostering competitive programming, web development, and algorithmic brilliance.</p>
+              <span class="home-club-link">Discover the club <span aria-hidden="true">↗</span></span>
+            </div>
+          </div>
+
+          <!-- Club Card 2 -->
+          <div class="home-club-card">
+            <div class="home-club-art home-club-art-2">
+              <span>R</span>
+              <small>RAC</small>
+            </div>
+            <div class="home-club-details">
+              <span class="home-club-category">Technical</span>
+              <h3>Robotics & Automation Club</h3>
+              <p>Designing tomorrow’s intelligent autonomous machines and robotics.</p>
+              <span class="home-club-link">Discover the club <span aria-hidden="true">↗</span></span>
+            </div>
+          </div>
+
+          <!-- Club Card 3 -->
+          <div class="home-club-card">
+            <div class="home-club-art home-club-art-3">
+              <span>R</span>
+              <small>RCC</small>
+            </div>
+            <div class="home-club-details">
+              <span class="home-club-category">Social & NSS</span>
+              <h3>Rotaract Club of ClubSphere</h3>
+              <p>Self-Development - Fellowship Through Service.</p>
+              <span class="home-club-link">Discover the club <span aria-hidden="true">↗</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8. Upcoming Events Section -->
+    <section id="campusEvents" class="home-events home-section">
+      <div class="container home-events-grid">
+        <div class="home-events-intro">
+          <span class="home-section-index">05 / ON THE CALENDAR</span>
+          <h2>Make a little room for <span>something new.</span></h2>
+          <p>From hands-on workshops to campus-wide celebrations, there’s always something worth showing up for.</p>
+          <a href="#featuredClubs" class="home-underlined-link">See all campus events <span aria-hidden="true">↗</span></a>
+        </div>
+        <div class="home-event-list">
+          <div class="home-event-item">
+            <div class="home-event-date">
+              <strong>05</strong>
+              <span>Nov</span>
+            </div>
+            <div>
+              <span>Coding Club ClubSphere</span>
+              <h3>CodeStorm 2026: 24-Hour National Hackathon</h3>
+              <small>F-Block Central Facility · 09:00 AM</small>
+            </div>
+            <span class="home-event-arrow" aria-hidden="true">↗</span>
+          </div>
+
+          <div class="home-event-item">
+            <div class="home-event-date">
+              <strong>12</strong>
+              <span>Nov</span>
+            </div>
+            <div>
+              <span>Coding Club ClubSphere</span>
+              <h3>Mastering Full-Stack with Node.js & MongoDB</h3>
+              <small>CC Lab 3, E-Block · 02:00 PM</small>
+            </div>
+            <span class="home-event-arrow" aria-hidden="true">↗</span>
+          </div>
+
+          <div class="home-event-item">
+            <div class="home-event-date">
+              <strong>18</strong>
+              <span>Nov</span>
+            </div>
+            <div>
+              <span>Robotics & Automation Club</span>
+              <h3>Autonomous Mobile Robots Workshop</h3>
+              <small>Robotics Center, D-Block · 10:00 AM</small>
+            </div>
+            <span class="home-event-arrow" aria-hidden="true">↗</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9. Viva Reference Summary Callout -->
+    <section id="vivaSummary" class="container" style="margin-top: 3rem; margin-bottom: 3rem;">
+      <div class="viva-banner" style="background: var(--card-bg, #ffffff); border: 2px solid var(--primary, #4338ca); border-radius: 16px; padding: 1.75rem;">
+        <div class="viva-banner-title" style="font-size: 1.25rem; font-weight: 800; color: var(--primary); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 8px;">
+          <span>🎓</span>
+          <span>WAD Project Viva Explanation Summary</span>
+        </div>
+        <p style="font-size: 0.95rem; line-height: 1.7; color: var(--text-dark, #1e293b); margin-bottom: 1.25rem;">
+          <strong>ClubSphere</strong> connects client-side HTML, CSS, and JavaScript with an Express.js backend. The server serves static files using <code>express.static('public')</code> and processes REST API requests (<code>GET</code> and <code>POST</code>) using body-parser middleware (<code>express.json()</code> and <code>express.urlencoded()</code>).
+        </p>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem;">
+          <div style="background: rgba(67, 56, 202, 0.05); padding: 1rem; border-radius: 8px; border: 1px solid rgba(67, 56, 202, 0.15);">
+            <strong style="color: var(--primary); font-size: 0.9rem;">1. Static Serving</strong>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">
+              <code>app.use(express.static('public'))</code> serves HTML, CSS, and JS directly.
+            </p>
+          </div>
+          <div style="background: rgba(67, 56, 202, 0.05); padding: 1rem; border-radius: 8px; border: 1px solid rgba(67, 56, 202, 0.15);">
+            <strong style="color: var(--primary); font-size: 0.9rem;">2. Fetch GET Request</strong>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">
+              <code>fetch('/api/clubs')</code> fetches records dynamically without reloading.
+            </p>
+          </div>
+          <div style="background: rgba(67, 56, 202, 0.05); padding: 1rem; border-radius: 8px; border: 1px solid rgba(67, 56, 202, 0.15);">
+            <strong style="color: var(--primary); font-size: 0.9rem;">3. Form POST Request</strong>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">
+              <code>fetch(..., {method: 'POST'})</code> sends JSON to Express.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 10. Call to Action -->
+    <section class="home-cta">
+      <div class="container home-cta-inner">
+        <span class="home-section-index">YOUR CAMPUS. YOUR PEOPLE.</span>
+        <h2>It all starts with <span>showing up.</span></h2>
+        <p>Explore what’s happening at College of Technology and find your place in it.</p>
+        <div class="home-hero-actions">
+          <a href="#featuredClubs" class="btn btn-light btn-lg">Find your community <span aria-hidden="true">↗</span></a>
+          <a href="#serverInspection" class="home-cta-link">Test Server Connection <span aria-hidden="true">→</span></a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Original Project Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <h3>
+            <span class="brand-icon" style="width:28px;height:28px;font-size:0.9rem;">CS</span>
+            ClubSphere
+          </h3>
+          <p style="font-size: 0.85rem; color: #9ca3af; margin-bottom: 0.75rem;">
+            A centralized platform for club discovery, recruitment drives, event registrations, and campus governance.
+          </p>
+          <span style="font-size: 0.72rem; background: rgba(99,102,241,.15); color: #a5b4fc; padding: 3px 8px; border-radius: 4px; font-weight: 600;">
+            WAD Review Demo
+          </span>
+        </div>
+
+        <div class="footer-links">
+          <h4>Explore</h4>
+          <ul>
+            <li><a href="#featuredClubs">All Clubs</a></li>
+            <li><a href="#featuredClubs">Technical Clubs</a></li>
+            <li><a href="#featuredClubs">Cultural Clubs</a></li>
+            <li><a href="#campusEvents">Upcoming Events</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-links">
+          <h4>Technology</h4>
+          <ul>
+            <li>HTML5 Semantic Markup</li>
+            <li>Vanilla CSS3 Design System</li>
+            <li>Express.js Web Server</li>
+            <li>REST API Architecture</li>
+          </ul>
+        </div>
+
+        <div class="footer-links">
+          <h4>About</h4>
+          <p style="font-size: 0.8rem; color: #9ca3af; line-height: 1.5;">
+            Built with Node.js & Express. Demonstrates seamless client-to-server connection, static asset routing, and REST communication.
+          </p>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>&copy; 2026 ClubSphere &bull; Club Discovery & Recruitment Platform</p>
+      </div>
+    </div>
+  </footer>
+
+  <div id="reviewToast">Connected</div>
+
+  <!-- Connected Client-side JavaScript -->
+  <script src="/app.js"></script>
+</body>
+</html>

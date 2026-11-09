@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f8f6fc">
+    <meta name="description" content="Standalone ClubSphere navigation preview">
+    <title>ClubSphere Navigation Preview</title>
+    <link rel="stylesheet" href="/styles.css">
+    <script src="/navigation.js" defer></script>
+  </head>
+  <body>
+    <nav class="navbar" aria-label="Main navigation">
+      <div class="nav-container">
+        <a href="/" class="brand" aria-label="ClubSphere home">
+          <span class="brand-icon" aria-hidden="true">CS</span>
+          <span>ClubSphere</span>
+        </a>
+
+        <div class="nav-right-actions">
+          <ul class="nav-links" id="navLinks">
+            <li><a href="/clubs" class="nav-link">Discover Clubs</a></li>
+            <li><a href="/events" class="nav-link">Campus Events</a></li>
+            <li><a href="/student/dashboard" class="nav-link">Dashboard</a></li>
+            <li><a href="/student/applications" class="nav-link">My Applications</a></li>
+            <li>
+              <a href="/student/notifications" class="nav-link">
+                Alerts <span class="nav-badge" aria-label="3 unread alerts">3</span>
+              </a>
+            </li>
+            <li class="user-badge">
+              <span class="user-avatar-dot" aria-hidden="true"></span>
+              <span>Alex</span>
+              <span class="user-role-tag">Student</span>
+            </li>
+            <li><a href="/auth/logout" class="logout-link">Logout</a></li>
+          </ul>
+
+          <button id="themeToggle" class="theme-toggle-btn" type="button"
+            aria-label="Switch to dark theme" title="Toggle light or dark theme">
+            <span class="theme-icon" aria-hidden="true">🌙</span>
+          </button>
+          <button class="mobile-menu-btn" type="button" aria-label="Open navigation menu"
+            aria-expanded="false" aria-controls="navLinks">
+            <span aria-hidden="true">☰</span>
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <main class="preview">
+      <p class="eyebrow">CLUBSPHERE · STUDENT VIEW</p>
+      <h1>Your campus, all in one place.</h1>
+      <p class="intro">
+        This is a standalone preview of the ClubSphere navigation. Resize the
+        window to try the mobile menu, or use the theme button to switch modes.
+      </p>
+      <div class="preview-card">
+        <span class="preview-mark" aria-hidden="true">✦</span>
+        <div>
+          <strong>Navigation preview</strong>
+          <p>Explore clubs, keep up with events, and manage your campus life.</p>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>
