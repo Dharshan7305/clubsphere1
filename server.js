@@ -12,6 +12,7 @@ const Club = require('./models/Club');
 const Recruitment = require('./models/Recruitment');
 const Event = require('./models/Event');
 const Notification = require('./models/Notification');
+const NotificationService = require('./services/notificationService');
 
 // Connect to MongoDB
 connectDB();
@@ -116,6 +117,8 @@ app.use('/secretary', require('./routes/secretaryRoutes'));
 app.use('/core', require('./routes/coreRoutes'));
 app.use('/faculty', require('./routes/facultyRoutes'));
 app.use('/admin', require('./routes/adminRoutes'));
+app.use('/notifications', require('./routes/notificationRoutes'));
+app.use('/principal', require('./routes/principalRoutes'));
 
 // 404 Handler
 app.use((req, res) => {

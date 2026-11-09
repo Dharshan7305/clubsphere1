@@ -2,109 +2,455 @@
 <%- include('../partials/navbar') %>
 <%- include('../partials/alerts') %>
 
-<main class="container" style="padding-top: 2rem; padding-bottom: 4rem;">
-  <div class="section-header">
-    <div>
-      <h1 class="section-title">🏛️ Club Discovery</h1>
-      <p class="section-subtitle">Explore student organizations, technical societies, and cultural forums</p>
-    </div>
-  </div>
-
-  <!-- Search & Category Filter Module -->
-  <div class="filter-bar">
-    <form action="/clubs" method="GET" style="display: flex; gap: 1rem; width: 100%; flex-wrap: wrap;">
-      <div class="search-input-wrapper">
-        <span class="search-icon">🔍</span>
-        <input 
-          type="text" 
-          name="search" 
-          class="search-input" 
-          placeholder="Search clubs by name, code, or description (e.g., Coding, Robotics, NSS)..." 
-          value="<%= searchQuery %>"
-        >
+<main class="clubs-discovery-page">
+  <!-- ========================================================
+       PAGE HEADER & SEARCH SECTION
+       ======================================================== -->
+  <header class="clubs-hero-header">
+    <div class="container text-center">
+      <div class="clubs-count-pill">
+        <span class="count-pill-dot"></span>
+        <span>Explore <%= totalClubsCount || 30 %> Student Clubs</span>
       </div>
 
-      <input type="hidden" name="category" value="<%= selectedCategory %>">
-      <button type="submit" class="btn btn-primary">Search</button>
-      <% if (searchQuery || (selectedCategory && selectedCategory !== 'All')) { %>
-        <a href="/clubs" class="btn btn-outline">Clear Filters</a>
-      <% } %>
-    </form>
+      <h1 class="clubs-main-heading">Discover Your Clubs</h1>
+      <p class="clubs-subheading">
+        Explore communities, discover your interests and find your place on campus.
+      </p>
 
-    <!-- Category Pills -->
-    <div class="category-pills">
-      <% categories.forEach(cat => { %>
-        <a 
-          href="/clubs?category=<%= encodeURIComponent(cat) %><%= searchQuery ? '&search=' + encodeURIComponent(searchQuery) : '' %>" 
-          class="category-pill <%= selectedCategory === cat ? 'active' : '' %>"
+      <!-- Prominent Search Bar -->
+      <div class="clubs-search-wrapper">
+        <div class="clubs-search-box">
+          <span class="clubs-search-icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </span>
+          <input 
+            type="text" 
+            id="clubSearchInput" 
+            class="clubs-search-input" 
+            placeholder="Search clubs by name or interest..." 
+            value="<%= searchQuery || '' %>"
+            autocomplete="off"
+            aria-label="Search clubs"
+          >
+          <button type="button" id="clearSearchBtn" class="clubs-search-clear" title="Clear search" style="<%= searchQuery ? '' : 'display: none;' %>">
+            ✕
+          </button>
+        </div>
+      </div>
+
+      <!-- Category Filter Buttons -->
+      <div class="clubs-category-filters" role="tablist" aria-label="Club categories">
+        <% categories.forEach(cat => { %>
+          <button 
+            type="button" 
+            class="category-filter-btn <%= selectedCategory === cat ? 'active' : '' %>"
+            data-category="<%= cat %>"
+            role="tab"
+            aria-selected="<%= selectedCategory === cat ? 'true' : 'false' %>"
+          >
+            <%= cat %>
+          </button>
+        <% }) %>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================
+       CLUBS DIRECTORY GRID (3-Column Responsive)
+       ======================================================== -->
+  <section class="container clubs-directory-section">
+    <div class="clubs-meta-bar">
+      <span id="clubsResultsCount" class="clubs-results-count">
+        Showing <strong id="visibleCount"><%= clubs.length %></strong> of <%= allClubs.length %> clubs
+      </span>
+      <span class="clubs-verified-tag">✓ Verified Student Organizations</span>
+    </div>
+
+    <!-- Active Grid -->
+    <div id="clubsGrid" class="clubs-grid-3">
+      <% clubs.forEach((club, index) => { %>
+        <%
+          // Serialize club data safely for modal view
+          const advisorsList = club.facultyAdvisors || (club.facultyAdvisor ? [club.facultyAdvisor] : []);
+          const modalData = {
+            id: club._id,
+            name: club.name,
+            code: club.code,
+            category: club.category,
+            tagline: club.tagline || '',
+            description: club.description || '',
+            objectives: club.objectives || [],
+            banner: club.banner,
+            recruitmentStatus: club.recruitmentStatus || null,
+            advisors: advisorsList
+          };
+        %>
+        <article 
+          class="club-dir-card" 
+          data-name="<%= club.name.toLowerCase() %>" 
+          data-code="<%= (club.code || '').toLowerCase() %>"
+          data-category="<%= club.category %>" 
+          data-desc="<%= (club.description || '').toLowerCase() %>"
+          data-tagline="<%= (club.tagline || '').toLowerCase() %>"
         >
-          <%= cat %>
-        </a>
-      <% }) %>
-    </div>
-  </div>
+          <!-- Card Image Header with Category Badge -->
+          <div class="club-dir-image-wrap">
+            <img 
+              src="<%= club.banner %>" 
+              alt="<%= club.name %> cover" 
+              class="club-dir-img" 
+              loading="lazy"
+              onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=700&q=80';"
+            >
+            <span class="club-dir-cat-badge"><%= club.category %></span>
+            <% if (club.recruitmentStatus === 'Open') { %>
+              <span class="club-dir-recruit-badge">Recruiting</span>
+            <% } %>
+          </div>
 
-  <!-- Clubs Grid -->
-  <% if (clubs.length === 0) { %>
-    <div style="text-align: center; padding: 4rem 1rem; background: #fff; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
-      <h3 style="color: var(--primary); font-size: 1.35rem; margin-bottom: 0.5rem;">No clubs found</h3>
-      <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Try adjusting your search criteria or category filter.</p>
-      <a href="/clubs" class="btn btn-outline">Show All Clubs</a>
-    </div>
-  <% } else { %>
-    <div class="grid-3">
-      <% clubs.forEach(club => { %>
-        <div class="card">
-          <div class="card-body">
-            <div class="club-card-badge-row">
-              <span class="badge badge-category"><%= club.category %></span>
-              <% if (club.recruitmentStatus === 'Open') { %>
-                <span class="badge badge-open">Recruiting Now</span>
-              <% } else if (club.recruitmentStatus === 'Coming Soon') { %>
-                <span class="badge badge-coming-soon">Coming Soon</span>
-              <% } else { %>
-                <span class="badge badge-closed">Recruitment Closed</span>
+          <!-- Card Body -->
+          <div class="club-dir-body">
+            <div class="club-dir-title-row">
+              <h3 class="club-dir-title"><%= club.name %></h3>
+              <% if (club.code) { %>
+                <span class="club-dir-code"><%= club.code %></span>
               <% } %>
             </div>
 
-            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-              <h2 class="club-card-title"><%= club.name %></h2>
-              <span style="font-size: 0.75rem; font-weight: 700; color: #64748b; background: #f1f5f9; padding: 2px 6px; border-radius: 4px;">
-                <%= club.code %>
+            <p class="club-dir-desc">
+              <%= club.description %>
+            </p>
+
+            <!-- Verified Advisor Snippet -->
+            <div class="club-dir-advisor-snippet">
+              <span class="advisor-label">Faculty Advisor:</span>
+              <span class="advisor-name">
+                <%= (advisorsList && advisorsList.length > 0) ? advisorsList[0].name : (club.facultyAdvisor ? club.facultyAdvisor.name : 'Verified Faculty Advisor') %>
               </span>
             </div>
 
-            <p class="club-card-tagline"><%= club.tagline %></p>
+            <!-- Card Actions -->
+            <div class="club-dir-footer">
+              <a 
+                href="/clubs/<%= club._id %>" 
+                class="btn-explore-modal" 
+                title="Explore <%= club.name %> details"
+              >
+                <span>Explore Club</span>
+                <span class="btn-arrow" aria-hidden="true">&rarr;</span>
+              </a>
 
-            <div class="club-meta-item">
-              <span>👨‍🏫 <strong>Advisor:</strong> <%= (club.facultyAdvisor && club.facultyAdvisor.name) ? club.facultyAdvisor.name : 'N/A' %></span>
-            </div>
-            <div class="club-meta-item">
-              <span>👤 <strong>Secretary:</strong> <%= (club.secretary && club.secretary.name) ? club.secretary.name : 'N/A' %></span>
-            </div>
-            <div class="club-meta-item">
-              <span>✉️ <%= club.contactEmail %></span>
+              <div class="club-dir-secondary-actions">
+                <% if (user && user.role === 'student' && club._id) { %>
+                  <form action="/clubs/<%= club._id %>/save" method="POST" style="display:inline;">
+                    <button 
+                      type="submit" 
+                      class="btn-save-circle <%= savedClubIds.includes(club._id.toString()) ? 'saved' : '' %>" 
+                      title="<%= savedClubIds.includes(club._id.toString()) ? 'Saved to dashboard' : 'Save club' %>"
+                    >
+                      <%= savedClubIds.includes(club._id.toString()) ? '★' : '☆' %>
+                    </button>
+                  </form>
+                <% } %>
+                <a href="/clubs/<%= club._id %>" class="btn-direct-link" title="Open full club profile page">
+                  ↗
+                </a>
+              </div>
             </div>
           </div>
-
-          <div class="card-footer">
-            <div style="display: flex; gap: 8px;">
-              <% if (user && user.role === 'student') { %>
-                <form action="/clubs/<%= club._id %>/save" method="POST" style="display: inline;">
-                  <button type="submit" class="btn btn-sm <%= savedClubIds.includes(club._id.toString()) ? 'btn-accent' : 'btn-outline' %>" title="Bookmark club">
-                    <%= savedClubIds.includes(club._id.toString()) ? '★ Saved' : '☆ Save' %>
-                  </button>
-                </form>
-              <% } %>
-            </div>
-            <a href="/clubs/<%= club._id %>" class="btn btn-sm btn-primary">
-              View Profile &rarr;
-            </a>
-          </div>
-        </div>
+        </article>
       <% }) %>
     </div>
-  <% } %>
+
+    <!-- Empty Results Placeholder (Hidden by default, shown when filters match 0 clubs) -->
+    <div id="noClubsFound" class="clubs-empty-state" style="<%= clubs.length === 0 ? '' : 'display: none;' %>">
+      <div class="empty-state-icon">🔍</div>
+      <h3>No matching clubs found</h3>
+      <p>We couldn't find any student clubs matching your search criteria. Try a different keyword or category.</p>
+      <button type="button" id="resetFiltersBtn" class="btn-reset-filters">
+        Reset All Filters
+      </button>
+    </div>
+  </section>
 </main>
+
+<!-- ========================================================
+     REUSABLE CLUB DETAILS MODAL (POPUP VIEW)
+     ======================================================== -->
+<div id="clubDetailsModal" class="club-modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="modalClubName">
+  <div class="club-modal-container">
+    <button type="button" class="club-modal-close" onclick="closeClubModal()" aria-label="Close modal">✕</button>
+
+    <!-- Modal Header Banner -->
+    <div class="club-modal-banner-wrap">
+      <img id="modalClubImg" src="" alt="Club banner" class="club-modal-banner-img">
+      <div class="club-modal-banner-overlay">
+        <span id="modalClubCategory" class="club-modal-cat-badge">Category</span>
+        <h2 id="modalClubName" class="club-modal-title">Club Name</h2>
+        <p id="modalClubTagline" class="club-modal-tagline"></p>
+      </div>
+    </div>
+
+    <!-- Modal Content -->
+    <div class="club-modal-body">
+      <!-- About Section -->
+      <div class="modal-section">
+        <h4 class="modal-section-title">About the Club</h4>
+        <p id="modalClubAbout" class="modal-section-text"></p>
+      </div>
+
+      <!-- Main Activities Section -->
+      <div class="modal-section" id="modalActivitiesSection">
+        <h4 class="modal-section-title">Main Activities & What You'll Do</h4>
+        <ul id="modalClubActivities" class="modal-activities-list"></ul>
+      </div>
+
+      <!-- Verified Faculty Advisors Section -->
+      <div class="modal-section">
+        <h4 class="modal-section-title">Verified Faculty Advisors</h4>
+        <div id="modalAdvisorsList" class="modal-advisors-grid"></div>
+      </div>
+
+      <!-- Recruitment Status & Actions -->
+      <div class="modal-footer-row">
+        <div class="modal-status-box" id="modalStatusBox">
+          <span class="status-label">Recruitment Status:</span>
+          <span id="modalRecruitStatus" class="status-badge status-open">Open</span>
+        </div>
+
+        <div class="modal-action-buttons">
+          <a id="modalFullPageBtn" href="#" class="btn-modal-fullpage">
+            <span>View Full Page</span>
+            <span aria-hidden="true">&rarr;</span>
+          </a>
+          <% if (user && user.role === 'student') { %>
+            <form id="modalJoinForm" action="#" method="POST" style="display:inline;">
+              <button type="submit" class="btn-modal-join">
+                Request to Join
+              </button>
+            </form>
+          <% } else if (!user) { %>
+            <a href="/auth/login" class="btn-modal-join">
+              Login to Join
+            </a>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================
+     CLIENT-SIDE DYNAMIC FILTER & MODAL JAVASCRIPT
+     ======================================================== -->
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('clubSearchInput');
+    const clearBtn = document.getElementById('clearSearchBtn');
+    const categoryBtns = document.querySelectorAll('.category-filter-btn');
+    const cards = document.querySelectorAll('.club-dir-card');
+    const emptyState = document.getElementById('noClubsFound');
+    const visibleCountSpan = document.getElementById('visibleCount');
+    const resetBtn = document.getElementById('resetFiltersBtn');
+
+    let activeCategory = '<%= selectedCategory || "All Clubs" %>';
+    let searchQuery = (searchInput.value || '').trim().toLowerCase();
+
+    function filterClubs() {
+      let visible = 0;
+      const q = searchQuery.toLowerCase().trim();
+
+      cards.forEach(card => {
+        const name = card.dataset.name || '';
+        const code = card.dataset.code || '';
+        const category = card.dataset.category || '';
+        const desc = card.dataset.desc || '';
+        const tagline = card.dataset.tagline || '';
+
+        // Category match
+        const matchesCategory = (activeCategory === 'All Clubs' || activeCategory === 'All') 
+          || (category.toLowerCase() === activeCategory.toLowerCase());
+
+        // Search match
+        const matchesSearch = !q 
+          || name.includes(q) 
+          || code.includes(q) 
+          || category.toLowerCase().includes(q) 
+          || desc.includes(q) 
+          || tagline.includes(q);
+
+        if (matchesCategory && matchesSearch) {
+          card.style.display = '';
+          visible++;
+        } else {
+          card.style.display = 'none';
+        }
+      });
+
+      if (visibleCountSpan) visibleCountSpan.textContent = visible;
+
+      if (visible === 0) {
+        if (emptyState) emptyState.style.display = 'block';
+      } else {
+        if (emptyState) emptyState.style.display = 'none';
+      }
+
+      if (clearBtn) {
+        clearBtn.style.display = searchInput.value.length > 0 ? 'inline-flex' : 'none';
+      }
+    }
+
+    // Live search input
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        searchQuery = e.target.value;
+        filterClubs();
+      });
+    }
+
+    // Clear search button
+    if (clearBtn) {
+      clearBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        searchQuery = '';
+        searchInput.focus();
+        filterClubs();
+      });
+    }
+
+    // Category button clicks
+    categoryBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        categoryBtns.forEach(b => {
+          b.classList.remove('active');
+          b.setAttribute('aria-selected', 'false');
+        });
+        btn.classList.add('active');
+        btn.setAttribute('aria-selected', 'true');
+        activeCategory = btn.dataset.category;
+        filterClubs();
+      });
+    });
+
+    // Reset filters
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        if (searchInput) searchInput.value = '';
+        searchQuery = '';
+        activeCategory = 'All Clubs';
+        categoryBtns.forEach(b => {
+          b.classList.toggle('active', b.dataset.category === 'All Clubs');
+          b.setAttribute('aria-selected', b.dataset.category === 'All Clubs' ? 'true' : 'false');
+        });
+        filterClubs();
+      });
+    }
+
+    // Initial filter run
+    filterClubs();
+  });
+
+  // Reusable Modal Functions
+  window.openClubModal = function(btn) {
+    try {
+      const data = JSON.parse(btn.getAttribute('data-club'));
+      const modal = document.getElementById('clubDetailsModal');
+      if (!modal || !data) return;
+
+      document.getElementById('modalClubName').textContent = data.name;
+      document.getElementById('modalClubCategory').textContent = data.category;
+      document.getElementById('modalClubTagline').textContent = data.tagline || '';
+      document.getElementById('modalClubAbout').textContent = data.description || '';
+      document.getElementById('modalClubImg').src = data.banner || 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=700&q=80';
+
+      // Activities
+      const actList = document.getElementById('modalClubActivities');
+      actList.innerHTML = '';
+      if (data.objectives && data.objectives.length > 0) {
+        data.objectives.forEach(act => {
+          const li = document.createElement('li');
+          li.textContent = act;
+          actList.appendChild(li);
+        });
+        document.getElementById('modalActivitiesSection').style.display = 'block';
+      } else {
+        document.getElementById('modalActivitiesSection').style.display = 'none';
+      }
+
+      // Verified Faculty Advisors
+      const advGrid = document.getElementById('modalAdvisorsList');
+      advGrid.innerHTML = '';
+      if (data.advisors && data.advisors.length > 0) {
+        data.advisors.forEach(adv => {
+          const item = document.createElement('div');
+          item.className = 'advisor-pill-card';
+          item.innerHTML = `
+            <div class="adv-icon">👨‍🏫</div>
+            <div class="adv-text">
+              <strong>${adv.name}</strong>
+              <small>${adv.department ? 'Dept. of ' + adv.department : 'Faculty Advisor'}</small>
+            </div>
+          `;
+          advGrid.appendChild(item);
+        });
+      } else {
+        advGrid.innerHTML = '<span style="color:#64748b; font-size:0.85rem;">Official faculty guidance verified by college affairs.</span>';
+      }
+
+      // Recruitment Status
+      const statusBox = document.getElementById('modalStatusBox');
+      const statusBadge = document.getElementById('modalRecruitStatus');
+      if (data.recruitmentStatus === 'Open') {
+        if (statusBox) statusBox.style.display = 'flex';
+        statusBadge.textContent = 'Recruiting';
+        statusBadge.className = 'status-badge status-open';
+      } else if (data.recruitmentStatus === 'Closed') {
+        if (statusBox) statusBox.style.display = 'flex';
+        statusBadge.textContent = 'Closed';
+        statusBadge.className = 'status-badge status-closed';
+      } else {
+        if (statusBox) statusBox.style.display = 'none';
+      }
+
+      // Actions
+      const fullPageBtn = document.getElementById('modalFullPageBtn');
+      if (fullPageBtn) fullPageBtn.href = '/clubs/' + (data.id || data.code.toLowerCase());
+
+      const joinForm = document.getElementById('modalJoinForm');
+      if (joinForm) joinForm.action = '/clubs/' + (data.id || data.code.toLowerCase()) + '/join';
+
+      modal.classList.add('active');
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    } catch (e) {
+      console.error('Error opening club modal:', e);
+    }
+  };
+
+  window.closeClubModal = function() {
+    const modal = document.getElementById('clubDetailsModal');
+    if (modal) {
+      modal.classList.remove('active');
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+  };
+
+  // Close modal on escape or backdrop click
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeClubModal();
+  });
+
+  const modalOverlay = document.getElementById('clubDetailsModal');
+  if (modalOverlay) {
+    modalOverlay.addEventListener('click', (e) => {
+      if (e.target === modalOverlay) closeClubModal();
+    });
+  }
+</script>
 
 <%- include('../partials/footer') %>

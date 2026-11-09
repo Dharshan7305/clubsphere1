@@ -1,0 +1,143 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/alerts') %>
+
+<main class="notifications-page-wrap">
+  <div class="container">
+    
+    <!-- Header Section -->
+    <div class="notif-page-header">
+      <div class="notif-header-info">
+        <span class="notif-role-badge">
+          <% if (user.role === 'faculty') { %>👨‍🏫 Main Faculty
+          <% } else if (user.role === 'principal') { %>🏛️ Principal Office
+          <% } else if (user.role === 'secretary') { %>📋 Club Secretary
+          <% } else if (user.role === 'admin') { %>🛡️ Administrator
+          <% } else { %>🎓 Student Portal
+          <% } %>
+        </span>
+        <h1 class="notif-page-title">Notifications Center</h1>
+        <p class="notif-page-subtitle">Real-time alerts, event approvals, recruitment updates, and campus notifications.</p>
+      </div>
+
+      <div class="notif-header-actions">
+        <% if (unreadCount > 0) { %>
+          <form action="/notifications/mark-all-read" method="POST" style="margin: 0;">
+            <button type="submit" class="btn btn-outline-purple btn-mark-all">
+              <span class="btn-icon">✓</span>
+              <span>Mark All as Read (<%= unreadCount %>)</span>
+            </button>
+          </form>
+        <% } else { %>
+          <span class="notif-all-read-pill">✓ All Caught Up</span>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Filter Tabs Bar -->
+    <div class="notif-filter-bar">
+      <div class="notif-filter-tabs">
+        <a href="/notifications?filter=all" class="notif-tab <%= activeFilter === 'all' ? 'active' : '' %>">
+          <span>All</span>
+          <span class="tab-count"><%= totalCount %></span>
+        </a>
+        <a href="/notifications?filter=unread" class="notif-tab <%= activeFilter === 'unread' ? 'active' : '' %>">
+          <span>Unread</span>
+          <% if (unreadCount > 0) { %>
+            <span class="tab-count tab-count-highlight"><%= unreadCount %></span>
+          <% } else { %>
+            <span class="tab-count">0</span>
+          <% } %>
+        </a>
+        <a href="/notifications?filter=event" class="notif-tab <%= activeFilter === 'event' ? 'active' : '' %>">
+          <span>📅 Events</span>
+        </a>
+        <a href="/notifications?filter=recruitment" class="notif-tab <%= activeFilter === 'recruitment' ? 'active' : '' %>">
+          <span>📢 Recruitments</span>
+        </a>
+        <a href="/notifications?filter=application" class="notif-tab <%= activeFilter === 'application' ? 'active' : '' %>">
+          <span>📝 Applications</span>
+        </a>
+        <a href="/notifications?filter=approval" class="notif-tab <%= activeFilter === 'approval' ? 'active' : '' %>">
+          <span>⚖️ Approvals</span>
+        </a>
+        <a href="/notifications?filter=admin" class="notif-tab <%= activeFilter === 'admin' ? 'active' : '' %>">
+          <span>🛡️ Admin</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Notifications List -->
+    <div class="notif-list-container">
+      <% if (notifications && notifications.length > 0) { %>
+        <div class="notif-items-grid">
+          <% notifications.forEach(function(n) { %>
+            <div class="notif-full-card <%= n.isRead ? 'is-read' : 'is-unread' %> type-<%= n.type %>">
+              <div class="notif-card-icon-col">
+                <span class="notif-type-icon-circle"><%= n.icon || '🔔' %></span>
+                <% if (!n.isRead) { %>
+                  <span class="notif-unread-dot" title="Unread notification"></span>
+                <% } %>
+              </div>
+
+              <div class="notif-card-main">
+                <div class="notif-card-top-row">
+                  <div class="notif-card-meta">
+                    <span class="notif-type-tag tag-<%= n.type %>">
+                      <%= n.type.toUpperCase() %>
+                    </span>
+                    <% if (n.club && n.club.name) { %>
+                      <span class="notif-club-tag"><%= n.club.name %></span>
+                    <% } %>
+                  </div>
+                  <span class="notif-timestamp" title="<%= new Date(n.createdAt).toLocaleString() %>">
+                    <%= n.timeAgo || new Date(n.createdAt).toLocaleDateString() %>
+                  </span>
+                </div>
+
+                <h3 class="notif-card-title"><%= n.title %></h3>
+                <p class="notif-card-msg"><%= n.message %></p>
+
+                <div class="notif-card-footer">
+                  <% if (n.relatedLink && n.relatedLink !== '#') { %>
+                    <a href="<%= n.relatedLink %>" class="notif-action-btn">
+                      <span>View Details</span>
+                      <span class="btn-arrow">&rarr;</span>
+                    </a>
+                  <% } %>
+
+                  <% if (!n.isRead) { %>
+                    <form action="/notifications/<%= n._id %>/read" method="POST" style="margin: 0; display: inline;">
+                      <button type="submit" class="btn-mark-single-read" title="Mark as read">
+                        ✓ Mark read
+                      </button>
+                    </form>
+                  <% } else { %>
+                    <span class="read-status-label">Read</span>
+                  <% } %>
+                </div>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+      <% } else { %>
+        <!-- Empty State -->
+        <div class="notif-empty-state">
+          <div class="notif-empty-icon">📭</div>
+          <h3 class="notif-empty-title">No notifications found</h3>
+          <p class="notif-empty-desc">
+            <% if (activeFilter === 'unread') { %>
+              You have read all your notifications! Great job staying on top of campus updates.
+            <% } else { %>
+              There are no notifications matching the "<%= activeFilter %>" category at this time.
+            <% } %>
+          </p>
+          <a href="/notifications?filter=all" class="btn btn-outline-purple">View All Notifications</a>
+        </div>
+      <% } %>
+    </div>
+
+  </div>
+</main>
+
+<%- include('../partials/footer') %>

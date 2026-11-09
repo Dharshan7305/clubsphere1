@@ -1,16 +1,16 @@
-﻿# ClubSphere – Club Discovery & Recruitment Platform
+# ClubSphere � Club Discovery & Recruitment Platform
 
-A realistic, full-stack Web Application Development (WAD) project built for **College of Technology**, designed specifically to be clean, modular, practical, and straightforward to demonstrate and defend in your **Viva Examination**.
-
----
-
-## 🎯 Short Viva Explanation (Pitch to Examiner)
-
-> **"ClubSphere is a centralized platform for college clubs. Students can discover clubs, view recruitment and event details, apply online, and track their applications. Club Secretaries and Core Members manage recruitments and events, Faculty Advisors approve activities, and Admin manages the entire system. The platform solves the problem of scattered club information across WhatsApp, Instagram, and notices by providing a single website for all club-related activities."** ✅
+A realistic, full-stack Web Application Development (WAD) project built for **ClubSphere**, designed specifically to be clean, modular, practical, and straightforward to demonstrate and defend in your **Viva Examination**.
 
 ---
 
-## 🛠️ Technology Stack (Syllabus Aligned)
+## ?? Short Viva Explanation (Pitch to Examiner)
+
+> **"ClubSphere is a centralized platform for college clubs. Students can discover clubs, view recruitment and event details, apply online, and track their applications. Club Secretaries and Core Members manage recruitments and events, Faculty Advisors approve activities, and Admin manages the entire system. The platform solves the problem of scattered club information across WhatsApp, Instagram, and notices by providing a single website for all club-related activities."** ?
+
+---
+
+## ??? Technology Stack (Syllabus Aligned)
 
 | Layer | Technology | Role in Project |
 |---|---|---|
@@ -21,7 +21,7 @@ A realistic, full-stack Web Application Development (WAD) project built for **Co
 
 ---
 
-## 👥 5 User Roles & Workflows
+## ?? 5 User Roles & Workflows
 
 ### 1. Student Module
 * Student Registration & Login (with Roll Number and Department)
@@ -67,63 +67,63 @@ A realistic, full-stack Web Application Development (WAD) project built for **Co
 
 ---
 
-## 📁 Clean MVC Architecture
+## ?? Clean MVC Architecture
 
 ```
 d:\lap\html-css\Projekt\
-├── server.js              # Express app initialization & route mounting
-├── seed.js                # Database seed script with sample ClubSphere data
-├── package.json           # Dependencies and scripts
-├── .env                   # Environment config (PORT, MONGO_URI, SESSION_SECRET)
-│
-├── config/
-│   └── db.js              # MongoDB Mongoose connection handler
-│
-├── models/
-│   ├── User.js            # User Schema (Roles, Passwords, Saved Clubs)
-│   ├── Club.js            # Club Profile, Objectives, Leadership team
-│   ├── Membership.js      # Direct club join requests and secretary decisions
-│   ├── Recruitment.js     # Recruitment Drive & Faculty Approval Schema
-│   ├── Application.js     # Student Application, Status & Interview details
-│   ├── Event.js           # Campus Events, Capacity & Participant Attendance
-│   └── Notification.js    # Alerts & Broadcast Announcements
-│
-├── middleware/
-│   └── auth.js            # Session auth & Role-Based Access Control (RBAC)
-│
-├── routes/
-│   ├── authRoutes.js      # /auth (login, register, logout)
-│   ├── clubRoutes.js      # /clubs (discovery, details, bookmarking, join requests)
-│   ├── eventRoutes.js     # /events (browse and registration)
-│   ├── studentRoutes.js   # /student (dashboard, apply, status, alerts)
-│   ├── secretaryRoutes.js # /secretary (profile, member approvals, recruitments, applicants, events)
-│   ├── coreRoutes.js      # /core (attendance check-in, event updates)
-│   ├── facultyRoutes.js   # /faculty (review & approve recruitments)
-│   └── adminRoutes.js     # /admin (clubs, users, viva reports)
-│
-├── public/
-│   ├── css/
-│   │   └── style.css      # ClubSphere institutional styling, responsive CSS
-│   └── js/
-│       └── main.js        # Modals, alerts, attendance toggle, 1-click test login
-│
-└── views/
-    ├── partials/          # Reusable header, navbar, alerts, footer
-    ├── auth/              # login.ejs, register.ejs
-    ├── clubs/             # index.ejs, show.ejs
-    ├── events/            # index.ejs, show.ejs
-    ├── student/           # dashboard.ejs, apply.ejs, applications.ejs, notifications.ejs
-    ├── secretary/         # dashboard.ejs, manage-club.ejs, recruitments.ejs, applicants.ejs, events.ejs, create-event.ejs
-    ├── core/              # dashboard.ejs, event-participants.ejs, applications.ejs
-    ├── faculty/           # dashboard.ejs, recruitments.ejs
-    ├── admin/             # dashboard.ejs, clubs.ejs, users.ejs, reports.ejs
-    ├── home.ejs           # Landing page
-    └── 404.ejs            # Error page
++-- server.js              # Express app initialization & route mounting
++-- seed.js                # Database seed script with sample ClubSphere data
++-- package.json           # Dependencies and scripts
++-- .env                   # Environment config (PORT, MONGO_URI, SESSION_SECRET)
+�
++-- config/
+�   +-- db.js              # MongoDB Mongoose connection handler
+�
++-- models/
+�   +-- User.js            # User Schema (Roles, Passwords, Saved Clubs)
+�   +-- Club.js            # Club Profile, Objectives, Leadership team
+�   +-- Membership.js      # Direct club join requests and secretary decisions
+�   +-- Recruitment.js     # Recruitment Drive & Faculty Approval Schema
+�   +-- Application.js     # Student Application, Status & Interview details
+�   +-- Event.js           # Campus Events, Capacity & Participant Attendance
+�   +-- Notification.js    # Alerts & Broadcast Announcements
+�
++-- middleware/
+�   +-- auth.js            # Session auth & Role-Based Access Control (RBAC)
+�
++-- routes/
+�   +-- authRoutes.js      # /auth (login, register, logout)
+�   +-- clubRoutes.js      # /clubs (discovery, details, bookmarking, join requests)
+�   +-- eventRoutes.js     # /events (browse and registration)
+�   +-- studentRoutes.js   # /student (dashboard, apply, status, alerts)
+�   +-- secretaryRoutes.js # /secretary (profile, member approvals, recruitments, applicants, events)
+�   +-- coreRoutes.js      # /core (attendance check-in, event updates)
+�   +-- facultyRoutes.js   # /faculty (review & approve recruitments)
+�   +-- adminRoutes.js     # /admin (clubs, users, viva reports)
+�
++-- public/
+�   +-- css/
+�   �   +-- style.css      # ClubSphere institutional styling, responsive CSS
+�   +-- js/
+�       +-- main.js        # Modals, alerts, attendance toggle, 1-click test login
+�
++-- views/
+    +-- partials/          # Reusable header, navbar, alerts, footer
+    +-- auth/              # login.ejs, register.ejs
+    +-- clubs/             # index.ejs, show.ejs
+    +-- events/            # index.ejs, show.ejs
+    +-- student/           # dashboard.ejs, apply.ejs, applications.ejs, notifications.ejs
+    +-- secretary/         # dashboard.ejs, manage-club.ejs, recruitments.ejs, applicants.ejs, events.ejs, create-event.ejs
+    +-- core/              # dashboard.ejs, event-participants.ejs, applications.ejs
+    +-- faculty/           # dashboard.ejs, recruitments.ejs
+    +-- admin/             # dashboard.ejs, clubs.ejs, users.ejs, reports.ejs
+    +-- home.ejs           # Landing page
+    +-- 404.ejs            # Error page
 ```
 
 ---
 
-## ⚡ Quick Demo Accounts for Viva
+## ? Quick Demo Accounts for Viva
 
 All accounts use the common demo password: `password123`
 
@@ -135,11 +135,11 @@ All accounts use the common demo password: `password123`
 | **Faculty Advisor** | `faculty@college.ac.in` | `password123` | Review and approve pending recruitment drives |
 | **Admin (Dean)** | `admin@college.ac.in` | `password123` | Add/edit clubs, change user roles & print viva reports |
 
-> 💡 **Tip:** On the Login page (`/auth/login`), there are 1-click buttons to instantly autofill any of these 5 accounts!
+> ?? **Tip:** On the Login page (`/auth/login`), there are 1-click buttons to instantly autofill any of these 5 accounts!
 
 ---
 
-## 🚀 How to Run the Project
+## ?? How to Run the Project
 
 ### 1. Start MongoDB
 Ensure MongoDB service is running (it runs automatically on `localhost:27017`).
@@ -158,7 +158,7 @@ Visit: **`http://localhost:3000`**
 
 ---
 
-## 🎓 Viva Questions & Answers (Frequently Asked)
+## ?? Viva Questions & Answers (Frequently Asked)
 
 **Q1: Why did you choose EJS instead of React or Angular?**  
 > *"Our WAD syllabus focuses on core server-side web architecture. EJS allows straightforward server-side rendering (SSR), cleaner routing with Express, and avoids the unnecessary complexity of client-side build tools, making the application easy to explain and maintain."*

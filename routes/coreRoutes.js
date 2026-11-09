@@ -3,6 +3,7 @@ const router = express.Router();
 const Club = require('../models/Club');
 const Event = require('../models/Event');
 const Application = require('../models/Application');
+const NotificationService = require('../services/notificationService');
 const { ensureAuthenticated, authorizeRoles } = require('../middleware/auth');
 
 // Protect all core member routes (allow core, secretary, admin)
@@ -23,7 +24,7 @@ async function getCoreClub(req) {
   });
 }
 
-// GET /core/dashboard - Core Member Dashboard
+// GET /core/dashboard - Core Team Dashboard
 router.get('/dashboard', async (req, res) => {
   try {
     const club = await getCoreClub(req);
@@ -94,7 +95,7 @@ router.post('/events/:id/attendance/:participantId', async (req, res) => {
   }
 });
 
-// POST /core/events/:id/update - Update Event Details
+// POST /core/events/:id/update - Update Event Details (Venue, Time, Status)
 router.post('/events/:id/update', async (req, res) => {
   try {
     const club = await getCoreClub(req);
@@ -106,15 +107,44 @@ router.post('/events/:id/update', async (req, res) => {
     }
 
     const { venue, eventDate, startTime, endTime, status, description } = req.body;
-    if (venue) event.venue = venue;
-    if (eventDate) event.eventDate = new Date(eventDate);
+    let detailsChanged = false;
+
+    if (venue && venue !== event.venue) {
+      event.venue = venue;
+      detailsChanged = true;
+    }
+    if (eventDate) {
+      const newD = new Date(eventDate);
+      if (newD.getTime() !== event.eventDate.getTime()) {
+        event.eventDate = newD;
+        detailsChanged = true;
+      }
+    }
     if (startTime) event.startTime = startTime;
     if (endTime) event.endTime = endTime;
     if (status) event.status = status;
     if (description) event.description = description;
 
     await event.save();
-    req.flash('success_msg', 'Event details updated successfully!');
+
+    // If venue or date changed, notify all registered participants
+    if (detailsChanged && event.participants.length > 0) {
+      for (const p of event.participants) {
+        if (p.student) {
+          await NotificationService.createNotification({
+            recipient: p.student,
+            club: event.club,
+            title: `Event Schedule/Venue Update: ${event.title}`,
+            message: `Important update for "${event.title}": Venue is ${event.venue} on ${new Date(event.eventDate).toLocaleDateString()} (${event.startTime}).`,
+            type: 'event',
+            relatedId: event._id,
+            relatedLink: `/events/${event._id}`
+          });
+        }
+      }
+    }
+
+    req.flash('success_msg', 'Event details updated successfully! Registered participants notified.');
     res.redirect(`/core/events/${event._id}/participants`);
   } catch (error) {
     console.error('Update event error:', error);

@@ -1,4 +1,4 @@
-﻿const mongoose = require('mongoose');
+const mongoose = require('mongoose');
 
 const EventSchema = new mongoose.Schema({
   club: {
@@ -66,6 +66,27 @@ const EventSchema = new mongoose.Schema({
     type: String,
     enum: ['Upcoming', 'Ongoing', 'Completed', 'Cancelled'],
     default: 'Upcoming'
+  },
+  approvalStatus: {
+    type: String,
+    enum: ['Pending Faculty', 'Rejected by Faculty', 'Pending Principal', 'Rejected by Principal', 'Changes Requested', 'Approved'],
+    default: 'Approved'
+  },
+  isPublished: {
+    type: Boolean,
+    default: true
+  },
+  facultyApproval: {
+    status: { type: String, enum: ['Pending', 'Approved', 'Rejected'], default: 'Approved' },
+    remarks: { type: String, default: '' },
+    reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    reviewedAt: { type: Date }
+  },
+  principalApproval: {
+    status: { type: String, enum: ['Pending', 'Approved', 'Rejected', 'Changes Requested'], default: 'Approved' },
+    remarks: { type: String, default: '' },
+    reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    reviewedAt: { type: Date }
   },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,

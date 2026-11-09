@@ -5,6 +5,7 @@ const User = require('../models/User');
 const Recruitment = require('../models/Recruitment');
 const Application = require('../models/Application');
 const Event = require('../models/Event');
+const NotificationService = require('../services/notificationService');
 const { ensureAuthenticated, authorizeRoles } = require('../middleware/auth');
 
 // Protect all admin routes
@@ -196,7 +197,7 @@ router.post('/users/:id/role', async (req, res) => {
       return res.redirect('/admin/users');
     }
 
-    if (!['student', 'secretary', 'core', 'faculty', 'admin'].includes(role)) {
+    if (!['student', 'secretary', 'core', 'faculty', 'principal', 'admin'].includes(role)) {
       req.flash('error_msg', 'Choose a valid user role.');
       return res.redirect('/admin/users');
     }
