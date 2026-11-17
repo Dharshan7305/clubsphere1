@@ -74,7 +74,7 @@
                   </button>
                 </div>
 
-                <div class="notif-dropdown-list" id="notifDropdownList">
+                <div class="notif-dropdown-list" id="notifDropdownList" aria-live="polite">
                   <% if (typeof recentNotifications !== 'undefined' && recentNotifications.length > 0) { %>
                     <% recentNotifications.forEach(function(item) { %>
                       <div class="notif-item <%= item.isRead ? 'read' : 'unread' %>" data-id="<%= item._id %>">

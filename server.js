@@ -11,7 +11,6 @@ const connectDB = require('./config/db');
 const Club = require('./models/Club');
 const Recruitment = require('./models/Recruitment');
 const Event = require('./models/Event');
-const Notification = require('./models/Notification');
 const NotificationService = require('./services/notificationService');
 
 const app = express();
@@ -58,19 +57,22 @@ app.use(async (req, res, next) => {
   res.locals.error_msg = req.flash('error_msg');
   res.locals.error = req.flash('error');
 
-  // Count unread notifications if user logged in
+  res.locals.unreadNotifs = 0;
+  res.locals.recentNotifications = [];
+
   if (req.session.user) {
     try {
-      const unreadCount = await Notification.countDocuments({
-        $or: [{ recipient: req.session.user._id }, { recipient: null }],
-        isRead: false
-      });
+      const { _id: userId, role } = req.session.user;
+      const [unreadCount, recentNotifications] = await Promise.all([
+        NotificationService.getUnreadCount(userId, role),
+        NotificationService.getNotificationsForUser(userId, role, { limit: 8 })
+      ]);
+
       res.locals.unreadNotifs = unreadCount;
-    } catch (e) {
-      res.locals.unreadNotifs = 0;
+      res.locals.recentNotifications = recentNotifications;
+    } catch (error) {
+      console.error('[Notification Middleware Error]:', error.message);
     }
-  } else {
-    res.locals.unreadNotifs = 0;
   }
 
   next();
