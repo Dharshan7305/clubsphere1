@@ -14,9 +14,6 @@ const Event = require('./models/Event');
 const Notification = require('./models/Notification');
 const NotificationService = require('./services/notificationService');
 
-// Connect to MongoDB
-connectDB();
-
 const app = express();
 
 // View Engine Setup (EJS)
@@ -42,6 +39,17 @@ app.use(
 
 // Connect Flash
 app.use(flash());
+
+// Connect before any middleware or route performs database operations.
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    console.error('[MongoDB Request Error]:', error.message);
+    res.status(503).send('The service is temporarily unavailable because the database could not be reached.');
+  }
+});
 
 // Global Variables & Notification Badge Middleware
 app.use(async (req, res, next) => {
