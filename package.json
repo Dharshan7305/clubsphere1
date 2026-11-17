@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
+    "start:navigation": "node navigation/app.js",
     "seed": "node seed.js"
   },
   "keywords": [
