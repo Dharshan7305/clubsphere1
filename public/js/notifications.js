@@ -10,6 +10,7 @@
     const pill = document.getElementById('notifUnreadPill');
     const markAllBtn = document.getElementById('btnMarkAllRead');
     const list = document.getElementById('notifDropdownList');
+    const actionStatus = document.getElementById('notifActionStatus');
 
     if (!bellBtn || !panel) return;
 
@@ -27,6 +28,7 @@
     function openDropdown() {
       panel.classList.add('active');
       bellBtn.setAttribute('aria-expanded', 'true');
+      setActionStatus('');
       loadRecentNotifications();
     }
 
@@ -63,6 +65,25 @@
         }
       }
       if (pill) pill.textContent = count > 0 ? count + ' Unread' : 'All Read';
+    }
+
+    function setActionStatus(message, isError) {
+      if (!actionStatus) return;
+      actionStatus.textContent = message;
+      actionStatus.hidden = !message;
+      actionStatus.classList.toggle('error', Boolean(message && isError));
+    }
+
+    async function markNotificationRead(notificationId) {
+      const response = await fetch('/notifications/api/' + encodeURIComponent(notificationId) + '/read', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const data = await response.json();
+      if (!response.ok || !data.success || !Number.isFinite(data.unreadCount)) {
+        throw new Error(data.error || 'Could not mark notification as read.');
+      }
+      return data;
     }
 
     function renderNotifications(notifications) {
@@ -159,25 +180,32 @@
       markAllBtn.addEventListener('click', async function(e) {
         e.preventDefault();
         e.stopPropagation();
+        markAllBtn.disabled = true;
+        setActionStatus('Marking notifications as read...');
         try {
           const res = await fetch('/notifications/api/mark-all-read', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' }
           });
           const data = await res.json();
-          if (data.success) {
-            updateBadgeUI(0);
-            // Mark all visible items as read
-            const unreadItems = panel.querySelectorAll('.notif-item.unread');
-            unreadItems.forEach(item => {
-              item.classList.remove('unread');
-              item.classList.add('read');
-              const btn = item.querySelector('.notif-item-mark-btn');
-              if (btn) btn.remove();
-            });
+          if (!res.ok || !data.success || !Number.isFinite(data.unreadCount)) {
+            throw new Error(data.error || 'Could not mark notifications as read.');
           }
-        } catch (err) {
-          console.error('Failed to mark all as read:', err);
+
+          updateBadgeUI(data.unreadCount);
+          const unreadItems = panel.querySelectorAll('.notif-item.unread');
+          unreadItems.forEach(item => {
+            item.classList.remove('unread');
+            item.classList.add('read');
+            const btn = item.querySelector('.notif-item-mark-btn');
+            if (btn) btn.remove();
+          });
+          setActionStatus('All notifications marked as read.');
+        } catch (error) {
+          console.error('Failed to mark all as read:', error);
+          setActionStatus(error.message, true);
+        } finally {
+          markAllBtn.disabled = false;
         }
       });
     }
@@ -192,22 +220,21 @@
           const notifId = markBtn.dataset.id;
           const item = markBtn.closest('.notif-item');
 
+          markBtn.disabled = true;
+          setActionStatus('Marking notification as read...');
           try {
-            const res = await fetch('/notifications/api/' + notifId + '/read', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' }
-            });
-            const data = await res.json();
-            if (data.success) {
-              if (item) {
-                item.classList.remove('unread');
-                item.classList.add('read');
-                markBtn.remove();
-              }
-              updateBadgeUI(data.unreadCount);
+            const data = await markNotificationRead(notifId);
+            if (item) {
+              item.classList.remove('unread');
+              item.classList.add('read');
+              markBtn.remove();
             }
-          } catch (err) {
-            console.error('Failed to mark notification read:', err);
+            updateBadgeUI(data.unreadCount);
+            setActionStatus('Notification marked as read.');
+          } catch (error) {
+            console.error('Failed to mark notification read:', error);
+            setActionStatus(error.message, true);
+            markBtn.disabled = false;
           }
           return;
         }
@@ -218,10 +245,20 @@
           const notifId = link.dataset.id;
           const item = link.closest('.notif-item');
           if (item && item.classList.contains('unread') && notifId) {
-            fetch('/notifications/api/' + notifId + '/read', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' }
-            }).catch(function(e) {});
+            e.preventDefault();
+            setActionStatus('Marking notification as read...');
+            try {
+              const data = await markNotificationRead(notifId);
+              item.classList.remove('unread');
+              item.classList.add('read');
+              const markBtn = item.querySelector('.notif-item-mark-btn');
+              if (markBtn) markBtn.remove();
+              updateBadgeUI(data.unreadCount);
+              window.location.assign(link.href);
+            } catch (error) {
+              console.error('Failed to mark notification read:', error);
+              setActionStatus(error.message, true);
+            }
           }
         }
       });
