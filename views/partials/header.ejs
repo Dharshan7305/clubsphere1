@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f8f6fc">
   <title><%= typeof title !== 'undefined' ? title : 'ClubSphere | Your Campus. Your Community.' %></title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -10,8 +11,17 @@
   <link rel="stylesheet" href="/css/style.css">
   <script>
     (function() {
-      const savedTheme = localStorage.getItem('clubsphere-theme') || 'light';
-      document.documentElement.setAttribute('data-theme', savedTheme);
+      let savedTheme = 'light';
+      try {
+        savedTheme = localStorage.getItem('clubsphere-theme') || savedTheme;
+      } catch (error) {
+        console.warn('Theme preference could not be loaded.', error);
+      }
+
+      const theme = savedTheme === 'dark' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+      document.querySelector('meta[name="theme-color"]').content =
+        theme === 'dark' ? '#100b1a' : '#f8f6fc';
     })();
   </script>
 </head>

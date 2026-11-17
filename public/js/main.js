@@ -10,19 +10,32 @@ document.addEventListener('DOMContentLoaded', () => {
       themeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
     }
     if (themeToggle) {
-      themeToggle.setAttribute('title', theme === 'dark' ? 'Switch to Light Theme' : 'Switch to Dark Theme');
+      const targetTheme = theme === 'dark' ? 'light' : 'dark';
+      themeToggle.setAttribute('aria-label', `Switch to ${targetTheme} theme`);
+      themeToggle.setAttribute('aria-pressed', String(theme === 'dark'));
+      themeToggle.setAttribute('title', `Switch to ${targetTheme} theme`);
     }
   }
 
-  const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+  const currentTheme = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
   updateThemeUI(currentTheme);
 
   if (themeToggle) {
     themeToggle.addEventListener('click', () => {
-      const active = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+      const active = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
       const targetTheme = active === 'dark' ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', targetTheme);
-      localStorage.setItem('clubsphere-theme', targetTheme);
+      document.documentElement.dataset.theme = targetTheme;
+      const themeColor = document.querySelector('meta[name="theme-color"]');
+      if (themeColor) {
+        themeColor.content = targetTheme === 'dark' ? '#100b1a' : '#f8f6fc';
+      }
+
+      try {
+        localStorage.setItem('clubsphere-theme', targetTheme);
+      } catch (error) {
+        console.warn('Theme preference could not be saved.', error);
+      }
+
       updateThemeUI(targetTheme);
     });
   }

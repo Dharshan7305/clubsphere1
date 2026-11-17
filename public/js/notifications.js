@@ -27,6 +27,7 @@
     function openDropdown() {
       panel.classList.add('active');
       bellBtn.setAttribute('aria-expanded', 'true');
+      loadRecentNotifications();
     }
 
     function closeDropdown() {
@@ -55,13 +56,101 @@
           badge.textContent = count > 99 ? '99+' : count;
           badge.style.display = 'inline-flex';
           bellBtn.classList.add('has-unread');
-          if (pill) pill.textContent = count + ' Unread';
         } else {
           badge.textContent = '0';
           badge.style.display = 'none';
           bellBtn.classList.remove('has-unread');
-          if (pill) pill.textContent = 'All Read';
         }
+      }
+      if (pill) pill.textContent = count > 0 ? count + ' Unread' : 'All Read';
+    }
+
+    function renderNotifications(notifications) {
+      if (!list) return;
+      list.replaceChildren();
+
+      if (notifications.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'notif-empty-dropdown';
+        const icon = document.createElement('span');
+        icon.className = 'notif-empty-icon';
+        icon.textContent = '📭';
+        const message = document.createElement('p');
+        message.textContent = "You're all caught up! No notifications.";
+        empty.append(icon, message);
+        list.appendChild(empty);
+        return;
+      }
+
+      notifications.forEach(function(notification) {
+        const item = document.createElement('div');
+        item.className = 'notif-item ' + (notification.isRead ? 'read' : 'unread');
+        item.dataset.id = notification._id;
+
+        const icon = document.createElement('span');
+        icon.className = 'notif-item-icon';
+        icon.textContent = notification.icon || '🔔';
+
+        const body = document.createElement('div');
+        body.className = 'notif-item-body';
+        const link = document.createElement('a');
+        link.className = 'notif-item-link';
+        link.dataset.id = notification._id;
+
+        const relatedLink = new URL(notification.relatedLink || '#', window.location.origin);
+        link.href = relatedLink.origin === window.location.origin
+          ? relatedLink.pathname + relatedLink.search + relatedLink.hash
+          : '/notifications';
+
+        const title = document.createElement('div');
+        title.className = 'notif-item-title';
+        title.textContent = notification.title || 'Notification';
+
+        const message = document.createElement('div');
+        message.className = 'notif-item-msg';
+        message.textContent = notification.message || '';
+
+        const time = document.createElement('div');
+        time.className = 'notif-item-time';
+        time.textContent = notification.timeAgo || '';
+
+        link.append(title, message, time);
+        body.appendChild(link);
+        item.append(icon, body);
+
+        if (!notification.isRead) {
+          const markButton = document.createElement('button');
+          markButton.type = 'button';
+          markButton.className = 'notif-item-mark-btn';
+          markButton.title = 'Mark as read';
+          markButton.dataset.id = notification._id;
+          markButton.textContent = '✓';
+          item.appendChild(markButton);
+        }
+
+        list.appendChild(item);
+      });
+    }
+
+    async function loadRecentNotifications() {
+      if (!list) return;
+      list.textContent = 'Loading notifications...';
+
+      try {
+        const response = await fetch('/notifications/api/recent');
+        if (!response.ok) {
+          throw new Error('Notification request failed with status ' + response.status);
+        }
+        const data = await response.json();
+        if (!data.success || !Array.isArray(data.notifications) || !Number.isFinite(data.unreadCount)) {
+          throw new Error('Notification response was invalid');
+        }
+
+        renderNotifications(data.notifications);
+        updateBadgeUI(data.unreadCount);
+      } catch (error) {
+        console.error('Failed to load recent notifications:', error);
+        list.textContent = 'Could not load notifications. Please try again.';
       }
     }
 

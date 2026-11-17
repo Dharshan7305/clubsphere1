@@ -169,73 +169,13 @@
         </div>
       </div>
 
-      <!-- RIGHT SIDE: Realistic College Club Information Card & Mini Info Cards -->
       <div class="hero-right">
-        <div class="hero-card-stack">
-          <!-- Main Realistic College Club Card -->
-          <article class="hero-club-card">
-            <div class="hero-club-card-header">
-              <div class="hero-club-icon-box">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="16 18 22 12 16 6"></polyline>
-                  <polyline points="8 6 2 12 8 18"></polyline>
-                </svg>
-              </div>
-              <div class="hero-club-meta">
-                <span class="hero-club-category">TECHNICAL COMMUNITY</span>
-                <h2 class="hero-club-name">Coding Club</h2>
-              </div>
-              <span class="hero-club-badge">Official</span>
-            </div>
-
-            <p class="hero-club-description">
-              Explore programming, develop technical skills and participate in coding activities and competitions.
-            </p>
-
-            <div class="hero-club-card-footer">
-              <a href="/clubs" class="hero-club-link">
-                <span>Explore Club</span>
-                <span class="hero-club-arrow" aria-hidden="true">&rarr;</span>
-              </a>
-              <span class="hero-club-stat">Student Community</span>
-            </div>
-          </article>
-
-          <!-- Two Small Naturally Arranged Information Cards -->
-          <div class="hero-subcards">
-            <!-- Upcoming Events Card -->
-            <a href="/events" class="hero-mini-card">
-              <div class="hero-mini-icon events-mini-icon">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                  <line x1="16" y1="2" x2="16" y2="6"/>
-                  <line x1="8" y1="2" x2="8" y2="6"/>
-                  <line x1="3" y1="10" x2="21" y2="10"/>
-                </svg>
-              </div>
-              <div class="hero-mini-text">
-                <span class="hero-mini-title">Upcoming Events</span>
-                <span class="hero-mini-desc">Browse scheduled campus events</span>
-              </div>
-              <span class="hero-mini-arrow" aria-hidden="true">&rarr;</span>
-            </a>
-
-            <!-- Club Opportunities Card -->
-            <a href="/clubs" class="hero-mini-card">
-              <div class="hero-mini-icon opps-mini-icon">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                  <circle cx="8.5" cy="7" r="4"/>
-                  <line x1="20" y1="8" x2="20" y2="14"/>
-                  <line x1="23" y1="11" x2="17" y2="11"/>
-                </svg>
-              </div>
-              <div class="hero-mini-text">
-                <span class="hero-mini-title">Club Opportunities</span>
-                <span class="hero-mini-desc">Apply for student recruitment drives</span>
-              </div>
-              <span class="hero-mini-arrow" aria-hidden="true">&rarr;</span>
-            </a>
+        <div class="hero-visual">
+          <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80" alt="Students collaborating on campus activities" />
+          <div class="hero-visual-badge">150+ clubs</div>
+          <div class="hero-visual-panel">
+            <span class="hero-visual-label">Campus Life</span>
+            <strong>Build friendships. Lead events. Grow together.</strong>
           </div>
         </div>
       </div>
@@ -301,14 +241,6 @@
         <% }) %>
       </div>
 
-      <div class="section-footer-cta">
-        <a href="/clubs" class="btn-outline-purple">
-          <span>Discover All Clubs</span>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M5 12h14M12 5l7 7-7 7"/>
-          </svg>
-        </a>
-      </div>
     </div>
   </section>
 
@@ -388,14 +320,6 @@
         <% }) %>
       </div>
 
-      <div class="section-footer-cta">
-        <a href="/events" class="btn-outline-purple">
-          <span>View All Campus Events</span>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M5 12h14M12 5l7 7-7 7"/>
-          </svg>
-        </a>
-      </div>
     </div>
   </section>
 
@@ -509,53 +433,6 @@
     </div>
   </section>
 
-  <!-- ========================================================
-       VIVA EVALUATION DEMO PANEL (DISCREET)
-       ======================================================== -->
-  <section class="container demo-switcher-section">
-    <button
-      type="button"
-      class="demo-access-toggle"
-      id="homeDemoAccessToggle"
-      aria-expanded="false"
-      aria-controls="homeDemoPanel"
-    >
-      <span>⚙️ Demo Test Accounts (Viva Evaluation)</span>
-    </button>
-    <div id="homeDemoPanel" hidden>
-      <div class="viva-banner">
-        <div class="viva-banner-title">
-          <span>🎓</span>
-          <strong>Pre-configured Accounts (Password: <code>password123</code>)</strong>
-        </div>
-        <p style="font-size: 0.85rem; color: #64748b; margin: 0.5rem 0 1rem;">
-          One-click login for demonstration across all 5 access roles.
-        </p>
-        <div class="viva-roles-grid">
-          <div class="viva-role-card">
-            <div><strong>🎓 Student</strong><div><code>student@college.ac.in</code></div></div>
-            <a href="/auth/login?role=student" class="btn btn-sm btn-outline" style="margin-top: 8px;">Login Student</a>
-          </div>
-          <div class="viva-role-card">
-            <div><strong>⚡ Club Secretary</strong><div><code>secretary@college.ac.in</code></div></div>
-            <a href="/auth/login?role=secretary" class="btn btn-sm btn-outline" style="margin-top: 8px;">Login Secretary</a>
-          </div>
-          <div class="viva-role-card">
-            <div><strong>🛡️ Core Member</strong><div><code>core@college.ac.in</code></div></div>
-            <a href="/auth/login?role=core" class="btn btn-sm btn-outline" style="margin-top: 8px;">Login Core</a>
-          </div>
-          <div class="viva-role-card">
-            <div><strong>👨‍🏫 Faculty Advisor</strong><div><code>faculty@college.ac.in</code></div></div>
-            <a href="/auth/login?role=faculty" class="btn btn-sm btn-outline" style="margin-top: 8px;">Login Faculty</a>
-          </div>
-          <div class="viva-role-card">
-            <div><strong>👑 Admin (Dean)</strong><div><code>admin@college.ac.in</code></div></div>
-            <a href="/auth/login?role=admin" class="btn btn-sm btn-outline" style="margin-top: 8px;">Login Admin</a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
 </main>
 
 <%- include('partials/footer') %>
