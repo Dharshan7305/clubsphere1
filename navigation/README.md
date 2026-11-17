@@ -19,3 +19,5 @@ node navigation/app.js
 Then open [http://127.0.0.1:4174](http://127.0.0.1:4174). Set the `PORT` environment variable to use another port.
 
 The preview server uses only Node.js built-ins and runs independently from the main ClubSphere application server.
+
+The server supports `GET` and `HEAD` requests for `/`, `/styles.css`, and `/navigation.js`. Unknown paths return `404 Not Found`; other HTTP methods return `405 Method Not Allowed`.

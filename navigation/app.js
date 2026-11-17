@@ -35,7 +35,18 @@ const server = http.createServer((request, response) => {
     return;
   }
 
-  const file = files[pathname] || files['/'];
+  const file = files[pathname];
+  if (!file) {
+    const body = Buffer.from('Not Found');
+    response.writeHead(404, {
+      'Content-Type': 'text/plain; charset=utf-8',
+      'Content-Length': body.length,
+      'X-Content-Type-Options': 'nosniff'
+    });
+    response.end(request.method === 'HEAD' ? undefined : body);
+    return;
+  }
+
   response.writeHead(200, {
     'Content-Type': file.type,
     'Content-Length': file.content.length,
