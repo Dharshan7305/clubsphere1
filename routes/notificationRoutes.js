@@ -39,9 +39,13 @@ router.post('/api/:id/read', async (req, res) => {
   try {
     const userId = req.session.user._id;
     const success = await NotificationService.markAsRead(req.params.id, userId);
+    if (!success) {
+      return res.status(404).json({ success: false, error: 'Notification could not be found or accessed.' });
+    }
+
     const unreadCount = await NotificationService.getUnreadCount(userId, req.session.user.role);
 
-    res.json({ success, unreadCount });
+    res.json({ success: true, unreadCount });
   } catch (error) {
     console.error('API Mark Read Error:', error);
     res.status(500).json({ success: false, error: error.message });
@@ -57,8 +61,13 @@ router.post('/api/mark-all-read', async (req, res) => {
     const userId = req.session.user._id;
     const role = req.session.user.role;
 
-    await NotificationService.markAllAsRead(userId, role);
-    res.json({ success: true, unreadCount: 0 });
+    const success = await NotificationService.markAllAsRead(userId, role);
+    if (!success) {
+      return res.status(500).json({ success: false, error: 'Could not mark notifications as read.' });
+    }
+
+    const unreadCount = await NotificationService.getUnreadCount(userId, role);
+    res.json({ success: true, unreadCount });
   } catch (error) {
     console.error('API Mark All Read Error:', error);
     res.status(500).json({ success: false, error: error.message });

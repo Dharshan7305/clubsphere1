@@ -5347,6 +5347,22 @@ textarea.form-control {
   text-decoration: underline;
 }
 
+.notif-mark-all-link:disabled,
+.notif-item-mark-btn:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
+.notif-action-status {
+  padding: 0.5rem 1.25rem;
+  color: #475569;
+  font-size: 0.78rem;
+}
+
+.notif-action-status.error {
+  color: #b91c1c;
+}
+
 /* Dropdown Scroll List */
 .notif-dropdown-list {
   max-height: 380px;
@@ -5860,6 +5876,14 @@ textarea.form-control {
 
 [data-theme="dark"] .notif-title {
   color: #f8fafc;
+}
+
+[data-theme="dark"] .notif-action-status {
+  color: #cbd5e1;
+}
+
+[data-theme="dark"] .notif-action-status.error {
+  color: #fca5a5;
 }
 
 [data-theme="dark"] .notif-item.unread {

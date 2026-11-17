@@ -74,6 +74,7 @@
                   </button>
                 </div>
 
+                <div class="notif-action-status" id="notifActionStatus" role="status" aria-live="polite" hidden></div>
                 <div class="notif-dropdown-list" id="notifDropdownList" aria-live="polite">
                   <% if (typeof recentNotifications !== 'undefined' && recentNotifications.length > 0) { %>
                     <% recentNotifications.forEach(function(item) { %>
