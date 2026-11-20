@@ -302,16 +302,50 @@ router.post('/:id/join', ensureAuthenticated, authorizeRoles('student'), async (
 
 // POST /clubs/:id/save - Toggle Save / Bookmark Club
 router.post('/:id/save', ensureAuthenticated, authorizeRoles('student'), async (req, res) => {
+  const referer = req.header('Referer') || '/clubs';
+
   try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-      req.flash('success_msg', 'Club saved to your dashboard!');
-      return res.redirect('/clubs');
+    let clubId = req.params.id;
+    if (!mongoose.Types.ObjectId.isValid(clubId)) {
+      const masterClub = clubs30.find(club => club.code.toLowerCase() === clubId.toLowerCase());
+      if (!masterClub) {
+        req.flash('error_msg', 'This club is not available to save yet.');
+        return res.redirect(referer);
+      }
+
+      const club = await Club.findOneAndUpdate(
+        { code: masterClub.code },
+        {
+          $setOnInsert: {
+            name: masterClub.name,
+            code: masterClub.code,
+            category: masterClub.category,
+            tagline: masterClub.tagline,
+            description: masterClub.description,
+            objectives: masterClub.objectives || [],
+            facultyAdvisor: masterClub.facultyAdvisor,
+            facultyAdvisors: masterClub.facultyAdvisors || [],
+            banner: masterClub.banner,
+            foundedYear: masterClub.foundedYear
+          }
+        },
+        { new: true, upsert: true, runValidators: true }
+      );
+      clubId = club._id.toString();
     }
 
-    const user = await User.findById(req.user._id);
-    const clubId = req.params.id;
+    const user = await User.findById(req.session.user._id);
+    if (!user) {
+      req.flash('error_msg', 'Could not find your account. Please log in again.');
+      return res.redirect('/auth/login');
+    }
 
-    const alreadySaved = user.savedClubs.some(id => id.toString() === clubId.toString());
+    if (!await Club.exists({ _id: clubId })) {
+      req.flash('error_msg', 'This club is not available to save yet.');
+      return res.redirect(referer);
+    }
+
+    const alreadySaved = user.savedClubs.some(id => id.toString() === clubId);
 
     if (alreadySaved) {
       user.savedClubs = user.savedClubs.filter(id => id.toString() !== clubId.toString());
@@ -323,7 +357,6 @@ router.post('/:id/save', ensureAuthenticated, authorizeRoles('student'), async (
       req.flash('success_msg', 'Club saved! You can view it under your student dashboard.');
     }
 
-    const referer = req.header('Referer') || '/clubs';
     res.redirect(referer);
   } catch (error) {
     console.error('Error saving club:', error);
