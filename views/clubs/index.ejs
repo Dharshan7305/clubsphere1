@@ -56,6 +56,16 @@
           </button>
         <% }) %>
       </div>
+      <div class="clubs-category-filters" role="group" aria-label="Recruitment filters" style="margin-top: 0.65rem;">
+        <button
+          type="button"
+          id="recruitingFilterBtn"
+          class="category-filter-btn"
+          aria-pressed="false"
+        >
+          Open for Recruitment
+        </button>
+      </div>
     </div>
   </header>
 
@@ -96,6 +106,7 @@
           data-category="<%= club.category %>" 
           data-desc="<%= (club.description || '').toLowerCase() %>"
           data-tagline="<%= (club.tagline || '').toLowerCase() %>"
+          data-recruitment-open="<%= club.recruitmentStatus === 'Open' ? 'true' : 'false' %>"
         >
           <!-- Card Image Header with Category Badge -->
           <div class="club-dir-image-wrap">
@@ -251,7 +262,8 @@
   document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('clubSearchInput');
     const clearBtn = document.getElementById('clearSearchBtn');
-    const categoryBtns = document.querySelectorAll('.category-filter-btn');
+    const categoryBtns = document.querySelectorAll('.category-filter-btn[data-category]');
+    const recruitingFilterBtn = document.getElementById('recruitingFilterBtn');
     const cards = document.querySelectorAll('.club-dir-card');
     const emptyState = document.getElementById('noClubsFound');
     const visibleCountSpan = document.getElementById('visibleCount');
@@ -259,6 +271,7 @@
 
     let activeCategory = '<%= selectedCategory || "All Clubs" %>';
     let searchQuery = (searchInput.value || '').trim().toLowerCase();
+    let activeRecruitmentOnly = false;
 
     function filterClubs() {
       let visible = 0;
@@ -283,7 +296,9 @@
           || desc.includes(q) 
           || tagline.includes(q);
 
-        if (matchesCategory && matchesSearch) {
+        const matchesRecruitment = !activeRecruitmentOnly || card.dataset.recruitmentOpen === 'true';
+
+        if (matchesCategory && matchesSearch && matchesRecruitment) {
           card.style.display = '';
           visible++;
         } else {
@@ -336,11 +351,25 @@
       });
     });
 
+    if (recruitingFilterBtn) {
+      recruitingFilterBtn.addEventListener('click', () => {
+        activeRecruitmentOnly = !activeRecruitmentOnly;
+        recruitingFilterBtn.classList.toggle('active', activeRecruitmentOnly);
+        recruitingFilterBtn.setAttribute('aria-pressed', String(activeRecruitmentOnly));
+        filterClubs();
+      });
+    }
+
     // Reset filters
     if (resetBtn) {
       resetBtn.addEventListener('click', () => {
         if (searchInput) searchInput.value = '';
         searchQuery = '';
+        activeRecruitmentOnly = false;
+        if (recruitingFilterBtn) {
+          recruitingFilterBtn.classList.remove('active');
+          recruitingFilterBtn.setAttribute('aria-pressed', 'false');
+        }
         activeCategory = 'All Clubs';
         categoryBtns.forEach(b => {
           b.classList.toggle('active', b.dataset.category === 'All Clubs');
