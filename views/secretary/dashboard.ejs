@@ -183,6 +183,36 @@
           </div>
         </div>
       </div>
+
+      <div class="card" style="margin-top: 2rem;">
+        <div class="card-header">
+          <h3 style="font-size: 1rem; font-weight: 700; color: var(--primary);">
+            👥 Core Team Members
+          </h3>
+          <span class="badge badge-category"><%= coreMembers.length %></span>
+        </div>
+        <div class="card-body">
+          <% if (coreMembers.length === 0) { %>
+            <p style="font-size: 0.88rem; color: var(--text-muted);">
+              No core members are currently assigned to this club.
+            </p>
+          <% } else { %>
+            <ul style="list-style: none; margin: 0; padding: 0;">
+              <% coreMembers.forEach(member => { %>
+                <li style="padding: 0.75rem 0; border-bottom: 1px solid var(--border-color);">
+                  <strong style="display: block; color: var(--text-dark);"><%= member.name %></strong>
+                  <span style="display: block; margin-top: 0.2rem; font-size: 0.8rem; color: var(--text-muted);">
+                    <%= [member.rollNo, member.department, member.year ? `Year ${member.year}` : ''].filter(Boolean).join(' · ') || 'Core Member' %>
+                  </span>
+                  <a href="mailto:<%= member.email %>" style="display: inline-block; margin-top: 0.2rem; font-size: 0.8rem;">
+                    <%= member.email %>
+                  </a>
+                </li>
+              <% }) %>
+            </ul>
+          <% } %>
+        </div>
+      </div>
     </div>
   </div>
 </main>

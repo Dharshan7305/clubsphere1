@@ -51,17 +51,6 @@ async function seedDatabase() {
       phone: '9842100002'
     });
 
-    const secretaryUser = await User.create({
-      name: 'Arun Kumar S',
-      email: 'secretary@college.ac.in',
-      password: 'password123',
-      role: 'secretary',
-      rollNo: '22CS102',
-      department: 'Computer Science & Engineering',
-      year: 3,
-      phone: '9842100003'
-    });
-
     const coreUser = await User.create({
       name: 'Kavitha M',
       email: 'core@college.ac.in',
@@ -84,7 +73,7 @@ async function seedDatabase() {
       phone: '9842100005'
     });
 
-    console.log('[Seed] Created default users for all 5 roles.');
+    console.log('[Seed] Created default student, core, faculty, and admin users.');
 
     // 2. Create All 30 Official College Clubs
     const clubsData = clubs30.map((c, idx) => {
@@ -112,10 +101,34 @@ async function seedDatabase() {
     const createdClubs = await Club.insertMany(clubsData);
     console.log(`[Seed] Created ${createdClubs.length} college clubs.`);
 
-    // Link Secretary and Faculty users to the Coding Club
+    // Give each club its own secretary account.
+    const secretaryUsers = [];
+    for (const club of createdClubs) {
+      const secretaryUser = await User.create({
+        name: `${club.name} Secretary`,
+        email: `secretary.${club.code.toLowerCase()}@college.ac.in`,
+        password: 'password123',
+        role: 'secretary',
+        department: 'Computer Applications',
+        year: 3,
+        club: club._id
+      });
+
+      club.secretary = {
+        name: secretaryUser.name,
+        rollNo: secretaryUser.rollNo,
+        email: secretaryUser.email,
+        user: secretaryUser._id
+      };
+      await club.save();
+      secretaryUsers.push(secretaryUser);
+    }
+
+    console.log(`[Seed] Created and assigned ${secretaryUsers.length} club secretaries.`);
+
+    // Link faculty and core users to the first club for demo data
     const codingClub = createdClubs[0];
-    secretaryUser.club = codingClub._id;
-    await secretaryUser.save();
+    const secretaryUser = secretaryUsers[0];
 
     coreUser.club = codingClub._id;
     await coreUser.save();
@@ -348,17 +361,10 @@ async function seedDatabase() {
     console.log('====================================================');
     console.log('Demo Credentials for Viva Examination:');
     console.log('1. Student:         student@college.ac.in   / password123');
-    console.log('2. Club Secretary:  secretary@college.ac.in / password123');
-    console.log('3. Core Member:     core@college.ac.in      / password123');
-    console.log('4. Faculty Advisor: faculty@college.ac.in   / password123');
-    console.log('5. Admin:           admin@college.ac.in     / password123');
+    console.log('2. Core Member:     core@college.ac.in      / password123');
+    console.log('3. Faculty Advisor: faculty@college.ac.in   / password123');
+    console.log('4. Admin:           admin@college.ac.in     / password123');
+    console.log('Club secretary accounts: secretary.<club-code>@college.ac.in / password123');
     console.log('====================================================');
 
-    process.exit(0);
-  } catch (error) {
-    console.error('[Seed Error]:', error);
-    process.exit(1);
-  }
-}
 
-seedDatabase();
