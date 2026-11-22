@@ -8,7 +8,10 @@
       <h1 class="section-title">🏛️ College Clubs Administration</h1>
       <p class="section-subtitle">Add new student clubs, edit profiles, and toggle active status</p>
     </div>
-    <button class="btn btn-primary" onclick="openModal('addClubModal')">+ Add New Club</button>
+    <div style="display: flex; gap: 0.6rem; flex-wrap: wrap;">
+      <a href="/admin/club-people" class="btn btn-outline">Browse Club People</a>
+      <button class="btn btn-primary" onclick="openModal('addClubModal')">+ Add New Club</button>
+    </div>
   </div>
 
   <div class="table-responsive">
@@ -47,6 +50,7 @@
             </td>
             <td>
               <div style="display: flex; gap: 6px;">
+                <a href="/admin/clubs/<%= club._id %>/people" class="btn btn-sm btn-outline">People</a>
                 <button 
                   type="button" 
                   class="btn btn-sm btn-outline"

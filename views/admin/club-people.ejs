@@ -1,0 +1,172 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/alerts') %>
+
+<main class="container admin-club-people-page">
+  <div class="admin-club-people-heading">
+    <div>
+      <a href="/admin/club-people" class="admin-back-link">&larr; All clubs</a>
+      <span class="badge badge-category"><%= club.code %> &bull; <%= club.category %></span>
+      <h1 class="section-title"><%= club.name %></h1>
+      <p class="section-subtitle">Club roster and leadership directory</p>
+    </div>
+    <div class="admin-club-stepper">
+      <% if (previousClub) { %>
+        <a class="btn btn-outline" href="/admin/clubs/<%= previousClub._id %>/people" aria-label="Previous club">&larr; Previous</a>
+      <% } %>
+      <label class="sr-only" for="clubSwitcher">Choose a club</label>
+      <select id="clubSwitcher" class="form-control">
+        <% clubs.forEach(item => { %>
+          <option value="<%= item._id %>" <%= item._id.toString() === club._id.toString() ? 'selected' : '' %>>
+            <%= item.code %> - <%= item.name %>
+          </option>
+        <% }) %>
+      </select>
+      <% if (nextClub) { %>
+        <a class="btn btn-outline" href="/admin/clubs/<%= nextClub._id %>/people" aria-label="Next club">Next &rarr;</a>
+      <% } %>
+    </div>
+  </div>
+
+  <div class="admin-people-summary">
+    <a class="admin-people-summary-card" href="#club-members">
+      <span class="admin-people-summary-icon">M</span>
+      <span><strong><%= members.length %></strong><small>Members</small></span>
+    </a>
+    <a class="admin-people-summary-card" href="#core-members">
+      <span class="admin-people-summary-icon">C</span>
+      <span><strong><%= coreMembers.length %></strong><small>Core Members</small></span>
+    </a>
+    <a class="admin-people-summary-card" href="#faculty-advisor">
+      <span class="admin-people-summary-icon">F</span>
+      <span><strong><%= facultyAdvisorAccount ? 'Linked' : 'Review' %></strong><small>Faculty Advisor</small></span>
+    </a>
+    <a class="admin-people-summary-card" href="#club-secretary">
+      <span class="admin-people-summary-icon">S</span>
+      <span><strong><%= secretaryAccount ? 'Linked' : 'Review' %></strong><small>Secretary</small></span>
+    </a>
+  </div>
+
+  <nav class="admin-people-tabs" aria-label="Club people sections">
+    <a href="#club-members">Members</a>
+    <a href="#core-members">Core Members</a>
+    <a href="#faculty-advisor">Faculty Advisor</a>
+    <a href="#club-secretary">Secretary</a>
+  </nav>
+
+  <section class="admin-people-panel" id="club-members">
+    <div class="admin-people-panel-heading">
+      <div>
+        <h2>Club Members</h2>
+        <p>Students who are approved or accepted members of this club.</p>
+      </div>
+      <span class="badge badge-category"><%= members.length %></span>
+    </div>
+    <% if (members.length > 0) { %>
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr><th>Name</th><th>Roll Number</th><th>Email</th><th>Department</th><th>Year</th></tr>
+          </thead>
+          <tbody>
+            <% members.forEach(member => { %>
+              <tr>
+                <td><strong><%= member.name %></strong></td>
+                <td><%= member.rollNo || '—' %></td>
+                <td><%= member.email %></td>
+                <td><%= member.department || '—' %></td>
+                <td><%= member.year || '—' %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } else { %>
+      <div class="admin-people-empty">No club members have been recorded yet.</div>
+    <% } %>
+  </section>
+
+  <section class="admin-people-panel" id="core-members">
+    <div class="admin-people-panel-heading">
+      <div>
+        <h2>Core Members</h2>
+        <p>Core team members assigned to <%= club.name %>.</p>
+      </div>
+      <span class="badge badge-category"><%= coreMembers.length %></span>
+    </div>
+    <% if (coreMembers.length > 0) { %>
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr><th>Name</th><th>Roll Number</th><th>Email</th><th>Department</th></tr>
+          </thead>
+          <tbody>
+            <% coreMembers.forEach(member => { %>
+              <tr>
+                <td><strong><%= (member.user && member.user.name) || (member.entry && member.entry.name) || 'Core Member' %></strong></td>
+                <td><%= (member.user && member.user.rollNo) || (member.entry && member.entry.rollNo) || '—' %></td>
+                <td><%= (member.user && member.user.email) || '—' %></td>
+                <td><%= (member.user && member.user.department) || '—' %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } else { %>
+      <div class="admin-people-empty">No core members are assigned to this club.</div>
+    <% } %>
+  </section>
+
+  <div class="admin-leadership-grid">
+    <section class="admin-people-panel" id="faculty-advisor">
+      <div class="admin-people-panel-heading">
+        <div>
+          <h2>Faculty Advisor</h2>
+          <p>Faculty contact assigned to this club.</p>
+        </div>
+        <span class="admin-leadership-icon">F</span>
+      </div>
+      <div class="admin-leadership-person">
+        <h3><%= (facultyAdvisorAccount && facultyAdvisorAccount.name) || (club.facultyAdvisor && club.facultyAdvisor.name) || 'Not assigned' %></h3>
+        <p><%= (facultyAdvisorAccount && facultyAdvisorAccount.department) || (club.facultyAdvisor && club.facultyAdvisor.department) || 'Department not listed' %></p>
+        <a href="mailto:<%= (facultyAdvisorAccount && facultyAdvisorAccount.email) || (club.facultyAdvisor && club.facultyAdvisor.email) || '' %>">
+          <%= (facultyAdvisorAccount && facultyAdvisorAccount.email) || (club.facultyAdvisor && club.facultyAdvisor.email) || 'Email not listed' %>
+        </a>
+        <span class="admin-link-status <%= facultyAdvisorAccount ? 'is-linked' : 'is-unlinked' %>">
+          <%= facultyAdvisorAccount ? 'Linked faculty account' : (club.facultyAdvisor && club.facultyAdvisor.user ? 'Linked account not found' : 'No linked login account') %>
+        </span>
+      </div>
+    </section>
+
+    <section class="admin-people-panel" id="club-secretary">
+      <div class="admin-people-panel-heading">
+        <div>
+          <h2>Club Secretary</h2>
+          <p>Student secretary assigned to this club.</p>
+        </div>
+        <span class="admin-leadership-icon">S</span>
+      </div>
+      <div class="admin-leadership-person">
+        <h3><%= (secretaryAccount && secretaryAccount.name) || (club.secretary && club.secretary.name) || 'Not assigned' %></h3>
+        <p><%= (secretaryAccount && secretaryAccount.rollNo) || 'Roll number not listed' %></p>
+        <a href="mailto:<%= (secretaryAccount && secretaryAccount.email) || (club.secretary && club.secretary.email) || '' %>">
+          <%= (secretaryAccount && secretaryAccount.email) || (club.secretary && club.secretary.email) || 'Email not listed' %>
+        </a>
+        <span class="admin-link-status <%= secretaryAccount ? 'is-linked' : 'is-unlinked' %>">
+          <%= secretaryAccount ? 'Linked secretary account' : (club.secretary && club.secretary.user ? 'Linked account not found' : 'No linked login account') %>
+        </span>
+      </div>
+    </section>
+  </div>
+</main>
+
+<script>
+  const clubSwitcher = document.getElementById('clubSwitcher');
+  if (clubSwitcher) {
+    clubSwitcher.addEventListener('change', () => {
+      window.location.href = `/admin/clubs/${encodeURIComponent(clubSwitcher.value)}/people`;
+    });
+  }
+</script>
+
+<%- include('../partials/footer') %>

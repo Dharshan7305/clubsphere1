@@ -39,6 +39,7 @@
           <% } else if (user.role === 'admin') { %>
             <li><a href="/admin/dashboard" class="nav-link <%= typeof currentPage !== 'undefined' && currentPage === 'dashboard' ? 'active' : '' %>">Admin Center</a></li>
             <li><a href="/admin/clubs" class="nav-link <%= typeof currentPage !== 'undefined' && currentPage === 'clubs' ? 'active' : '' %>">Clubs</a></li>
+            <li><a href="/admin/club-people" class="nav-link <%= typeof currentPage !== 'undefined' && currentPage === 'clubPeople' ? 'active' : '' %>">Club People</a></li>
             <li><a href="/admin/users" class="nav-link <%= typeof currentPage !== 'undefined' && currentPage === 'users' ? 'active' : '' %>">Users</a></li>
             <li><a href="/admin/reports" class="nav-link <%= typeof currentPage !== 'undefined' && currentPage === 'reports' ? 'active' : '' %>">Reports</a></li>
           <% } %>

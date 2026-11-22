@@ -1,0 +1,68 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/alerts') %>
+
+<main class="container admin-club-people-page">
+  <div class="section-header">
+    <div>
+      <span class="badge badge-category">Administrator</span>
+      <h1 class="section-title">Club People</h1>
+      <p class="section-subtitle">Choose a club to review its members, core team, faculty advisor, and secretary.</p>
+    </div>
+    <a href="/admin/clubs" class="btn btn-outline">Manage Clubs</a>
+  </div>
+
+  <div class="admin-directory-toolbar">
+    <label class="sr-only" for="clubSearch">Search clubs</label>
+    <input id="clubSearch" class="form-control" type="search" placeholder="Search clubs by name, code, or category">
+    <span class="admin-directory-count"><%= clubs.length %> clubs</span>
+  </div>
+
+  <% if (clubs.length > 0) { %>
+    <div class="admin-club-directory" id="clubDirectory">
+      <% clubs.forEach(club => { %>
+        <a
+          class="admin-club-directory-card"
+          href="/admin/clubs/<%= club._id %>/people"
+          data-search="<%= `${club.name} ${club.code} ${club.category}`.toLowerCase() %>"
+        >
+          <div class="admin-directory-card-top">
+            <span class="admin-club-code"><%= club.code %></span>
+            <span class="admin-club-status <%= club.isActive ? 'is-active' : 'is-inactive' %>">
+              <%= club.isActive ? 'Active' : 'Inactive' %>
+            </span>
+          </div>
+          <h2><%= club.name %></h2>
+          <p class="admin-directory-category"><%= club.category %></p>
+          <div class="admin-directory-leads">
+            <span><strong>Faculty</strong><%= club.facultyAdvisor && club.facultyAdvisor.name ? club.facultyAdvisor.name : 'Not assigned' %></span>
+            <span><strong>Secretary</strong><%= club.secretary && club.secretary.name ? club.secretary.name : 'Not assigned' %></span>
+          </div>
+          <span class="admin-directory-open">View club people <span aria-hidden="true">&rarr;</span></span>
+        </a>
+      <% }) %>
+    </div>
+    <p id="clubSearchEmpty" class="admin-directory-empty" hidden>No clubs match your search.</p>
+  <% } else { %>
+    <div class="admin-directory-empty">No clubs are available.</div>
+  <% } %>
+</main>
+
+<script>
+  const clubSearchInput = document.getElementById('clubSearch');
+  if (clubSearchInput) {
+    clubSearchInput.addEventListener('input', () => {
+      const query = clubSearchInput.value.trim().toLowerCase();
+      const cards = Array.from(document.querySelectorAll('.admin-club-directory-card'));
+      let visibleCards = 0;
+      cards.forEach(card => {
+        const isMatch = card.dataset.search.includes(query);
+        card.hidden = !isMatch;
+        if (isMatch) visibleCards += 1;
+      });
+      document.getElementById('clubSearchEmpty').hidden = visibleCards > 0;
+    });
+  }
+</script>
+
+<%- include('../partials/footer') %>

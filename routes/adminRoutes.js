@@ -4,6 +4,7 @@ const Club = require('../models/Club');
 const User = require('../models/User');
 const Recruitment = require('../models/Recruitment');
 const Application = require('../models/Application');
+const Membership = require('../models/Membership');
 const Event = require('../models/Event');
 const NotificationService = require('../services/notificationService');
 const { findOtherCoreClub } = require('../services/coreMembershipService');
@@ -75,6 +76,115 @@ router.get('/clubs', async (req, res) => {
     console.error('Admin Clubs Error:', error);
     req.flash('error_msg', 'Could not fetch clubs list.');
     res.redirect('/admin/dashboard');
+  }
+});
+
+// GET /admin/club-people - Browse club rosters
+router.get('/club-people', async (req, res) => {
+  try {
+    const clubs = await Club.find()
+      .select('name code category facultyAdvisor.name secretary.name isActive')
+      .sort({ name: 1 })
+      .lean();
+
+    res.render('admin/club-people-index', {
+      title: 'Club People - Admin | ClubSphere',
+      clubs,
+      currentPage: 'clubPeople'
+    });
+  } catch (error) {
+    console.error('Admin Club People Directory Error:', error);
+    req.flash('error_msg', 'Could not load the club directory.');
+    res.redirect('/admin/dashboard');
+  }
+});
+
+// GET /admin/clubs/:id/people - View a club's members and leadership
+router.get('/clubs/:id/people', async (req, res) => {
+  try {
+    const [club, clubs] = await Promise.all([
+      Club.findById(req.params.id),
+      Club.find().select('name code').sort({ name: 1 }).lean()
+    ]);
+
+    if (!club) {
+      req.flash('error_msg', 'Club not found.');
+      return res.redirect('/admin/club-people');
+    }
+
+    const [acceptedMemberIds, approvedMemberIds, legacyCoreMembers] = await Promise.all([
+      Application.distinct('student', { club: club._id, status: 'Accepted' }),
+      Membership.distinct('student', { club: club._id, status: 'Approved' }),
+      User.find({ role: 'core', club: club._id })
+        .select('_id')
+        .lean()
+    ]);
+
+    const memberIds = new Set([
+      ...(club.members || []).map(id => id.toString()),
+      ...acceptedMemberIds.map(id => id.toString()),
+      ...approvedMemberIds.map(id => id.toString())
+    ]);
+    const coreEntriesByUser = new Map();
+    (club.coreTeam || []).forEach(entry => {
+      if (entry.user) coreEntriesByUser.set(entry.user.toString(), entry);
+    });
+    const coreMemberIds = new Set([
+      ...coreEntriesByUser.keys(),
+      ...legacyCoreMembers.map(member => member._id.toString())
+    ]);
+    const allUserIds = new Set([...memberIds, ...coreMemberIds]);
+    const rosterUsers = await User.find({ _id: { $in: [...allUserIds] } })
+      .select('name email rollNo department year')
+      .lean();
+    const usersById = new Map(rosterUsers.map(user => [user._id.toString(), user]));
+
+    const members = [...memberIds]
+      .filter(id => !coreMemberIds.has(id))
+      .map(id => usersById.get(id))
+      .filter(Boolean)
+      .sort((a, b) => a.name.localeCompare(b.name));
+    const coreMembers = [...coreMemberIds]
+      .map(id => ({
+        user: usersById.get(id) || null,
+        entry: coreEntriesByUser.get(id) || null
+      }))
+      .filter(member => member.user || member.entry);
+    (club.coreTeam || []).forEach(entry => {
+      if (!entry.user) coreMembers.push({ user: null, entry });
+    });
+    coreMembers.sort((a, b) => {
+      const nameA = (a.user && a.user.name) || (a.entry && a.entry.name) || '';
+      const nameB = (b.user && b.user.name) || (b.entry && b.entry.name) || '';
+      return nameA.localeCompare(nameB);
+    });
+
+    const [facultyAdvisorAccount, secretaryAccount] = await Promise.all([
+      User.findById(club.facultyAdvisor && club.facultyAdvisor.user)
+        .select('name email department')
+        .lean(),
+      User.findById(club.secretary && club.secretary.user)
+        .select('name email rollNo department')
+        .lean()
+    ]);
+    const clubIndex = clubs.findIndex(item => item._id.toString() === club._id.toString());
+
+    res.render('admin/club-people', {
+      title: `${club.name} People - Admin | ClubSphere`,
+      club,
+      clubs,
+      members,
+      coreMembers,
+      facultyAdvisorAccount,
+      secretaryAccount,
+      previousClub: clubIndex > 0 ? clubs[clubIndex - 1] : null,
+      nextClub: clubIndex >= 0 && clubIndex < clubs.length - 1 ? clubs[clubIndex + 1] : null,
+      currentPage: 'clubPeople'
+    });
+  } catch (error) {
+    console.error('Admin Club People Error:', error);
+    req.flash('error_msg', 'Could not load this club roster.');
+    res.redirect('/admin/club-people');
   }
 });
 
