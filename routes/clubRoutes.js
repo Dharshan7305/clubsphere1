@@ -36,10 +36,7 @@ router.get('/', async (req, res) => {
     const mergedClubs = clubs30.map((masterClub) => {
       const existing = dbClubs.find(dbC => normalize(dbC.name) === normalize(masterClub.name));
       if (existing) {
-        const recruitmentStatus = activeClubIds.has(existing._id.toString())
-          || existing.recruitmentStatus === 'Open'
-          ? 'Open'
-          : existing.recruitmentStatus;
+        const recruitmentStatus = activeClubIds.has(existing._id.toString()) ? 'Open' : null;
 
         return {
           _id: existing._id,

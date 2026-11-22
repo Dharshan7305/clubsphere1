@@ -63,8 +63,9 @@ app.use(async (req, res, next) => {
   res.locals.coreClubs = [];
 
   if (req.session.user) {
+    const userId = req.session.user._id;
     try {
-      const { _id: userId, role } = req.session.user;
+      const { role } = req.session.user;
       const [unreadCount, recentNotifications] = await Promise.all([
         NotificationService.getUnreadCount(userId, role),
         NotificationService.getNotificationsForUser(userId, role, { limit: 8 })
