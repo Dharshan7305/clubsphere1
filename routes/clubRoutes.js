@@ -349,4 +349,185 @@ router.post('/:id/save', ensureAuthenticated, authorizeRoles('student'), async (
     const alreadySaved = user.savedClubs.some(id => id.toString() === clubId);
 
     if (alreadySaved) {
-      user.savedClubs = user.savedClubs.filter(id => id.toString<
+      user.savedClubs = user.savedClubs.filter(id => id.toString() !== clubId.toString());
+      await user.save();
+      req.flash('success_msg', 'Club removed from your saved list.');
+    } else {
+      user.savedClubs.push(clubId);
+      await user.save();
+      req.flash('success_msg', 'Club saved! You can view it under your student dashboard.');
+    }
+
+    res.redirect(referer);
+  } catch (error) {
+    console.error('Error saving club:', error);
+    req.flash('error_msg', 'Could not update saved status.');
+    res.redirect('/clubs');
+  }
+});
+
+
+// POST /clubs/:id/apply - Student Application Submission
+router.post('/:id/apply', async (req, res) => {
+  // 1. Check whether student is logged in
+  if (!req.session.user) {
+    req.flash('error_msg', 'Please log in to submit your club application.');
+    return res.redirect('/auth/login?returnTo=/clubs/' + req.params.id);
+  }
+
+  try {
+    const studentUser = req.session.user;
+    const { studentName, rollNo, email, whyJoin, skills, department, year } = req.body;
+
+    // 2. Validate required fields
+    if (!studentName || !rollNo || !email || !whyJoin || !whyJoin.trim()) {
+      req.flash('error_msg', 'Please fill in all required fields (Name, Roll Number, Email, and Reason to Join).');
+      return res.redirect('/clubs/' + req.params.id);
+    }
+
+    // 3. Resolve club
+    let club = null;
+    if (mongoose.Types.ObjectId.isValid(req.params.id)) {
+      club = await Club.findById(req.params.id);
+    }
+    if (!club) {
+      const paramSlug = req.params.id.toLowerCase().replace(/[-_]/g, ' ');
+      const masterMatch = clubs30.find(c => 
+        c.code.toLowerCase() === req.params.id.toLowerCase() ||
+        c.name.toLowerCase() === paramSlug ||
+        c.name.toLowerCase().replace(/[^a-z0-9]/g, '') === req.params.id.toLowerCase().replace(/[^a-z0-9]/g, '')
+      );
+      if (masterMatch) {
+        club = await Club.findOne({ name: masterMatch.name });
+        if (!club) {
+          try {
+            club = await Club.create({
+              name: masterMatch.name,
+              code: masterMatch.code,
+              category: masterMatch.category,
+              tagline: masterMatch.tagline,
+              description: masterMatch.description,
+              objectives: masterMatch.objectives,
+              facultyAdvisor: masterMatch.facultyAdvisor,
+              facultyAdvisors: masterMatch.facultyAdvisors,
+              banner: masterMatch.banner,
+              foundedYear: masterMatch.foundedYear,
+              contactEmail: masterMatch.code.toLowerCase() + '@college.ac.in',
+              isActive: true
+            });
+          } catch (e) {}
+        }
+      }
+    }
+
+    if (!club) {
+      req.flash('error_msg', 'Club not found.');
+      return res.redirect('/clubs');
+    }
+
+    // 4. Check if student is already an active member
+    if (club.members && club.members.some(m => m.toString() === studentUser._id.toString())) {
+      req.flash('error_msg', 'You are already an active member of ' + club.name + '.');
+      return res.redirect('/clubs/' + req.params.id);
+    }
+
+    // 5. Check duplicate applications
+    const existingMembership = await Membership.findOne({
+      club: club._id,
+      student: studentUser._id
+    });
+    if (existingMembership && existingMembership.status === 'Pending') {
+      req.flash('error_msg', 'You already have an application under review for ' + club.name + '.');
+      return res.redirect('/clubs/' + req.params.id);
+    }
+
+    // 6. Connect with active recruitment drive if one exists
+    const activeRecruitment = await Recruitment.findOne({
+      club: club._id,
+      status: 'Open',
+      deadline: { $gte: new Date() }
+    });
+
+    if (activeRecruitment) {
+      const existingApp = await Application.findOne({
+        recruitment: activeRecruitment._id,
+        student: studentUser._id
+      });
+      if (existingApp) {
+        req.flash('error_msg', 'You have already submitted an application for the active recruitment drive in ' + club.name + '.');
+        return res.redirect('/clubs/' + req.params.id);
+      }
+
+      await Application.create({
+        recruitment: activeRecruitment._id,
+        club: club._id,
+        student: studentUser._id,
+        appliedRole: (activeRecruitment.roles && activeRecruitment.roles[0] && activeRecruitment.roles[0].roleName) || 'General Member',
+        studentName: studentName.trim(),
+        rollNo: rollNo.trim(),
+        department: department || studentUser.department || 'General',
+        year: year ? parseInt(year) : (studentUser.year || 1),
+        email: email.trim(),
+        phone: studentUser.phone || '',
+        cgpa: 8.0,
+        skills: skills ? skills.trim() : 'General member',
+        whyJoin: whyJoin.trim(),
+        status: 'Submitted',
+        submittedAt: new Date()
+      });
+    }
+
+    // 7. Create or update Membership record
+    if (existingMembership) {
+      existingMembership.status = 'Pending';
+      existingMembership.message = whyJoin.trim();
+      existingMembership.createdAt = new Date();
+      await existingMembership.save();
+    } else {
+      await Membership.create({
+        club: club._id,
+        student: studentUser._id,
+        message: whyJoin.trim(),
+        status: 'Pending'
+      });
+    }
+
+    // 8. Notify student & club secretary
+    try {
+      // Notify student
+      await NotificationService.createNotification({
+        recipient: studentUser._id,
+        club: club._id,
+        title: `Application Submitted: ${club.name}`,
+        message: `Your application to join ${club.name} was successfully submitted and is under committee review.`,
+        type: 'application',
+        relatedId: club._id,
+        relatedLink: '/clubs/' + (club._id || club.code.toLowerCase())
+      });
+
+      // Notify secretary
+      if (club.secretary && club.secretary.user) {
+        await NotificationService.createNotification({
+          recipient: club.secretary.user,
+          club: club._id,
+          title: 'New Membership Application: ' + club.name,
+          message: `${studentName} (${rollNo}) submitted an application to join ${club.name}.`,
+          type: 'application',
+          relatedId: club._id,
+          relatedLink: '/secretary/applications'
+        });
+      }
+    } catch (e) {
+      console.error('Notification error on club apply:', e);
+    }
+
+    req.flash('success_msg', `Your application to join ${club.name} has been submitted successfully! The club committee will review your request.`);
+    res.redirect('/clubs/' + req.params.id);
+  } catch (error) {
+    console.error('Error submitting club application:', error);
+    req.flash('error_msg', 'Failed to submit application. Please try again.');
+    res.redirect('/clubs/' + req.params.id);
+  }
+});
+
+module.exports = router;
