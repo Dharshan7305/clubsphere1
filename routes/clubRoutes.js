@@ -377,7 +377,7 @@ router.post('/:id/apply', async (req, res) => {
 
   try {
     const studentUser = req.session.user;
-    const { studentName, rollNo, email, whyJoin, skills, department, year } = req.body;
+    const { studentName, rollNo, email, whyJoin, skills, department, year, phone } = req.body;
 
     // 2. Validate required fields
     if (!studentName || !rollNo || !email || !whyJoin || !whyJoin.trim()) {
@@ -468,7 +468,7 @@ router.post('/:id/apply', async (req, res) => {
         department: department || studentUser.department || 'General',
         year: year ? parseInt(year) : (studentUser.year || 1),
         email: email.trim(),
-        phone: studentUser.phone || '',
+        phone: (phone && phone.trim()) || (studentUser && studentUser.phone) || 'Not provided',
         cgpa: 8.0,
         skills: skills ? skills.trim() : 'General member',
         whyJoin: whyJoin.trim(),

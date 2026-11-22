@@ -155,7 +155,7 @@ router.post('/recruitments/:id/apply', async (req, res) => {
       department: department || req.session.user.department,
       year: parseInt(year, 10) || req.session.user.year,
       email: req.session.user.email,
-      phone: phone || req.session.user.phone,
+      phone: (phone && phone.trim()) || (req.session.user && req.session.user.phone) || 'Not provided',
       cgpa: parseFloat(cgpa) || 8.0,
       skills,
       priorExperience: priorExperience || 'None',
