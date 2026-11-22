@@ -213,6 +213,14 @@
                 You are registered as a member of <strong><%= club.name %></strong>. Check your student dashboard for club meetings and updates.
               </p>
             </div>
+          <% } else if (existingApplication && existingApplication.status === 'Rejected') { %>
+            <div class="applied-notice-card" style="background: #FEF2F2; border-color: #FECACA;">
+              <div style="font-size: 2rem; margin-bottom: 0.4rem;">✕</div>
+              <h3 class="applied-notice-title" style="color: #B91C1C;">Application Rejected</h3>
+              <p class="applied-notice-text" style="color: #475467;">
+                Your application to join <strong><%= club.name %></strong> was not approved. Check your student dashboard for any feedback from the club committee.
+              </p>
+            </div>
           <% } else if (existingApplication || (membershipRequest && membershipRequest.status === 'Pending')) { %>
             <!-- Student already submitted an application -->
             <div class="applied-notice-card" style="background: #F3EEFF; border-color: #E5DBFB;">

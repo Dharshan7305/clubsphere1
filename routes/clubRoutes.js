@@ -35,11 +35,12 @@ router.get('/', async (req, res) => {
     // Merge DB clubs with the 30 master clubs to ensure all 30 clubs always exist
     const mergedClubs = clubs30.map((masterClub) => {
       const existing = dbClubs.find(dbC => normalize(dbC.name) === normalize(masterClub.name));
-      let recruitmentStatus = null;
       if (existing) {
-        if (activeClubIds.has(existing._id.toString())) {
-          recruitmentStatus = 'Open';
-        }
+        const recruitmentStatus = activeClubIds.has(existing._id.toString())
+          || existing.recruitmentStatus === 'Open'
+          ? 'Open'
+          : existing.recruitmentStatus;
+
         return {
           _id: existing._id,
           name: existing.name,

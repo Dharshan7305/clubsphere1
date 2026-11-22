@@ -52,6 +52,54 @@ ClubSphere is a student club discovery and campus activities platform. Students 
 
 `npm run seed` creates sample clubs, events, recruitments, notifications, and role-based accounts. **Seeding deletes existing application data in the configured database before creating the samples.** Only run it against a disposable development database.
 
+### Demo logins
+
+These accounts are created by `npm run seed`. Use the email address as the username.
+
+| Role | Username | Password |
+|---|---|---|
+| Student | `student@college.ac.in` | `password123` |
+| Core Member | `core@college.ac.in` | `password123` |
+| Faculty Advisor | `faculty@college.ac.in` | `password123` |
+| Admin | `admin@college.ac.in` | `password123` |
+
+Each club has its own secretary account. The secretary username is `secretary.<club-code>@college.ac.in`, where `<club-code>` is lowercase; all secretary passwords are `password123`.
+
+| Club | Username | Password |
+|---|---|---|
+| Tech Music (TM) | `secretary.tm@college.ac.in` | `password123` |
+| Tamil Mandram (TMN) | `secretary.tmn@college.ac.in` | `password123` |
+| Dramatics Club (DC) | `secretary.dc@college.ac.in` | `password123` |
+| Fine Arts Club (FAC) | `secretary.fac@college.ac.in` | `password123` |
+| CAP & Nature Club (CNC) | `secretary.cnc@college.ac.in` | `password123` |
+| English Literary Society (ELS) | `secretary.els@college.ac.in` | `password123` |
+| Youth Red Cross Society (YRC) | `secretary.yrc@college.ac.in` | `password123` |
+| Martial Arts Club (MAC) | `secretary.mac@college.ac.in` | `password123` |
+| Rotaract Club (RC) | `secretary.rc@college.ac.in` | `password123` |
+| Entrepreneurs Club (EC) | `secretary.ec@college.ac.in` | `password123` |
+| Astronomy Club (AC) | `secretary.ac@college.ac.in` | `password123` |
+| Pathshala Club (PC) | `secretary.pc@college.ac.in` | `password123` |
+| Global Leaders Forum (GLF) | `secretary.glf@college.ac.in` | `password123` |
+| International Education Cell (IEC) | `secretary.iec@college.ac.in` | `password123` |
+| Animal Welfare Club (AWC) | `secretary.awc@college.ac.in` | `password123` |
+| Women in Development Cell (WDC) | `secretary.wdc@college.ac.in` | `password123` |
+| Association of Serious Quizzers (ASQ) | `secretary.asq@college.ac.in` | `password123` |
+| Student Research Council (SRC) | `secretary.src@college.ac.in` | `password123` |
+| Industry (Alumni) Interaction Forum (IIF) | `secretary.iif@college.ac.in` | `password123` |
+| Radio Hub (RH) | `secretary.rh@college.ac.in` | `password123` |
+| Book Readers Club (BRC) | `secretary.brc@college.ac.in` | `password123` |
+| PSG Tech Chronicle Club (PTC) | `secretary.ptc@college.ac.in` | `password123` |
+| Youth Outreach Club (YOC) | `secretary.yoc@college.ac.in` | `password123` |
+| Artificial Intelligence & Robotics Club (AIR) | `secretary.air@college.ac.in` | `password123` |
+| Aeromodelling Club (AMC) | `secretary.amc@college.ac.in` | `password123` |
+| Finverse Club (FC) | `secretary.fc@college.ac.in` | `password123` |
+| SPIC-MACAY Heritage Club (SMHC) | `secretary.smhc@college.ac.in` | `password123` |
+| Anti Drug Club (ADC) | `secretary.adc@college.ac.in` | `password123` |
+| Yuva Tourism Club (YTC) | `secretary.ytc@college.ac.in` | `password123` |
+| Cyber Security Club (CSC) | `secretary.csc@college.ac.in` | `password123` |
+
+These are development/demo credentials only. Do not use them in production. **Seeding deletes existing application data** in the configured database, so only run it against a disposable development database.
+
 ## Main routes
 
 | Route | Purpose |

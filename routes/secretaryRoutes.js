@@ -21,13 +21,7 @@ async function getSecretaryClub(req) {
     if (clubId) return await Club.findById(clubId);
     return await Club.findOne();
   }
-  return await Club.findOne({
-    $or: [
-      { _id: req.session.user.club?._id },
-      { 'secretary.user': req.session.user._id },
-      { 'secretary.email': req.session.user.email }
-    ]
-  });
+  return await Club.findOne({ 'secretary.user': req.session.user._id });
 }
 
 async function syncClubMembers(club) {
@@ -99,6 +93,9 @@ router.get('/dashboard', async (req, res) => {
       .sort({ submittedAt: -1 });
 
     const events = await Event.find({ club: club._id }).sort({ eventDate: -1 });
+    const coreMembers = await User.find({ role: 'core', club: club._id })
+      .select('name email rollNo department year')
+      .sort({ name: 1 });
 
     // Metrics
     const totalApplicants = applications.length;
@@ -113,6 +110,7 @@ router.get('/dashboard', async (req, res) => {
       recruitments,
       applications: applications.slice(0, 8),
       events: events.slice(0, 5),
+      coreMembers,
       metrics: {
         totalApplicants,
         pendingApplicants,
