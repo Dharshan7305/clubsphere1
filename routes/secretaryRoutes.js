@@ -1,5 +1,6 @@
 ﻿const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 const Club = require('../models/Club');
 const Recruitment = require('../models/Recruitment');
 const Application = require('../models/Application');
@@ -17,7 +18,8 @@ router.use(ensureAuthenticated, authorizeRoles('secretary', 'admin'));
 async function getSecretaryClub(req) {
   if (req.session.user.role === 'admin') {
     // If admin is viewing secretary views, take first club or specific query
-    const clubId = req.query.clubId || req.session.user.club?._id;
+    const bodyClubId = req.body && req.body.clubId;
+    const clubId = req.query.clubId || bodyClubId || req.session.user.club?._id;
     if (clubId) return await Club.findById(clubId);
     return await Club.findOne();
   }
@@ -46,6 +48,14 @@ async function syncClubMembers(club) {
   }
 
   return Club.findById(club._id);
+}
+
+async function getCoreMemberIds(club) {
+  const legacyCoreMembers = await User.find({ role: 'core', club: club._id }).select('_id').lean();
+  return [...new Set([
+    ...(club.coreTeam || []).map(member => member.user && member.user.toString()),
+    ...legacyCoreMembers.map(member => member._id.toString())
+  ].filter(Boolean))];
 }
 
 async function addMemberWithinLimit(club, studentId) {
@@ -93,7 +103,8 @@ router.get('/dashboard', async (req, res) => {
       .sort({ submittedAt: -1 });
 
     const events = await Event.find({ club: club._id }).sort({ eventDate: -1 });
-    const coreMembers = await User.find({ role: 'core', club: club._id })
+    const coreMemberIds = await getCoreMemberIds(club);
+    const coreMembers = await User.find({ _id: { $in: coreMemberIds } })
       .select('name email rollNo department year')
       .sort({ name: 1 });
 
@@ -195,7 +206,7 @@ router.post('/club', async (req, res) => {
   }
 });
 
-// GET /secretary/members - Review direct membership requests
+// GET /secretary/members - Manage club members and review join requests
 router.get('/members', async (req, res) => {
   try {
     let club = await getSecretaryClub(req);
@@ -205,13 +216,34 @@ router.get('/members', async (req, res) => {
     }
 
     club = await syncClubMembers(club);
-    const membershipRequests = await Membership.find({ club: club._id })
-      .populate('student', 'name email rollNo department year')
-      .sort({ createdAt: -1 });
+    const coreTeamMemberIds = (club.coreTeam || [])
+      .map(member => member.user)
+      .filter(Boolean);
+    const [membershipRequests, members, legacyCoreMembers] = await Promise.all([
+      Membership.find({ club: club._id })
+        .populate('student', 'name email rollNo department year')
+        .sort({ createdAt: -1 }),
+      User.find({
+        $or: [
+          { _id: { $in: [...club.members, ...coreTeamMemberIds] } },
+          { role: 'core', club: club._id }
+        ]
+      })
+        .select('name email rollNo department year role club')
+        .populate('club', 'name code')
+        .sort({ name: 1 }),
+      User.find({ role: 'core', club: club._id }).select('_id').lean()
+    ]);
+    const coreMemberIds = [...new Set([
+      ...(club.coreTeam || []).map(member => member.user && member.user.toString()),
+      ...legacyCoreMembers.map(member => member._id.toString())
+    ].filter(Boolean))];
 
     res.render('secretary/members', {
-      title: `Membership Requests - ${club.name}`,
+      title: `Members & Requests - ${club.name}`,
       club,
+      members,
+      coreMemberIds,
       membershipRequests,
       currentPage: 'members'
     });
@@ -219,6 +251,102 @@ router.get('/members', async (req, res) => {
     console.error('Membership Requests Error:', error);
     req.flash('error_msg', 'Could not load membership requests.');
     res.redirect('/secretary/dashboard');
+  }
+});
+
+// POST /secretary/members/:memberId/role - Set a member's role in this club
+router.post('/members/:memberId/role', async (req, res) => {
+  try {
+    const club = await getSecretaryClub(req);
+    if (!club) {
+      req.flash('error_msg', 'Club not found.');
+      return res.redirect('/secretary/dashboard');
+    }
+
+    const { role } = req.body;
+    if (!['member', 'core'].includes(role)) {
+      req.flash('error_msg', 'Choose either Normal Member or Core Member.');
+      return res.redirect('/secretary/members');
+    }
+    if (!mongoose.Types.ObjectId.isValid(req.params.memberId)) {
+      req.flash('error_msg', 'Club member not found.');
+      return res.redirect('/secretary/members');
+    }
+
+    const currentClub = await syncClubMembers(club);
+    const member = await User.findById(req.params.memberId);
+    if (!member) {
+      req.flash('error_msg', 'Student account not found.');
+      return res.redirect('/secretary/members');
+    }
+
+    const memberId = member._id.toString();
+    const clubId = currentClub._id.toString();
+    const isClubMember = currentClub.members.some(
+      id => id.toString() === memberId
+    ) || (currentClub.coreTeam || []).some(
+      entry => entry.user && entry.user.toString() === memberId
+    ) || (member.role === 'core' && member.club && member.club.toString() === clubId);
+    if (!isClubMember) {
+      req.flash('error_msg', 'This student is not a member of your club.');
+      return res.redirect('/secretary/members');
+    }
+
+    if (!['student', 'core'].includes(member.role)) {
+      req.flash('error_msg', 'Only student accounts can be assigned club member roles.');
+      return res.redirect('/secretary/members');
+    }
+
+    const currentCoreEntry = (currentClub.coreTeam || []).find(
+      entry => entry.user && entry.user.toString() === memberId
+    );
+    const legacyCoreAssignment = member.role === 'core'
+      && member.club
+      && member.club.toString() === clubId;
+    const isCoreMember = Boolean(currentCoreEntry || legacyCoreAssignment);
+
+    if (role === 'core' && !isCoreMember) {
+      currentClub.coreTeam.push({
+        name: member.name,
+        designation: 'Core Member',
+        rollNo: member.rollNo || '',
+        user: member._id
+      });
+      await currentClub.save();
+    } else if (role === 'member' && isCoreMember) {
+      currentClub.coreTeam = currentClub.coreTeam.filter(
+        entry => !entry.user || entry.user.toString() !== memberId
+      );
+      await currentClub.save();
+
+      if (member.role === 'core') {
+        const [otherCoreClub, legacyClubStillAssigned] = await Promise.all([
+          Club.findOne({ _id: { $ne: currentClub._id }, 'coreTeam.user': member._id }).select('_id').lean(),
+          member.club && member.club.toString() !== clubId
+            ? Club.exists({ _id: member.club })
+            : null
+        ]);
+
+        if (otherCoreClub) {
+          member.club = otherCoreClub._id;
+          await member.save();
+        } else if (!legacyClubStillAssigned) {
+          member.role = 'student';
+          member.club = null;
+          await member.save();
+        }
+      }
+    }
+
+    req.flash(
+      'success_msg',
+      `${member.name} is now a ${role === 'core' ? 'Core Member' : 'Normal Member'} of ${currentClub.name}.`
+    );
+    res.redirect('/secretary/members');
+  } catch (error) {
+    console.error('Club Member Role Update Error:', error);
+    req.flash('error_msg', "Could not update this member's club role.");
+    res.redirect('/secretary/members');
   }
 });
 
@@ -337,10 +465,6 @@ router.post('/recruitments', async (req, res) => {
           });
         }
       });
-    }
-
-    if (roles.length === 0) {
-      roles.push({ roleName: 'Core Member', vacancies: 5, requirements: 'Enthusiastic and committed student' });
     }
 
     const recruitment = new Recruitment({

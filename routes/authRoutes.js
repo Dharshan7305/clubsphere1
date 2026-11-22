@@ -4,6 +4,7 @@ const User = require('../models/User');
 const Club = require('../models/Club');
 const NotificationService = require('../services/notificationService');
 const { ensureGuest } = require('../middleware/auth');
+const PSG_EMAIL_PATTERN = /^\d{2}[a-z]{2}\d{3}@psgtech\.ac\.in$/i;
 
 // Render Login Page
 router.get('/login', ensureGuest, (req, res) => {
@@ -89,6 +90,12 @@ router.post('/register', ensureGuest, async (req, res) => {
       return res.redirect('/auth/register');
     }
 
+    const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
+    if (!PSG_EMAIL_PATTERN.test(normalizedEmail)) {
+      req.flash('error_msg', 'Use your PSG Tech email in the format 26mx105@psgtech.ac.in.');
+      return res.redirect('/auth/register');
+    }
+
     if (password.length < 6) {
       req.flash('error_msg', 'Password must be at least 6 characters long.');
       return res.redirect('/auth/register');
@@ -99,7 +106,7 @@ router.post('/register', ensureGuest, async (req, res) => {
       return res.redirect('/auth/register');
     }
 
-    const existingUser = await User.findOne({ email: email.toLowerCase().trim() });
+    const existingUser = await User.findOne({ email: normalizedEmail });
     if (existingUser) {
       req.flash('error_msg', 'An account with this email already exists.');
       return res.redirect('/auth/register');
@@ -107,7 +114,7 @@ router.post('/register', ensureGuest, async (req, res) => {
 
     const newUser = new User({
       name: name.trim(),
-      email: email.toLowerCase().trim(),
+      email: normalizedEmail,
       password,
       role: 'student',
       rollNo: rollNo.toUpperCase().trim(),

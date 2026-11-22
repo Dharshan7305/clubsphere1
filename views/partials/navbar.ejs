@@ -15,12 +15,18 @@
           <% if (user.role === 'student') { %>
             <li><a href="/student/dashboard" class="nav-link <%= typeof currentPage !== 'undefined' && currentPage === 'dashboard' ? 'active' : '' %>">Dashboard</a></li>
             <li><a href="/student/applications" class="nav-link <%= typeof currentPage !== 'undefined' && currentPage === 'applications' ? 'active' : '' %>">My Applications</a></li>
+            <% if (typeof coreClubs !== 'undefined' && coreClubs.length > 0) { %>
+              <li><a href="/core/dashboard" class="nav-link">Core Team Portal</a></li>
+            <% } %>
           <% } else if (user.role === 'secretary') { %>
             <li><a href="/secretary/dashboard" class="nav-link <%= typeof currentPage !== 'undefined' && currentPage === 'dashboard' ? 'active' : '' %>">Secretary Panel</a></li>
             <li><a href="/secretary/applications" class="nav-link <%= typeof currentPage !== 'undefined' && currentPage === 'applications' ? 'active' : '' %>">Applicants</a></li>
+            <li><a href="/secretary/members" class="nav-link <%= typeof currentPage !== 'undefined' && currentPage === 'members' ? 'active' : '' %>">Members</a></li>
             <li><a href="/secretary/recruitments" class="nav-link <%= typeof currentPage !== 'undefined' && currentPage === 'recruitments' ? 'active' : '' %>">Recruitments</a></li>
             <li><a href="/secretary/events" class="nav-link <%= typeof currentPage !== 'undefined' && currentPage === 'events' ? 'active' : '' %>">Events</a></li>
           <% } else if (user.role === 'core') { %>
+            <li><a href="/student/dashboard" class="nav-link">Student Dashboard</a></li>
+            <li><a href="/student/applications" class="nav-link">My Applications</a></li>
             <li><a href="/core/dashboard" class="nav-link <%= typeof currentPage !== 'undefined' && currentPage === 'dashboard' ? 'active' : '' %>">Core Team Portal</a></li>
             <li><a href="/core/applications" class="nav-link <%= typeof currentPage !== 'undefined' && currentPage === 'applications' ? 'active' : '' %>">Screening</a></li>
           <% } else if (user.role === 'faculty') { %>

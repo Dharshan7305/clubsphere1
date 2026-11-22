@@ -126,73 +126,55 @@ async function seedDatabase() {
 
     console.log(`[Seed] Created and assigned ${secretaryUsers.length} club secretaries.`);
 
-    // Link faculty and core users to the first club for demo data
-    const codingClub = createdClubs[0];
-    const secretaryUser = secretaryUsers[0];
+    // Link demo users and content to clubs by code, not array position.
+    const techMusicClub = createdClubs.find(club => club.code === 'TM');
+    const tamilMandramClub = createdClubs.find(club => club.code === 'TMN');
+    const techMusicSecretary = techMusicClub
+      ? secretaryUsers.find(user =>
+        user.club && user.club.toString() === techMusicClub._id.toString()
+      )
+      : null;
+    const tamilMandramSecretary = tamilMandramClub
+      ? secretaryUsers.find(user =>
+        user.club && user.club.toString() === tamilMandramClub._id.toString()
+      )
+      : null;
 
-    coreUser.club = codingClub._id;
+    if (!techMusicClub || !tamilMandramClub || !techMusicSecretary || !tamilMandramSecretary) {
+      throw new Error('Required demo clubs or secretary accounts were not created.');
+    }
+
+    coreUser.club = techMusicClub._id;
     await coreUser.save();
 
-    facultyUser.club = codingClub._id;
+    facultyUser.club = techMusicClub._id;
     await facultyUser.save();
 
     // 3. Create Recruitment Drives
-    const recruitment1 = await Recruitment.create({
-      club: codingClub._id,
-      title: 'Coding Club Core & Executive Team Recruitment 2026',
+    const techMusicRecruitment = await Recruitment.create({
+      club: techMusicClub._id,
+      title: 'Tech Music Membership Drive 2026',
       academicYear: '2025-2026',
-      roles: [
-        {
-          roleName: 'Full-Stack Web Developer',
-          vacancies: 4,
-          description: 'Build web applications for college symposiums and club portals.',
-          requirements: 'Experience in Node.js, Express, MongoDB, HTML, CSS, JavaScript.'
-        },
-        {
-          roleName: 'Competitive Programming Lead',
-          vacancies: 3,
-          description: 'Host weekly contest problems, editorial sessions, and workshops.',
-          requirements: 'Active Codeforces / LeetCode profile, strong in DSA (C++/Java/Python).'
-        },
-        {
-          roleName: 'UI/UX & Graphic Designer',
-          vacancies: 2,
-          description: 'Create event banners, posters, social media media, and UX flows.',
-          requirements: 'Figma, Canva, or Photoshop proficiency.'
-        }
-      ],
-      eligibility: 'Open to 1st, 2nd, and 3rd year BE/B.Tech, MCA, and MSc students.',
+      roles: [],
+      eligibility: 'Open to all students interested in singing, instruments, music production, or live performances.',
       deadline: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days from now
       status: 'Open',
       facultyApproval: {
         status: 'Approved',
         reviewedBy: facultyUser._id,
-        remarks: 'Approved by Dr. R. Venkatesh. Excellent initiative for student skill enrichment.',
+        remarks: 'Approved for students interested in music and campus performances.',
         reviewedAt: new Date()
       },
-      postedBy: secretaryUser._id,
-      instructions: 'Please provide valid GitHub/Portfolio links. Shortlisted candidates will be invited for a personal interview.'
+      postedBy: techMusicSecretary._id,
+      instructions: 'This is a general club membership drive. No specific roles are required.'
     });
 
-    const recruitment2 = await Recruitment.create({
-      club: createdClubs[1]._id, // Robotics
-      title: 'Robotics Club Project Crew Recruitment 2026',
+    const tamilMandramRecruitment = await Recruitment.create({
+      club: tamilMandramClub._id,
+      title: 'Tamil Mandram Membership Drive 2026',
       academicYear: '2025-2026',
-      roles: [
-        {
-          roleName: 'Embedded Systems Developer',
-          vacancies: 3,
-          description: 'Program microcontrollers, sensors, and telemetry systems.',
-          requirements: 'Hands-on knowledge of Arduino, ESP32, C/C++.'
-        },
-        {
-          roleName: 'Mechanical CAD Designer',
-          vacancies: 2,
-          description: 'Design 3D chassis, arms, and mechanisms.',
-          requirements: 'SolidWorks or Fusion 360 skills.'
-        }
-      ],
-      eligibility: 'All branches welcome, especially Robotics, Mech, EEE, ECE.',
+      roles: [],
+      eligibility: 'Open to students interested in Tamil language, literature, or cultural activities.',
       deadline: new Date(Date.now() + 20 * 24 * 60 * 60 * 1000),
       status: 'Open',
       facultyApproval: {
@@ -200,40 +182,34 @@ async function seedDatabase() {
         remarks: 'Approved.',
         reviewedAt: new Date()
       },
-      instructions: 'Candidates will undergo a 1-round technical task followed by discussion.'
+      instructions: 'This is a general club membership drive. No specific roles are required.'
     });
 
-    // A pending recruitment drive for Faculty to test viva approval workflow!
+    // A role-free pending membership drive for faculty approval demo data.
     const pendingRecruitment = await Recruitment.create({
-      club: codingClub._id,
-      title: 'AI/ML Special Interest Group Lead Recruitment',
+      club: techMusicClub._id,
+      title: 'Tech Music Membership Intake 2026',
       academicYear: '2025-2026',
-      roles: [
-        {
-          roleName: 'Machine Learning Research Lead',
-          vacancies: 2,
-          description: 'Guide student research papers and deep learning workshops.',
-          requirements: 'PyTorch/TensorFlow, Python, Computer Vision / NLP.'
-        }
-      ],
-      eligibility: '2nd and 3rd year students with ML project experience.',
+      roles: [],
+      eligibility: 'Open to students interested in music and campus performances.',
       deadline: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000),
       status: 'Pending Approval',
       facultyApproval: {
         status: 'Pending',
-        remarks: 'Pending review by Dr. R. Venkatesh.'
+        remarks: 'Pending faculty review.'
       },
-      postedBy: secretaryUser._id
+      postedBy: techMusicSecretary._id,
+      instructions: 'General club membership intake with no role selection.'
     });
 
     console.log('[Seed] Created recruitment drives (including 1 pending for viva approval demo).');
 
     // 4. Create Sample Application by Student
     const sampleApp = await Application.create({
-      recruitment: recruitment1._id,
-      club: codingClub._id,
+      recruitment: techMusicRecruitment._id,
+      club: techMusicClub._id,
       student: studentUser._id,
-      appliedRole: 'Full-Stack Web Developer',
+      appliedRole: 'Club Member',
       studentName: 'Dharshan R',
       rollNo: '24MX108',
       department: 'Computer Applications',
@@ -241,28 +217,25 @@ async function seedDatabase() {
       email: 'student@college.ac.in',
       phone: '9842100005',
       cgpa: 8.8,
-      skills: 'JavaScript, Node.js, Express, MongoDB, HTML5, CSS3, EJS',
-      priorExperience: 'Built Web Applications for college mini-projects and solved DSA problems on LeetCode.',
-      whyJoin: 'I am passionate about building practical software solutions and want to actively collaborate with senior developers at ClubSphere Coding Club.',
-      portfolioLink: 'https://github.com/college-student',
-      status: 'Shortlisted',
-      interviewDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
-      interviewVenue: 'CC Lab 2, F-Block 3rd Floor',
-      secretaryNotes: 'Strong profile in Node.js and full stack. Shortlisted for interview.'
+      skills: 'Singing and acoustic guitar',
+      priorExperience: 'Performed at college cultural events.',
+      whyJoin: 'I enjoy singing and playing music and would like to participate in Tech Music performances.',
+      status: 'Under Review',
+      secretaryNotes: 'Membership application is under review.'
     });
 
     console.log('[Seed] Created sample recruitment application.');
 
     // 5. Create Events
     const event1 = await Event.create({
-      club: codingClub._id,
-      title: 'CodeStorm 2026: 24-Hour National Hackathon',
-      category: 'Hackathon',
-      description: 'The flagship hackathon of ClubSphere where top minds collaborate to solve pressing problems in AI, Healthcare, FinTech, and Smart Campus Automation.',
-      venue: 'F-Block Central Computing Facility & Auditorium',
+      club: techMusicClub._id,
+      title: 'Tech Music Unplugged Night 2026',
+      category: 'Cultural Fest',
+      description: 'An evening of acoustic sets, solo vocal performances, and student bands hosted by Tech Music.',
+      venue: 'College Auditorium',
       eventDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      startTime: '09:00 AM',
-      endTime: '09:00 AM (Next Day)',
+      startTime: '06:00 PM',
+      endTime: '08:30 PM',
       registrationDeadline: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
       maxParticipants: 150,
       status: 'Upcoming',
@@ -286,15 +259,15 @@ async function seedDatabase() {
           attended: true
         }
       ],
-      createdBy: secretaryUser._id
+      createdBy: techMusicSecretary._id
     });
 
     const event2 = await Event.create({
-      club: codingClub._id,
-      title: 'Mastering Full-Stack with Node.js & MongoDB',
+      club: techMusicClub._id,
+      title: 'Vocal Harmony and Acoustic Jam Workshop',
       category: 'Workshop',
-      description: 'Hands-on practical workshop covering Express routing, MongoDB aggregation, sessions, security, and deploying web applications.',
-      venue: 'CC Lab 3, E-Block',
+      description: 'A practical session for vocal warm-ups, harmony practice, rhythm, and acoustic ensemble playing.',
+      venue: 'Music Practice Room',
       eventDate: new Date(Date.now() + 12 * 24 * 60 * 60 * 1000),
       startTime: '02:00 PM',
       endTime: '05:00 PM',
@@ -302,15 +275,15 @@ async function seedDatabase() {
       maxParticipants: 60,
       status: 'Upcoming',
       participants: [],
-      createdBy: secretaryUser._id
+      createdBy: techMusicSecretary._id
     });
 
     const event3 = await Event.create({
-      club: createdClubs[1]._id,
-      title: 'Autonomous Mobile Robots Workshop',
-      category: 'Workshop',
-      description: 'Practical training on ROS2, LIDAR mapping, and path planning on differential drive robots.',
-      venue: 'Robotics Center, D-Block Ground Floor',
+      club: tamilMandramClub._id,
+      title: 'Muthamizh Vizha and Poetry Recital',
+      category: 'Cultural Fest',
+      description: 'A celebration of Tamil literature and culture featuring poetry recitals, oratory, and traditional performances.',
+      venue: 'Tamil Seminar Hall',
       eventDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
       startTime: '10:00 AM',
       endTime: '04:00 PM',
@@ -318,7 +291,7 @@ async function seedDatabase() {
       maxParticipants: 40,
       status: 'Upcoming',
       participants: [],
-      createdBy: facultyUser._id
+      createdBy: tamilMandramSecretary._id
     });
 
     console.log('[Seed] Created campus events.');
@@ -327,27 +300,27 @@ async function seedDatabase() {
     await Notification.create([
       {
         recipient: studentUser._id,
-        club: codingClub._id,
-        title: 'Interview Call: Coding Club Recruitment',
-        message: 'Your application for Full-Stack Web Developer has been Shortlisted! Interview is scheduled at CC Lab 2.',
+        club: techMusicClub._id,
+        title: 'Tech Music Membership Application',
+        message: 'Your membership application is under review by the Tech Music committee.',
         type: 'application',
         relatedLink: '/student/applications',
         isRead: false
       },
       {
         recipient: null, // broadcast
-        club: codingClub._id,
-        title: 'Registration Open: CodeStorm 2026',
-        message: 'Registrations are now open for our flagship 24-hour hackathon CodeStorm 2026. Register now to reserve seats!',
+        club: techMusicClub._id,
+        title: 'Registration Open: Tech Music Unplugged Night',
+        message: 'Registration is open for Tech Music Unplugged Night 2026. Join us for live campus performances.',
         type: 'event',
         relatedLink: `/events/${event1._id}`,
         isRead: false
       },
       {
         recipient: facultyUser._id,
-        club: codingClub._id,
-        title: 'Recruitment Approval Pending',
-        message: 'A new recruitment drive "AI/ML Special Interest Group Lead" is waiting for your review and approval.',
+        club: techMusicClub._id,
+        title: 'Membership Drive Approval Pending',
+        message: 'The Tech Music membership intake is waiting for your review and approval.',
         type: 'recruitment',
         relatedLink: '/faculty/dashboard',
         isRead: false

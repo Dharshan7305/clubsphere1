@@ -118,7 +118,7 @@ router.post('/recruitments/:id/apply', async (req, res) => {
     }
 
     const {
-      appliedRole,
+      appliedRole: submittedRole,
       rollNo,
       department,
       year,
@@ -129,9 +129,14 @@ router.post('/recruitments/:id/apply', async (req, res) => {
       whyJoin,
       portfolioLink
     } = req.body;
+    const roles = Array.isArray(recruitment.roles) ? recruitment.roles : [];
+    const hasRoles = roles.length > 0;
+    const appliedRole = hasRoles ? String(submittedRole || '').trim() : 'Club Member';
+    const selectedRoleExists = !hasRoles || roles.some(role => role.roleName === appliedRole);
+    const applicantInterests = (skills && skills.trim()) || '';
 
-    if (!appliedRole || !rollNo || !skills || !whyJoin) {
-      req.flash('error_msg', 'Please fill in all mandatory fields.');
+    if (!rollNo || !whyJoin || !whyJoin.trim() || !selectedRoleExists || (hasRoles && !applicantInterests)) {
+      req.flash('error_msg', 'Please complete the required membership application fields.');
       return res.redirect(`/student/recruitments/${recruitment._id}/apply`);
     }
 
@@ -157,7 +162,7 @@ router.post('/recruitments/:id/apply', async (req, res) => {
       email: req.session.user.email,
       phone: (phone && phone.trim()) || (req.session.user && req.session.user.phone) || 'Not provided',
       cgpa: parseFloat(cgpa) || 8.0,
-      skills,
+      skills: applicantInterests || 'Not provided',
       priorExperience: priorExperience || 'None',
       whyJoin,
       portfolioLink: portfolioLink || '',
@@ -171,7 +176,9 @@ router.post('/recruitments/:id/apply', async (req, res) => {
       recipient: req.session.user._id,
       club: recruitment.club._id,
       title: `Application Submitted: ${recruitment.club.name}`,
-      message: `Your application for "${appliedRole}" at ${recruitment.club.name} was successfully submitted. You can track status on your dashboard.`,
+      message: hasRoles
+        ? `Your application for "${appliedRole}" at ${recruitment.club.name} was successfully submitted. You can track status on your dashboard.`
+        : `Your membership application to ${recruitment.club.name} was successfully submitted. You can track status on your dashboard.`,
       type: 'recruitment',
       relatedLink: '/student/applications'
     });
@@ -182,7 +189,9 @@ router.post('/recruitments/:id/apply', async (req, res) => {
         recipient: recruitment.club.secretary.user,
         club: recruitment.club._id,
         title: `New Applicant: ${req.session.user.name}`,
-        message: `${req.session.user.name} (${rollNo}) has applied for "${appliedRole}".`,
+        message: hasRoles
+          ? `${req.session.user.name} (${rollNo}) has applied for "${appliedRole}".`
+          : `${req.session.user.name} (${rollNo}) has applied to join the club.`,
         type: 'application',
         relatedLink: '/secretary/applications'
       });

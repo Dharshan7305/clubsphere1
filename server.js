@@ -9,6 +9,7 @@ dotenv.config();
 
 const connectDB = require('./config/db');
 const Club = require('./models/Club');
+const User = require('./models/User');
 const Recruitment = require('./models/Recruitment');
 const Event = require('./models/Event');
 const NotificationService = require('./services/notificationService');
@@ -59,6 +60,7 @@ app.use(async (req, res, next) => {
 
   res.locals.unreadNotifs = 0;
   res.locals.recentNotifications = [];
+  res.locals.coreClubs = [];
 
   if (req.session.user) {
     try {
@@ -72,6 +74,34 @@ app.use(async (req, res, next) => {
       res.locals.recentNotifications = recentNotifications;
     } catch (error) {
       console.error('[Notification Middleware Error]:', error.message);
+    }
+
+    if (['student', 'core'].includes(req.session.user.role)) {
+      try {
+        const [account, coreClubs] = await Promise.all([
+          User.findById(userId).select('role club').populate('club', 'name code').lean(),
+          Club.find({ 'coreTeam.user': userId }).select('_id name code').sort({ name: 1 }).lean()
+        ]);
+
+        if (account) {
+          req.session.user.role = account.role;
+          req.session.user.club = account.club
+            ? { _id: account.club._id, name: account.club.name, code: account.club.code }
+            : null;
+        }
+
+        const legacyClubId = account && account.club && account.club._id;
+        if (account && account.role === 'core' && legacyClubId) {
+          if (!coreClubs.some(club => club._id.toString() === legacyClubId.toString())) {
+            coreClubs.push(account.club);
+          }
+        }
+
+        res.locals.user = req.session.user;
+        res.locals.coreClubs = coreClubs;
+      } catch (error) {
+        console.error('[Core Membership Middleware Error]:', error.message);
+      }
     }
   }
 

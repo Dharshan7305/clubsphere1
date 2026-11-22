@@ -3,25 +3,80 @@ const router = express.Router();
 const Club = require('../models/Club');
 const Event = require('../models/Event');
 const Application = require('../models/Application');
+const User = require('../models/User');
 const NotificationService = require('../services/notificationService');
-const { ensureAuthenticated, authorizeRoles } = require('../middleware/auth');
+const { ensureAuthenticated } = require('../middleware/auth');
 
-// Protect all core member routes (allow core, secretary, admin)
-router.use(ensureAuthenticated, authorizeRoles('core', 'secretary', 'admin'));
+async function ensureCoreAccess(req, res, next) {
+  if (['admin', 'secretary'].includes(req.session.user.role)) return next();
 
-// Helper to get club associated with core member
+  try {
+    const account = await User.findById(req.session.user._id).select('role club').lean();
+    const assignedClubs = [{ 'coreTeam.user': req.session.user._id }];
+    if (account && account.role === 'core' && account.club) {
+      assignedClubs.push({ _id: account.club });
+    }
+
+    const hasCoreAccess = account
+      && ['student', 'core'].includes(account.role)
+      && await Club.exists({ $or: assignedClubs });
+    if (hasCoreAccess) return next();
+
+    req.flash('error_msg', 'You must be assigned as a club core member to access this portal.');
+    return res.redirect('/');
+  } catch (error) {
+    console.error('Core Portal Access Error:', error);
+    req.flash('error_msg', 'Could not verify core-member access.');
+    return res.redirect('/');
+  }
+}
+
+router.use(ensureAuthenticated, ensureCoreAccess);
+
+async function getCoreClubs(user) {
+  const clubs = await Club.find({ 'coreTeam.user': user._id }).sort({ name: 1 });
+  const legacyClubId = user.club && user.club._id ? user.club._id : user.club;
+  if (user.role === 'core' && legacyClubId) {
+    const legacyClub = await Club.findById(legacyClubId);
+    if (legacyClub && !clubs.some(club => club._id.toString() === legacyClub._id.toString())) {
+      clubs.unshift(legacyClub);
+    }
+  }
+  return clubs;
+}
+
 async function getCoreClub(req) {
   if (req.session.user.role === 'admin') {
     const clubId = req.query.clubId || req.session.user.club?._id;
     if (clubId) return await Club.findById(clubId);
     return await Club.findOne();
   }
-  return await Club.findOne({
-    $or: [
-      { _id: req.session.user.club?._id },
-      { 'coreTeam.user': req.session.user._id }
-    ]
-  });
+  if (req.session.user.role === 'secretary') {
+    return await Club.findOne({ 'secretary.user': req.session.user._id });
+  }
+
+  const clubs = await getCoreClubs(req.session.user);
+  const requestedClubId = req.query.clubId;
+  if (requestedClubId) {
+    const selectedClub = clubs.find(club => club._id.toString() === requestedClubId);
+    if (!selectedClub) return null;
+    req.session.coreClubId = selectedClub._id.toString();
+    return selectedClub;
+  }
+
+  const sessionClub = clubs.find(
+    club => club._id.toString() === req.session.coreClubId
+  );
+  const legacyClubId = req.session.user.club && req.session.user.club._id
+    ? req.session.user.club._id.toString()
+    : req.session.user.club && req.session.user.club.toString();
+  const selectedClub = sessionClub
+    || clubs.find(club => club._id.toString() === legacyClubId)
+    || clubs[0]
+    || null;
+
+  if (selectedClub) req.session.coreClubId = selectedClub._id.toString();
+  return selectedClub;
 }
 
 // GET /core/dashboard - Core Team Dashboard
@@ -35,6 +90,9 @@ router.get('/dashboard', async (req, res) => {
 
     const events = await Event.find({ club: club._id }).sort({ eventDate: 1 });
     const applications = await Application.find({ club: club._id }).sort({ submittedAt: -1 }).limit(10);
+    const coreClubs = ['student', 'core'].includes(req.session.user.role)
+      ? await getCoreClubs(req.session.user)
+      : [];
 
     const totalParticipants = events.reduce((sum, e) => sum + e.participants.length, 0);
 
@@ -43,6 +101,7 @@ router.get('/dashboard', async (req, res) => {
       club,
       events,
       applications,
+      coreClubs,
       totalParticipants,
       currentPage: 'dashboard'
     });
@@ -57,6 +116,11 @@ router.get('/dashboard', async (req, res) => {
 router.get('/events/:id/participants', async (req, res) => {
   try {
     const club = await getCoreClub(req);
+    if (!club) {
+      req.flash('error_msg', 'You are not assigned to a club core team.');
+      return res.redirect('/core/dashboard');
+    }
+
     const event = await Event.findOne({ _id: req.params.id, club: club._id });
 
     if (!event) {
@@ -80,7 +144,10 @@ router.get('/events/:id/participants', async (req, res) => {
 // POST /core/events/:id/attendance/:participantId - Toggle Attendance Check-In
 router.post('/events/:id/attendance/:participantId', async (req, res) => {
   try {
-    const event = await Event.findById(req.params.id);
+    const club = await getCoreClub(req);
+    if (!club) return res.status(403).json({ error: 'You are not assigned to a club core team.' });
+
+    const event = await Event.findOne({ _id: req.params.id, club: club._id });
     if (!event) return res.status(404).json({ error: 'Event not found' });
 
     const participant = event.participants.id(req.params.participantId);
@@ -99,6 +166,11 @@ router.post('/events/:id/attendance/:participantId', async (req, res) => {
 router.post('/events/:id/update', async (req, res) => {
   try {
     const club = await getCoreClub(req);
+    if (!club) {
+      req.flash('error_msg', 'You are not assigned to a club core team.');
+      return res.redirect('/core/dashboard');
+    }
+
     const event = await Event.findOne({ _id: req.params.id, club: club._id });
 
     if (!event) {
@@ -157,6 +229,11 @@ router.post('/events/:id/update', async (req, res) => {
 router.get('/applications', async (req, res) => {
   try {
     const club = await getCoreClub(req);
+    if (!club) {
+      req.flash('error_msg', 'You are not assigned to a club core team.');
+      return res.redirect('/core/dashboard');
+    }
+
     const applications = await Application.find({ club: club._id })
       .populate('recruitment')
       .sort({ submittedAt: -1 });

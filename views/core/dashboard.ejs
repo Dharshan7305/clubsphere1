@@ -14,6 +14,20 @@
     </div>
   </div>
 
+  <% if (coreClubs.length > 1) { %>
+    <form action="/core/dashboard" method="GET" class="card" style="display: flex; align-items: end; gap: 0.75rem; padding: 1rem; margin-bottom: 1.5rem;">
+      <div class="form-group" style="margin: 0; min-width: 240px;">
+        <label for="coreClubId">Core team club</label>
+        <select id="coreClubId" name="clubId" class="form-control">
+          <% coreClubs.forEach(coreClub => { %>
+            <option value="<%= coreClub._id %>" <%= coreClub._id.toString() === club._id.toString() ? 'selected' : '' %>><%= coreClub.name %></option>
+          <% }) %>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary">Switch Club</button>
+    </form>
+  <% } %>
+
   <div class="stats-grid">
     <div class="stat-box">
       <div class="stat-icon stat-icon-blue">🎟️</div>

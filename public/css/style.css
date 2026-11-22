@@ -5917,3 +5917,206 @@ textarea.form-control {
     font-size: 1.75rem;
   }
 }
+
+/* Dark theme coverage for legacy pages and hard-coded light surfaces. */
+[data-theme="dark"] body {
+  color: var(--text-main);
+}
+
+[data-theme="dark"] main {
+  color: var(--text-main);
+}
+
+[data-theme="dark"] input[type="text"],
+[data-theme="dark"] input[type="email"],
+[data-theme="dark"] input[type="tel"],
+[data-theme="dark"] input[type="password"],
+[data-theme="dark"] input[type="number"],
+[data-theme="dark"] textarea,
+[data-theme="dark"] select {
+  background-color: var(--bg-card);
+  border-color: var(--border-color);
+  color: var(--text-main);
+}
+
+[data-theme="dark"] [style*="background" i][style*="#fff" i],
+[data-theme="dark"] [style*="background" i][style*="white" i] {
+  background-color: var(--bg-card) !important;
+}
+
+[data-theme="dark"] [style*="background" i][style*="#f8fafc" i],
+[data-theme="dark"] [style*="background" i][style*="#f8f6fc" i],
+[data-theme="dark"] [style*="background" i][style*="#f8f9fc" i],
+[data-theme="dark"] [style*="background" i][style*="#f9fafb" i],
+[data-theme="dark"] [style*="background" i][style*="#fafafa" i],
+[data-theme="dark"] [style*="background" i][style*="#f1f5f9" i],
+[data-theme="dark"] [style*="background" i][style*="#f3f4f6" i],
+[data-theme="dark"] [style*="background" i][style*="#e2e8f0" i] {
+  background-color: var(--bg-light) !important;
+}
+
+[data-theme="dark"] [style*="background" i][style*="#f3eeff" i],
+[data-theme="dark"] [style*="background" i][style*="#ede9fe" i],
+[data-theme="dark"] [style*="background" i][style*="#e0e7ff" i] {
+  background-color: var(--primary-light) !important;
+}
+
+[data-theme="dark"] [style*="background" i][style*="#eff6ff" i] {
+  background-color: rgba(96, 165, 250, 0.14) !important;
+}
+
+[data-theme="dark"] [style*="background" i][style*="#fef3c7" i],
+[data-theme="dark"] [style*="background" i][style*="#fffbeb" i] {
+  background-color: rgba(251, 191, 36, 0.14) !important;
+}
+
+[data-theme="dark"] [style*="background" i][style*="#dcfce7" i],
+[data-theme="dark"] [style*="background" i][style*="#eef8f2" i] {
+  background-color: rgba(52, 211, 153, 0.12) !important;
+}
+
+[data-theme="dark"] [style*="background" i][style*="#fee2e2" i],
+[data-theme="dark"] [style*="background" i][style*="#fef2f2" i] {
+  background-color: rgba(248, 113, 113, 0.12) !important;
+}
+
+[data-theme="dark"] [style*="color" i][style*="#15152b" i],
+[data-theme="dark"] [style*="color" i][style*="#1e293b" i],
+[data-theme="dark"] [style*="color" i][style*="#111827" i],
+[data-theme="dark"] [style*="color" i][style*="#0f172a" i],
+[data-theme="dark"] [style*="color" i][style*="#334155" i] {
+  color: var(--text-main) !important;
+}
+
+[data-theme="dark"] [style*="color" i][style*="#475569" i],
+[data-theme="dark"] [style*="color" i][style*="#64748b" i],
+[data-theme="dark"] [style*="color" i][style*="#5e6578" i],
+[data-theme="dark"] [style*="color" i][style*="#475467" i] {
+  color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] [style*="color" i][style*="#5521b8" i],
+[data-theme="dark"] [style*="color" i][style*="#3730a3" i] {
+  color: var(--primary) !important;
+}
+
+[data-theme="dark"] [style*="color" i][style*="#1e3a8a" i] {
+  color: #bfdbfe !important;
+}
+
+[data-theme="dark"] [style*="color" i][style*="#b45309" i],
+[data-theme="dark"] [style*="color" i][style*="#d97706" i] {
+  color: #fcd34d !important;
+}
+
+[data-theme="dark"] [style*="color" i][style*="#15803d" i],
+[data-theme="dark"] [style*="color" i][style*="#16a34a" i] {
+  color: #6ee7b7 !important;
+}
+
+[data-theme="dark"] [style*="color" i][style*="#dc2626" i] {
+  color: #fca5a5 !important;
+}
+
+[data-theme="dark"] [style*="border" i][style*="#e2e8f0" i],
+[data-theme="dark"] [style*="border" i][style*="#eaebf0" i],
+[data-theme="dark"] [style*="border" i][style*="#f1f3f9" i] {
+  border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .club-details-page {
+  background: var(--bg-main);
+}
+
+[data-theme="dark"] .club-details-nav-bar {
+  background: var(--bg-muted);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .club-breadcrumb {
+  color: var(--text-muted);
+}
+
+[data-theme="dark"] .club-breadcrumb-current,
+[data-theme="dark"] .about-feature-box h4,
+[data-theme="dark"] .activity-text,
+[data-theme="dark"] .advisor-info-box h4,
+[data-theme="dark"] .form-group label {
+  color: var(--text-main);
+}
+
+[data-theme="dark"] .club-breadcrumb a,
+[data-theme="dark"] .club-section-title,
+[data-theme="dark"] .btn-back-clubs,
+[data-theme="dark"] .advisor-dept-tag {
+  color: var(--primary);
+}
+
+[data-theme="dark"] .btn-back-clubs:hover {
+  background: var(--primary-light);
+}
+
+[data-theme="dark"] .club-breadcrumb-sep,
+[data-theme="dark"] .club-section-desc,
+[data-theme="dark"] .about-feature-box p,
+[data-theme="dark"] .advisor-role-tag,
+[data-theme="dark"] .join-status-label,
+[data-theme="dark"] .join-status-desc {
+  color: var(--text-muted);
+}
+
+[data-theme="dark"] .btn-back-clubs,
+[data-theme="dark"] .club-section-card,
+[data-theme="dark"] .club-application-form {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .about-feature-box,
+[data-theme="dark"] .join-status-banner {
+  background: var(--bg-muted);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .activity-card {
+  background: var(--bg-light);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .club-section-header {
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .activity-icon,
+[data-theme="dark"] .advisor-avatar-box {
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+[data-theme="dark"] .advisor-card-item {
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .form-control-input,
+[data-theme="dark"] .form-control-textarea,
+[data-theme="dark"] .form-control-input[readonly] {
+  background: var(--bg-light);
+  border-color: var(--border-color);
+  color: var(--text-main);
+}
+
+[data-theme="dark"] .pill-closed {
+  background: var(--bg-light);
+  border-color: var(--border-color);
+  color: var(--text-muted);
+}
+
+[data-theme="dark"] .applied-notice-card {
+  background: rgba(52, 211, 153, 0.12);
+  border-color: rgba(52, 211, 153, 0.28);
+}
+
+[data-theme="dark"] .applied-notice-title,
+[data-theme="dark"] .applied-notice-text {
+  color: #6ee7b7;
+}

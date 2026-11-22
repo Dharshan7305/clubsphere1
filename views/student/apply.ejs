@@ -3,13 +3,17 @@
 <%- include('../partials/alerts') %>
 
 <main class="container" style="padding-top: 2rem; padding-bottom: 4rem;">
+  <% const recruitmentRoles = Array.isArray(recruitment.roles) ? recruitment.roles : []; %>
+
   <div style="margin-bottom: 1.5rem;">
     <a href="/clubs/<%= recruitment.club._id %>" class="btn btn-sm btn-outline">&larr; Back to <%= recruitment.club.name %></a>
   </div>
 
   <div class="form-card" style="max-width: 800px;">
     <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 1.5rem; margin-bottom: 2rem;">
-      <span class="badge badge-open" style="margin-bottom: 0.5rem;">Recruitment Application</span>
+      <span class="badge badge-open" style="margin-bottom: 0.5rem;">
+        <%= recruitmentRoles.length ? 'Recruitment Application' : 'Club Membership Application' %>
+      </span>
       <h1 style="font-size: 1.85rem; font-weight: 800; color: var(--primary); margin-bottom: 0.35rem;">
         <%= recruitment.title %>
       </h1>
@@ -24,17 +28,18 @@
     </div>
 
     <form action="/student/recruitments/<%= recruitment._id %>/apply" method="POST">
-      <!-- Role Selection -->
-      <div class="form-group">
-        <label for="appliedRole">Select Role You Wish to Apply For *</label>
-        <select id="appliedRole" name="appliedRole" class="form-control" required>
-          <% recruitment.roles.forEach(role => { %>
-            <option value="<%= role.roleName %>">
-              <%= role.roleName %> (<%= role.vacancies %> openings)
-            </option>
-          <% }) %>
-        </select>
-      </div>
+      <% if (recruitmentRoles.length > 0) { %>
+        <div class="form-group">
+          <label for="appliedRole">Select Role You Wish to Apply For *</label>
+          <select id="appliedRole" name="appliedRole" class="form-control" required>
+            <% recruitmentRoles.forEach(role => { %>
+              <option value="<%= role.roleName %>">
+                <%= role.roleName %> (<%= role.vacancies %> openings)
+              </option>
+            <% }) %>
+          </select>
+        </div>
+      <% } %>
 
       <!-- Applicant Details -->
       <div class="form-row">
@@ -69,16 +74,17 @@
           <label for="phone">Contact Number *</label>
           <input type="tel" id="phone" name="phone" class="form-control" value="<%= user.phone %>" placeholder="10-digit mobile" required>
         </div>
-        <div class="form-group">
-          <label for="cgpa">Current CGPA</label>
-          <input type="number" step="0.01" min="0" max="10" id="cgpa" name="cgpa" class="form-control" placeholder="e.g. 8.75">
-        </div>
+        <% if (recruitmentRoles.length > 0) { %>
+          <div class="form-group">
+            <label for="cgpa">Current CGPA</label>
+            <input type="number" step="0.01" min="0" max="10" id="cgpa" name="cgpa" class="form-control" placeholder="e.g. 8.75">
+          </div>
+        <% } %>
       </div>
 
-      <!-- Qualitative Questions -->
       <div class="form-group">
-        <label for="skills">Skills & Technical Competencies *</label>
-        <textarea id="skills" name="skills" class="form-control" placeholder="List your key skills, programming languages, design tools, management experience (e.g. JavaScript, C++, Python, UI/UX, Event Management)..." required></textarea>
+        <label for="skills">Interests & Relevant Experience<% if (recruitmentRoles.length > 0) { %> *<% } %></label>
+        <textarea id="skills" name="skills" class="form-control" placeholder="Share any interests or experience related to this club..." <%= recruitmentRoles.length > 0 ? 'required' : '' %>></textarea>
       </div>
 
       <div class="form-group">
@@ -91,13 +97,15 @@
         <textarea id="whyJoin" name="whyJoin" class="form-control" placeholder="Explain your motivation, what you hope to learn, and how you will contribute..." required></textarea>
       </div>
 
-      <div class="form-group">
-        <label for="portfolioLink">Portfolio / GitHub / LinkedIn / Drive Link (Optional)</label>
-        <input type="url" id="portfolioLink" name="portfolioLink" class="form-control" placeholder="https://github.com/your-username or personal link">
-      </div>
+      <% if (recruitmentRoles.length > 0) { %>
+        <div class="form-group">
+          <label for="portfolioLink">Portfolio / GitHub / LinkedIn / Drive Link (Optional)</label>
+          <input type="url" id="portfolioLink" name="portfolioLink" class="form-control" placeholder="https://github.com/your-username or personal link">
+        </div>
+      <% } %>
 
       <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
-        Submit Recruitment Application &rarr;
+        <%= recruitmentRoles.length ? 'Submit Recruitment Application' : 'Submit Membership Application' %> &rarr;
       </button>
     </form>
   </div>

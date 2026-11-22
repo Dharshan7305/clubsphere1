@@ -53,14 +53,14 @@
       <div class="card" style="margin-bottom: 2rem;">
         <div class="card-header">
           <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--primary);">
-            📋 My Recruitment Applications
+            📋 My Club Applications
           </h3>
           <a href="/student/applications" class="btn btn-sm btn-outline">View Details &rarr;</a>
         </div>
         <div class="card-body" style="padding: 0;">
           <% if (applications.length === 0) { %>
             <div style="padding: 2rem; text-align: center; color: var(--text-muted);">
-              You haven't applied to any clubs yet. Browse open recruitments below!
+              You haven't applied to any clubs yet. Browse clubs with membership open below!
             </div>
           <% } else { %>
             <div class="table-responsive" style="border: none; box-shadow: none;">
@@ -68,7 +68,7 @@
                 <thead>
                   <tr>
                     <th>Club</th>
-                    <th>Role</th>
+                    <th>Membership / Role</th>
                     <th>Status</th>
                     <th>Date</th>
                   </tr>

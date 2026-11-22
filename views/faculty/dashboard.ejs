@@ -70,14 +70,18 @@
             </div>
 
             <div style="margin: 0.85rem 0;">
-              <strong style="font-size: 0.825rem; color: var(--text-muted); text-transform: uppercase;">Proposed Roles:</strong>
-              <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 0.35rem;">
-                <% rec.roles.forEach(role => { %>
-                  <span style="background: #f1f5f9; padding: 3px 8px; border-radius: 4px; font-size: 0.825rem;">
-                    <%= role.roleName %> (<%= role.vacancies %> seats)
-                  </span>
-                <% }) %>
-              </div>
+              <% if (rec.roles && rec.roles.length > 0) { %>
+                <strong style="font-size: 0.825rem; color: var(--text-muted); text-transform: uppercase;">Proposed Roles:</strong>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 0.35rem;">
+                  <% rec.roles.forEach(role => { %>
+                    <span style="background: #f1f5f9; padding: 3px 8px; border-radius: 4px; font-size: 0.825rem;">
+                      <%= role.roleName %> (<%= role.vacancies %> seats)
+                    </span>
+                  <% }) %>
+                </div>
+              <% } else { %>
+                <span style="font-size: 0.825rem; color: var(--text-muted);">General club membership (no specific roles).</span>
+              <% } %>
             </div>
 
             <!-- Approval / Rejection Form -->

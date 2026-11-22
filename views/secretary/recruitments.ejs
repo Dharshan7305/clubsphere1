@@ -39,16 +39,20 @@
           </div>
 
           <div class="card-body">
-            <div style="margin-bottom: 1rem;">
-              <strong style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">Roles & Vacancies:</strong>
-              <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 0.4rem;">
-                <% rec.roles.forEach(role => { %>
-                  <span style="background: #f1f5f9; border: 1px solid var(--border-color); font-size: 0.825rem; padding: 4px 10px; border-radius: 4px;">
-                    <strong><%= role.roleName %></strong> (<%= role.vacancies %> seats)
-                  </span>
-                <% }) %>
+            <% if (rec.roles && rec.roles.length > 0) { %>
+              <div style="margin-bottom: 1rem;">
+                <strong style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">Roles & Vacancies:</strong>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 0.4rem;">
+                  <% rec.roles.forEach(role => { %>
+                    <span style="background: #f1f5f9; border: 1px solid var(--border-color); font-size: 0.825rem; padding: 4px 10px; border-radius: 4px;">
+                      <strong><%= role.roleName %></strong> (<%= role.vacancies %> seats)
+                    </span>
+                  <% }) %>
+                </div>
               </div>
-            </div>
+            <% } else { %>
+              <p style="margin-bottom: 1rem; color: var(--text-muted);">General club membership — no specific roles.</p>
+            <% } %>
 
             <!-- Faculty Approval Box -->
             <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0.75rem 1rem; font-size: 0.85rem;">
@@ -110,9 +114,9 @@
           </div>
 
           <div class="form-group">
-            <label for="rolesText">Roles Available (Format: Role Name | Vacancies | Requirements)</label>
-            <textarea id="rolesText" name="rolesText" class="form-control" style="min-height: 90px;" placeholder="Full-Stack Web Developer | 3 | Node.js, MongoDB knowledge&#10;UI/UX Designer | 2 | Figma and creative skills&#10;Event Coordinator | 4 | Good communication & management"></textarea>
-            <small class="form-text">Enter one role per line separated by pipe (|)</small>
+            <label for="rolesText">Optional roles (leave blank for general club membership)</label>
+            <textarea id="rolesText" name="rolesText" class="form-control" style="min-height: 90px;" placeholder="Enter one role per line: Role Name | Vacancies | Requirements"></textarea>
+            <small class="form-text">Leave this blank if students are applying to join the club without selecting a role.</small>
           </div>
 
           <div class="form-group">

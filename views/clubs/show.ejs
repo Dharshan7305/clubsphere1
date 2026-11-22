@@ -41,9 +41,9 @@
             <span class="club-hero-code-badge"><%= club.code %></span>
           <% } %>
           <% if (club.recruitmentStatus === 'Open') { %>
-            <span class="club-hero-status-badge badge-status-open">● Recruitment Open</span>
+            <span class="club-hero-status-badge badge-status-open">● Membership Open</span>
           <% } else { %>
-            <span class="club-hero-status-badge badge-status-closed">Recruitment Currently Closed</span>
+            <span class="club-hero-status-badge badge-status-closed">Membership Currently Closed</span>
           <% } %>
         </div>
 
@@ -170,18 +170,18 @@
               <span>Join This Club</span>
             </h2>
             <% if (club.recruitmentStatus === 'Open') { %>
-              <span class="join-status-pill pill-open">Recruitment Open</span>
+              <span class="join-status-pill pill-open">Membership Open</span>
             <% } else { %>
-              <span class="join-status-pill pill-closed">Recruitment Currently Closed</span>
+              <span class="join-status-pill pill-closed">Membership Currently Closed</span>
             <% } %>
           </div>
 
-          <!-- Recruitment Status Info Banner -->
+          <!-- Membership Status Info Banner -->
           <div class="join-status-banner">
             <div class="join-status-row">
-              <span class="join-status-label">Recruitment Status:</span>
+              <span class="join-status-label">Membership Status:</span>
               <span class="join-status-pill <%= club.recruitmentStatus === 'Open' ? 'pill-open' : 'pill-closed' %>">
-                <%= club.recruitmentStatus === 'Open' ? 'Currently Accepting Applications' : 'Recruitment Currently Closed' %>
+                <%= club.recruitmentStatus === 'Open' ? 'Currently Accepting Members' : 'Membership Currently Closed' %>
               </span>
             </div>
 
@@ -198,7 +198,7 @@
               </div>
             <% } else { %>
               <p class="join-status-desc">
-                Official club recruitment drives are announced at the start of each academic semester. Students interested in joining can submit an application below to be reviewed by the club committee.
+                Membership openings are announced by the club each semester. Submit an application below to join this club.
               </p>
             <% } %>
           </div>
@@ -327,13 +327,13 @@
               </div>
 
               <div class="form-group">
-                <label for="skills">Key Skills & Areas of Interest</label>
+                <label for="skills">Interests & Relevant Experience</label>
                 <input 
                   type="text" 
                   id="skills" 
                   name="skills" 
                   class="form-control-input" 
-                  placeholder="e.g. Public speaking, video editing, event coordination, coding"
+                  placeholder="Share any interests or experience related to this club"
                 >
               </div>
 

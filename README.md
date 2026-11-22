@@ -5,6 +5,7 @@ ClubSphere is a student club discovery and campus activities platform. Students 
 ## Features
 
 - Browse, search, and filter campus clubs.
+- Let each club secretary manage that club's member roster and assign club-specific Core Member roles.
 - Publish and manage recruitment drives with faculty approval.
 - Submit and review student applications.
 - Create campus events and manage registrations and attendance.
@@ -50,7 +51,13 @@ ClubSphere is a student club discovery and campus activities platform. Students 
 
 ## Sample data
 
-`npm run seed` creates sample clubs, events, recruitments, notifications, and role-based accounts. **Seeding deletes existing application data in the configured database before creating the samples.** Only run it against a disposable development database.
+`npm run seed` creates sample clubs, events, recruitments, notifications, and demo accounts. **Seeding deletes existing application data in the configured database before creating the samples.** Only run it against a disposable development database.
+
+`npm run migrate:club-demo-content` safely updates only the known old Tech Music and Tamil Mandram demo recruitments, events, applications, and notifications. It does not clear collections or alter unrelated records.
+
+### Student registration email
+
+New student registrations require a PSG Tech address in the format `YYccNNN@psgtech.ac.in`, for example `26mx105@psgtech.ac.in` (joining year, course code, and roll number). Seeded demo accounts remain available for login.
 
 ### Demo logins
 

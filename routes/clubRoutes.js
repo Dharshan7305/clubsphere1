@@ -188,7 +188,7 @@ router.get('/:id', async (req, res) => {
       if (user && user.savedClubs) {
         isSaved = user.savedClubs.some(id => id.toString() === club._id.toString());
       }
-      if (req.session.user.role === 'student') {
+      if (['student', 'core'].includes(req.session.user.role)) {
         isMember = (club.members && club.members.some(id => id.toString() === req.session.user._id.toString()))
           || Boolean(await Application.exists({
             club: club._id,
@@ -241,7 +241,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // POST /clubs/:id/join - Request club membership
-router.post('/:id/join', ensureAuthenticated, authorizeRoles('student'), async (req, res) => {
+router.post('/:id/join', ensureAuthenticated, authorizeRoles('student', 'core'), async (req, res) => {
   try {
     let club = null;
     if (mongoose.Types.ObjectId.isValid(req.params.id)) {
@@ -321,7 +321,7 @@ router.post('/:id/join', ensureAuthenticated, authorizeRoles('student'), async (
 });
 
 // POST /clubs/:id/save - Toggle Save / Bookmark Club
-router.post('/:id/save', ensureAuthenticated, authorizeRoles('student'), async (req, res) => {
+router.post('/:id/save', ensureAuthenticated, authorizeRoles('student', 'core'), async (req, res) => {
   const referer = req.header('Referer') || '/clubs';
 
   try {
@@ -394,7 +394,7 @@ router.post('/:id/apply', async (req, res) => {
     return res.redirect('/auth/login?returnTo=/clubs/' + req.params.id);
   }
 
-  if (req.session.user.role !== 'student') {
+  if (!['student', 'core'].includes(req.session.user.role)) {
     req.flash('error_msg', 'Only student accounts can apply to join a club.');
     return res.redirect('/clubs/' + req.params.id);
   }
@@ -489,7 +489,7 @@ router.post('/:id/apply', async (req, res) => {
       recruitment: activeRecruitment._id,
       club: club._id,
       student: studentUser._id,
-      appliedRole: (activeRecruitment.roles && activeRecruitment.roles[0] && activeRecruitment.roles[0].roleName) || 'General Member',
+      appliedRole: (activeRecruitment.roles && activeRecruitment.roles[0] && activeRecruitment.roles[0].roleName) || 'Club Member',
       studentName: studentName.trim(),
       rollNo: rollNo.trim(),
       department: department || studentUser.department || 'General',

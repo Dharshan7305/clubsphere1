@@ -13,14 +13,14 @@
         📅 Create Campus Event for <%= club.name %>
       </h1>
       <p style="color: var(--text-muted); font-size: 0.9rem;">
-        Publish an upcoming workshop, hackathon, or competition for college students
+        Create an event that fits your club's activities and interests.
       </p>
     </div>
 
     <form action="/secretary/events" method="POST">
       <div class="form-group">
         <label for="title">Event Title *</label>
-        <input type="text" id="title" name="title" class="form-control" placeholder="e.g. CodeStorm 2026: 24-Hour Hackathon" required>
+        <input type="text" id="title" name="title" class="form-control" placeholder="e.g. Annual Club Showcase" required>
       </div>
 
       <div class="form-row">
