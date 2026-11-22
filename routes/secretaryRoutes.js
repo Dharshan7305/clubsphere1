@@ -8,6 +8,7 @@ const Membership = require('../models/Membership');
 const Event = require('../models/Event');
 const Notification = require('../models/Notification');
 const NotificationService = require('../services/notificationService');
+const { findOtherCoreClub } = require('../services/coreMembershipService');
 const User = require('../models/User');
 const { ensureAuthenticated, authorizeRoles } = require('../middleware/auth');
 
@@ -265,7 +266,7 @@ router.post('/members/:memberId/role', async (req, res) => {
 
     const { role } = req.body;
     if (!['member', 'core'].includes(role)) {
-      req.flash('error_msg', 'Choose either Normal Member or Core Member.');
+      req.flash('error_msg', 'Choose either Member or Core Member.');
       return res.redirect('/secretary/members');
     }
     if (!mongoose.Types.ObjectId.isValid(req.params.memberId)) {
@@ -305,14 +306,28 @@ router.post('/members/:memberId/role', async (req, res) => {
       && member.club.toString() === clubId;
     const isCoreMember = Boolean(currentCoreEntry || legacyCoreAssignment);
 
-    if (role === 'core' && !isCoreMember) {
-      currentClub.coreTeam.push({
-        name: member.name,
-        designation: 'Core Member',
-        rollNo: member.rollNo || '',
-        user: member._id
-      });
-      await currentClub.save();
+    if (role === 'core') {
+      const otherCoreClub = await findOtherCoreClub(member, currentClub._id);
+      if (otherCoreClub) {
+        const assignedClubLabel = otherCoreClub.name
+          ? `of ${otherCoreClub.name}`
+          : 'in another club';
+        req.flash(
+          'error_msg',
+          `${member.name} is already a Core Member ${assignedClubLabel}. A student can only be a Core Member in one club at a time.`
+        );
+        return res.redirect('/secretary/members');
+      }
+
+      if (!isCoreMember) {
+        currentClub.coreTeam.push({
+          name: member.name,
+          designation: 'Core Member',
+          rollNo: member.rollNo || '',
+          user: member._id
+        });
+        await currentClub.save();
+      }
     } else if (role === 'member' && isCoreMember) {
       currentClub.coreTeam = currentClub.coreTeam.filter(
         entry => !entry.user || entry.user.toString() !== memberId
@@ -340,7 +355,7 @@ router.post('/members/:memberId/role', async (req, res) => {
 
     req.flash(
       'success_msg',
-      `${member.name} is now a ${role === 'core' ? 'Core Member' : 'Normal Member'} of ${currentClub.name}.`
+      `${member.name} is now a ${role === 'core' ? 'Core Member' : 'Member'} of ${currentClub.name}.`
     );
     res.redirect('/secretary/members');
   } catch (error) {

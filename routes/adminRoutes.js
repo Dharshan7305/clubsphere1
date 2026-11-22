@@ -6,6 +6,7 @@ const Recruitment = require('../models/Recruitment');
 const Application = require('../models/Application');
 const Event = require('../models/Event');
 const NotificationService = require('../services/notificationService');
+const { findOtherCoreClub } = require('../services/coreMembershipService');
 const { ensureAuthenticated, authorizeRoles } = require('../middleware/auth');
 
 // Protect all admin routes
@@ -203,6 +204,31 @@ router.post('/users/:id/role', async (req, res) => {
     }
 
     let assignedClub = null;
+    if (role === 'core') {
+      if (!clubId) {
+        req.flash('error_msg', 'Select a club when assigning a core member.');
+        return res.redirect('/admin/users');
+      }
+
+      assignedClub = await Club.findById(clubId);
+      if (!assignedClub) {
+        req.flash('error_msg', 'Selected club was not found.');
+        return res.redirect('/admin/users');
+      }
+
+      const otherCoreClub = await findOtherCoreClub(user, assignedClub._id);
+      if (otherCoreClub) {
+        const assignedClubLabel = otherCoreClub.name
+          ? `of ${otherCoreClub.name}`
+          : 'in another club';
+        req.flash(
+          'error_msg',
+          `${user.name} is already a Core Member ${assignedClubLabel}. A student can only be a Core Member in one club at a time.`
+        );
+        return res.redirect('/admin/users');
+      }
+    }
+
     if (role === 'secretary') {
       if (!clubId) {
         req.flash('error_msg', 'Select a club when assigning a secretary.');

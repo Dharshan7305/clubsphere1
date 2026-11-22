@@ -5,7 +5,7 @@ ClubSphere is a student club discovery and campus activities platform. Students 
 ## Features
 
 - Browse, search, and filter campus clubs.
-- Let each club secretary manage that club's member roster and assign club-specific Core Member roles.
+- Let each club secretary manage that club's member roster and assign club-specific Core Member roles, with each student limited to one club's core team.
 - Publish and manage recruitment drives with faculty approval.
 - Submit and review student applications.
 - Create campus events and manage registrations and attendance.

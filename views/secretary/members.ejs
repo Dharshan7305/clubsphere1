@@ -23,7 +23,7 @@
     </div>
     <% if (members.length === 0) { %>
       <div class="card-body" style="text-align: center; padding: 2rem 1rem;">
-        <p style="color: var(--text-muted);">Approved normal members and core members assigned to this club will appear here.</p>
+        <p style="color: var(--text-muted);">Approved members and core members assigned to this club will appear here.</p>
       </div>
     <% } else { %>
       <div class="table-responsive" style="border: none; box-shadow: none;">
@@ -47,7 +47,7 @@
                 <td><%= member.department || '—' %> · Year <%= member.year || '—' %></td>
                 <td>
                   <span class="badge <%= isCoreMember ? 'badge-category' : 'badge-submitted' %>">
-                    <%= isCoreMember ? 'Core Member' : 'Normal Member' %>
+                    <%= isCoreMember ? 'Core Member' : 'Member' %>
                   </span>
                 </td>
                 <td>
@@ -57,7 +57,7 @@
                         <input type="hidden" name="clubId" value="<%= club._id %>">
                       <% } %>
                       <select name="role" class="form-control" aria-label="Role for <%= member.name %>" required>
-                        <option value="member" <%= isCoreMember ? '' : 'selected' %>>Normal Member</option>
+                        <option value="member" <%= isCoreMember ? '' : 'selected' %>>Member</option>
                         <option value="core" <%= isCoreMember ? 'selected' : '' %>>Core Member</option>
                       </select>
                       <button type="submit" class="btn btn-sm btn-primary">Save</button>
