@@ -367,11 +367,4 @@ async function seedDatabase() {
     console.log('Club secretary accounts: secretary.<club-code>@college.ac.in / password123');
     console.log('====================================================');
 
-    process.exit(0);
-  } catch (error) {
-    console.error('[Seed Error]:', error);
-    process.exit(1);
-  }
-}
 
-seedDatabase();
