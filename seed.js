@@ -32,7 +32,7 @@ async function seedDatabase() {
     const salt = await bcrypt.genSalt(10);
     const commonHashedPassword = await bcrypt.hash('password123', salt);
 
-    // 1. Create Base Users for All 5 Roles
+    // 1. Create default platform accounts.
     const adminUser = await User.create({
       name: 'Dr. Dean Student Affairs',
       email: 'admin@college.ac.in',
@@ -42,14 +42,7 @@ async function seedDatabase() {
       phone: '9842100001'
     });
 
-    const facultyUser = await User.create({
-      name: 'Dr. R. Venkatesh',
-      email: 'faculty@college.ac.in',
-      password: 'password123',
-      role: 'faculty',
-      department: 'Computer Science & Engineering',
-      phone: '9842100002'
-    });
+    let facultyUser = null;
 
     const coreUser = await User.create({
       name: 'Kavitha M',
@@ -73,7 +66,7 @@ async function seedDatabase() {
       phone: '9842100005'
     });
 
-    console.log('[Seed] Created default student, core, faculty, and admin users.');
+    console.log('[Seed] Created default student, core, and admin users.');
 
     // 2. Create All 30 Official College Clubs
     const clubsData = clubs30.map((c, idx) => {
@@ -100,6 +93,32 @@ async function seedDatabase() {
 
     const createdClubs = await Club.insertMany(clubsData);
     console.log(`[Seed] Created ${createdClubs.length} college clubs.`);
+
+    const facultyUsers = [];
+    for (const club of createdClubs) {
+      const advisor = club.facultyAdvisor || {};
+      const facultyEmail = club.code === 'TM'
+        ? 'faculty@college.ac.in'
+        : `faculty.${club.code.toLowerCase()}@college.ac.in`;
+      const advisorUser = await User.create({
+        name: advisor.name || `${club.name} Faculty Advisor`,
+        email: facultyEmail,
+        password: 'password123',
+        role: 'faculty',
+        department: advisor.department || 'Faculty',
+        club: club._id
+      });
+
+      club.facultyAdvisor.user = advisorUser._id;
+      await club.save();
+      facultyUsers.push(advisorUser);
+      if (club.code === 'TM') facultyUser = advisorUser;
+    }
+
+    if (!facultyUser) {
+      throw new Error('Tech Music faculty advisor account was not created.');
+    }
+    console.log(`[Seed] Created and assigned ${facultyUsers.length} club faculty advisors.`);
 
     // Give each club its own secretary account.
     const secretaryUsers = [];
@@ -146,9 +165,6 @@ async function seedDatabase() {
 
     coreUser.club = techMusicClub._id;
     await coreUser.save();
-
-    facultyUser.club = techMusicClub._id;
-    await facultyUser.save();
 
     // 3. Create Recruitment Drives
     const techMusicRecruitment = await Recruitment.create({
@@ -337,6 +353,7 @@ async function seedDatabase() {
     console.log('2. Core Member:     core@college.ac.in      / password123');
     console.log('3. Faculty Advisor: faculty@college.ac.in   / password123');
     console.log('4. Admin:           admin@college.ac.in     / password123');
+    console.log('Other faculty advisors: faculty.<club-code>@college.ac.in / password123');
     console.log('Club secretary accounts: secretary.<club-code>@college.ac.in / password123');
     console.log('====================================================');
 

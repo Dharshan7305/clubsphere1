@@ -8,7 +8,8 @@
     "dev": "nodemon server.js",
     "start:navigation": "node navigation/app.js",
     "seed": "node seed.js",
-    "migrate:club-demo-content": "node scripts/migrateClubDemoContent.js"
+    "migrate:club-demo-content": "node scripts/migrateClubDemoContent.js",
+    "migrate:faculty-advisors": "node scripts/migrateFacultyAdvisorAccounts.js"
   },
   "keywords": [
     "clubsphere",

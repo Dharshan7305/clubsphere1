@@ -118,4 +118,12 @@ ClubSchema.index(
   }
 );
 
+ClubSchema.index(
+  { 'facultyAdvisor.user': 1 },
+  {
+    unique: true,
+    partialFilterExpression: { 'facultyAdvisor.user': { $type: 'objectId' } }
+  }
+);
+
 module.exports = mongoose.model('Club', ClubSchema);

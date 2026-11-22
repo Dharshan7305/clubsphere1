@@ -55,6 +55,8 @@ ClubSphere is a student club discovery and campus activities platform. Students 
 
 `npm run migrate:club-demo-content` safely updates only the known old Tech Music and Tamil Mandram demo recruitments, events, applications, and notifications. It does not clear collections or alter unrelated records.
 
+`npm run migrate:faculty-advisors` creates demo faculty accounts for clubs that do not yet have one and links each account to a single club. It does not clear existing data.
+
 ### Student registration email
 
 New student registrations require a PSG Tech address in the format `YYccNNN@psgtech.ac.in`, for example `26mx105@psgtech.ac.in` (joining year, course code, and roll number). Seeded demo accounts remain available for login.
@@ -67,10 +69,11 @@ These accounts are created by `npm run seed`. Use the email address as the usern
 |---|---|---|
 | Student | `student@college.ac.in` | `password123` |
 | Core Member | `core@college.ac.in` | `password123` |
-| Faculty Advisor | `faculty@college.ac.in` | `password123` |
+| Tech Music Faculty Advisor | `faculty@college.ac.in` | `password123` |
 | Admin | `admin@college.ac.in` | `password123` |
 
 Each club has its own secretary account. The secretary username is `secretary.<club-code>@college.ac.in`, where `<club-code>` is lowercase; all secretary passwords are `password123`.
+Each club also has its own faculty advisor account. Tech Music uses `faculty@college.ac.in`; other clubs use `faculty.<club-code>@college.ac.in`. All demo faculty passwords are `password123`.
 
 | Club | Username | Password |
 |---|---|---|

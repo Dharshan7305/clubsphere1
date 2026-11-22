@@ -229,6 +229,58 @@ router.post('/users/:id/role', async (req, res) => {
       }
     }
 
+    if (role === 'faculty') {
+      if (!clubId) {
+        req.flash('error_msg', 'Select a club when assigning a faculty advisor.');
+        return res.redirect('/admin/users');
+      }
+
+      assignedClub = await Club.findById(clubId);
+      if (!assignedClub) {
+        req.flash('error_msg', 'Selected club was not found.');
+        return res.redirect('/admin/users');
+      }
+
+      const targetAdvisorId = assignedClub.facultyAdvisor
+        && assignedClub.facultyAdvisor.user;
+      const otherAdvisorClub = await Club.findOne({
+        _id: { $ne: assignedClub._id },
+        'facultyAdvisor.user': user._id
+      }).select('name').lean();
+      const legacyAdvisorClubId = user.role === 'faculty'
+        && user.club
+        && user.club.toString() !== assignedClub._id.toString()
+        ? user.club
+        : null;
+      const legacyAdvisorClub = legacyAdvisorClubId
+        ? await Club.findById(legacyAdvisorClubId).select('name').lean()
+        : null;
+      const otherFacultyUser = await User.findOne({
+        role: 'faculty',
+        club: assignedClub._id,
+        _id: { $ne: user._id }
+      }).select('_id').lean();
+
+      if ((targetAdvisorId && targetAdvisorId.toString() !== user._id.toString())
+        || otherFacultyUser) {
+        req.flash('error_msg', `${assignedClub.name} already has a faculty advisor. Reassign or remove the current advisor before assigning another.`);
+        return res.redirect('/admin/users');
+      }
+
+      const existingAdvisorClub = otherAdvisorClub
+        || (legacyAdvisorClubId ? legacyAdvisorClub || { name: null } : null);
+      if (existingAdvisorClub) {
+        const clubLabel = existingAdvisorClub.name
+          ? `to ${existingAdvisorClub.name}`
+          : 'to another club';
+        req.flash(
+          'error_msg',
+          `${user.name} is already assigned as a faculty advisor ${clubLabel}. Each faculty advisor can be assigned to only one club.`
+        );
+        return res.redirect('/admin/users');
+      }
+    }
+
     if (role === 'secretary') {
       if (!clubId) {
         req.flash('error_msg', 'Select a club when assigning a secretary.');
@@ -268,6 +320,14 @@ router.post('/users/:id/role', async (req, res) => {
       }
     }
 
+    const previousFacultyClubs = await Club.find({ 'facultyAdvisor.user': user._id });
+    for (const previousClub of previousFacultyClubs) {
+      if (role !== 'faculty' || previousClub._id.toString() !== clubId) {
+        previousClub.facultyAdvisor.user = null;
+        await previousClub.save();
+      }
+    }
+
     // If assigned to club as secretary, link into Club record
     if (role === 'secretary' && assignedClub) {
       assignedClub.secretary.name = user.name;
@@ -281,13 +341,12 @@ router.post('/users/:id/role', async (req, res) => {
     user.club = clubId || null;
     await user.save();
 
-    // If assigned as faculty, link into Club record
-    if (role === 'faculty' && clubId) {
-      await Club.findByIdAndUpdate(clubId, {
-        'facultyAdvisor.name': user.name,
-        'facultyAdvisor.email': user.email,
-        'facultyAdvisor.user': user._id
-      });
+    // If assigned as faculty, link the account to its single club.
+    if (role === 'faculty' && assignedClub) {
+      assignedClub.facultyAdvisor.name = user.name;
+      assignedClub.facultyAdvisor.email = user.email;
+      assignedClub.facultyAdvisor.user = user._id;
+      await assignedClub.save();
     }
 
     req.flash('success_msg', `Role for ${user.name} updated to ${role}.`);

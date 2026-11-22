@@ -16,13 +16,11 @@ async function getFacultyClub(req) {
     if (clubId) return await Club.findById(clubId);
     return await Club.findOne();
   }
-  return await Club.findOne({
-    $or: [
-      { _id: req.session.user.club?._id },
-      { 'facultyAdvisor.user': req.session.user._id },
-      { 'facultyAdvisor.email': req.session.user.email }
-    ]
-  });
+  const userClubId = req.session.user.club && req.session.user.club._id
+    ? req.session.user.club._id
+    : req.session.user.club;
+  if (userClubId) return await Club.findById(userClubId);
+  return await Club.findOne({ 'facultyAdvisor.user': req.session.user._id });
 }
 
 // GET /faculty/dashboard - Faculty Advisor Module
