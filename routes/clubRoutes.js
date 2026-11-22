@@ -169,7 +169,8 @@ router.get('/:id', async (req, res) => {
     if (mongoose.Types.ObjectId.isValid(club._id)) {
       recruitments = await Recruitment.find({
         club: club._id,
-        status: 'Open'
+        status: 'Open',
+        deadline: { $gte: new Date() }
       }).sort({ deadline: 1 });
 
       upcomingEvents = await Event.find({
@@ -212,7 +213,8 @@ router.get('/:id', async (req, res) => {
     }
 
     // Only mark recruitment open if there is an active drive
-    if (recruitments && recruitments.length > 0) {
+    const isRecruitmentOpen = recruitments.length > 0;
+    if (isRecruitmentOpen) {
       club.recruitmentStatus = 'Open';
     } else {
       club.recruitmentStatus = null;
@@ -222,6 +224,7 @@ router.get('/:id', async (req, res) => {
       title: `${club.name} - Club Details | ClubSphere`,
       club,
       recruitments,
+      isRecruitmentOpen,
       upcomingEvents,
       isMember,
       membershipRequest,
@@ -240,26 +243,42 @@ router.get('/:id', async (req, res) => {
 // POST /clubs/:id/join - Request club membership
 router.post('/:id/join', ensureAuthenticated, authorizeRoles('student'), async (req, res) => {
   try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-      req.flash('success_msg', 'Membership request submitted successfully for review!');
-      return res.redirect('/clubs/' + req.params.id);
+    let club = null;
+    if (mongoose.Types.ObjectId.isValid(req.params.id)) {
+      club = await Club.findById(req.params.id);
+    } else {
+      const masterClub = clubs30.find(c => c.code.toLowerCase() === req.params.id.toLowerCase());
+      if (masterClub) {
+        club = await Club.findOne({ code: masterClub.code });
+      }
     }
 
-    const club = await Club.findById(req.params.id);
     if (!club) {
       req.flash('error_msg', 'Club not found.');
       return res.redirect('/clubs');
     }
 
+    const activeRecruitment = await Recruitment.findOne({
+      club: club._id,
+      status: 'Open',
+      deadline: { $gte: new Date() }
+    });
+    if (!activeRecruitment) {
+      req.flash('error_msg', 'Recruitment for this club is currently closed.');
+      return res.redirect(`/clubs/${club._id}`);
+    }
+
+    const studentId = req.session.user._id;
+
     // Check if already a member or pending
-    if (club.members.includes(req.user._id)) {
+    if (club.members.some(memberId => memberId.toString() === studentId.toString())) {
       req.flash('error_msg', 'You are already an active member of this club.');
       return res.redirect(`/clubs/${club._id}`);
     }
 
     const existingReq = await Membership.findOne({
       club: club._id,
-      student: req.user._id
+      student: studentId
     });
 
     if (existingReq && existingReq.status === 'Pending') {
@@ -269,14 +288,14 @@ router.post('/:id/join', ensureAuthenticated, authorizeRoles('student'), async (
 
     if (existingReq && existingReq.status === 'Rejected') {
       existingReq.status = 'Pending';
-      existingReq.reason = req.body.reason || 'Re-applied for general membership';
-      existingReq.updatedAt = new Date();
+      existingReq.message = req.body.reason || 'Re-applied for club membership';
+      existingReq.createdAt = new Date();
       await existingReq.save();
     } else {
       await Membership.create({
         club: club._id,
-        student: req.user._id,
-        reason: req.body.reason || 'General student membership request',
+        student: studentId,
+        message: req.body.reason || 'General student membership request',
         status: 'Pending'
       });
     }
@@ -285,10 +304,10 @@ router.post('/:id/join', ensureAuthenticated, authorizeRoles('student'), async (
     if (club.secretary && club.secretary.user) {
       await Notification.create({
         recipient: club.secretary.user,
-        sender: req.user._id,
         title: 'New Club Membership Request',
-        message: `${req.user.name} (${req.user.rollNo || req.user.email}) requested to join ${club.name}.`,
-        link: '/secretary/applications'
+        message: `${req.session.user.name} (${req.session.user.rollNo || req.session.user.email}) requested to join ${club.name}.`,
+        type: 'application',
+        relatedLink: '/secretary/members'
       });
     }
 
@@ -375,17 +394,16 @@ router.post('/:id/apply', async (req, res) => {
     return res.redirect('/auth/login?returnTo=/clubs/' + req.params.id);
   }
 
+  if (req.session.user.role !== 'student') {
+    req.flash('error_msg', 'Only student accounts can apply to join a club.');
+    return res.redirect('/clubs/' + req.params.id);
+  }
+
   try {
     const studentUser = req.session.user;
-    const { studentName, rollNo, email, whyJoin, skills, department, year } = req.body;
+    const { studentName, rollNo, email, whyJoin, skills, department, year, phone } = req.body;
 
-    // 2. Validate required fields
-    if (!studentName || !rollNo || !email || !whyJoin || !whyJoin.trim()) {
-      req.flash('error_msg', 'Please fill in all required fields (Name, Roll Number, Email, and Reason to Join).');
-      return res.redirect('/clubs/' + req.params.id);
-    }
-
-    // 3. Resolve club
+    // Resolve club
     let club = null;
     if (mongoose.Types.ObjectId.isValid(req.params.id)) {
       club = await Club.findById(req.params.id);
@@ -425,13 +443,30 @@ router.post('/:id/apply', async (req, res) => {
       return res.redirect('/clubs');
     }
 
-    // 4. Check if student is already an active member
+    const activeRecruitment = await Recruitment.findOne({
+      club: club._id,
+      status: 'Open',
+      deadline: { $gte: new Date() }
+    });
+
+    if (!activeRecruitment) {
+      req.flash('error_msg', 'Recruitment for this club is currently closed.');
+      return res.redirect('/clubs/' + req.params.id);
+    }
+
+    // Validate required fields after confirming recruitment is open.
+    if (!studentName || !rollNo || !email || !whyJoin || !whyJoin.trim()) {
+      req.flash('error_msg', 'Please fill in all required fields (Name, Roll Number, Email, and Reason to Join).');
+      return res.redirect('/clubs/' + req.params.id);
+    }
+
+    // Check if student is already an active member
     if (club.members && club.members.some(m => m.toString() === studentUser._id.toString())) {
       req.flash('error_msg', 'You are already an active member of ' + club.name + '.');
       return res.redirect('/clubs/' + req.params.id);
     }
 
-    // 5. Check duplicate applications
+    // Check duplicate applications
     const existingMembership = await Membership.findOne({
       club: club._id,
       student: studentUser._id
@@ -441,43 +476,34 @@ router.post('/:id/apply', async (req, res) => {
       return res.redirect('/clubs/' + req.params.id);
     }
 
-    // 6. Connect with active recruitment drive if one exists
-    const activeRecruitment = await Recruitment.findOne({
-      club: club._id,
-      status: 'Open',
-      deadline: { $gte: new Date() }
+    const existingApp = await Application.findOne({
+      recruitment: activeRecruitment._id,
+      student: studentUser._id
     });
-
-    if (activeRecruitment) {
-      const existingApp = await Application.findOne({
-        recruitment: activeRecruitment._id,
-        student: studentUser._id
-      });
-      if (existingApp) {
-        req.flash('error_msg', 'You have already submitted an application for the active recruitment drive in ' + club.name + '.');
-        return res.redirect('/clubs/' + req.params.id);
-      }
-
-      await Application.create({
-        recruitment: activeRecruitment._id,
-        club: club._id,
-        student: studentUser._id,
-        appliedRole: (activeRecruitment.roles && activeRecruitment.roles[0] && activeRecruitment.roles[0].roleName) || 'General Member',
-        studentName: studentName.trim(),
-        rollNo: rollNo.trim(),
-        department: department || studentUser.department || 'General',
-        year: year ? parseInt(year) : (studentUser.year || 1),
-        email: email.trim(),
-        phone: studentUser.phone || '',
-        cgpa: 8.0,
-        skills: skills ? skills.trim() : 'General member',
-        whyJoin: whyJoin.trim(),
-        status: 'Submitted',
-        submittedAt: new Date()
-      });
+    if (existingApp) {
+      req.flash('error_msg', 'You have already submitted an application for the active recruitment drive in ' + club.name + '.');
+      return res.redirect('/clubs/' + req.params.id);
     }
 
-    // 7. Create or update Membership record
+    await Application.create({
+      recruitment: activeRecruitment._id,
+      club: club._id,
+      student: studentUser._id,
+      appliedRole: (activeRecruitment.roles && activeRecruitment.roles[0] && activeRecruitment.roles[0].roleName) || 'General Member',
+      studentName: studentName.trim(),
+      rollNo: rollNo.trim(),
+      department: department || studentUser.department || 'General',
+      year: year ? parseInt(year) : (studentUser.year || 1),
+      email: email.trim(),
+      phone: (phone && phone.trim()) || (studentUser && studentUser.phone) || 'Not provided',
+      cgpa: 8.0,
+      skills: skills ? skills.trim() : 'General member',
+      whyJoin: whyJoin.trim(),
+      status: 'Submitted',
+      submittedAt: new Date()
+    });
+
+    // Create or update Membership record
     if (existingMembership) {
       existingMembership.status = 'Pending';
       existingMembership.message = whyJoin.trim();

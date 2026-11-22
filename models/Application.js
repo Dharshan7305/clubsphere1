@@ -42,7 +42,7 @@ const ApplicationSchema = new mongoose.Schema({
   },
   phone: {
     type: String,
-    required: true
+    default: 'Not provided'
   },
   cgpa: {
     type: Number,

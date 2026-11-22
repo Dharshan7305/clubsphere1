@@ -77,7 +77,7 @@ router.get('/dashboard', async (req, res) => {
 router.get('/recruitments/:id/apply', async (req, res) => {
   try {
     const recruitment = await Recruitment.findById(req.params.id).populate('club');
-    if (!recruitment || recruitment.status !== 'Open') {
+    if (!recruitment || recruitment.status !== 'Open' || recruitment.deadline < new Date()) {
       req.flash('error_msg', 'This recruitment drive is not currently accepting applications.');
       return res.redirect('/clubs');
     }
@@ -112,7 +112,7 @@ router.get('/recruitments/:id/apply', async (req, res) => {
 router.post('/recruitments/:id/apply', async (req, res) => {
   try {
     const recruitment = await Recruitment.findById(req.params.id).populate('club');
-    if (!recruitment || recruitment.status !== 'Open') {
+    if (!recruitment || recruitment.status !== 'Open' || recruitment.deadline < new Date()) {
       req.flash('error_msg', 'Recruitment drive is no longer open.');
       return res.redirect('/clubs');
     }
@@ -155,7 +155,7 @@ router.post('/recruitments/:id/apply', async (req, res) => {
       department: department || req.session.user.department,
       year: parseInt(year, 10) || req.session.user.year,
       email: req.session.user.email,
-      phone: phone || req.session.user.phone,
+      phone: (phone && phone.trim()) || (req.session.user && req.session.user.phone) || 'Not provided',
       cgpa: parseFloat(cgpa) || 8.0,
       skills,
       priorExperience: priorExperience || 'None',
