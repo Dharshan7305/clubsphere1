@@ -22,32 +22,61 @@ ClubSphere is a student club discovery and campus activities platform. Students 
 
 ## Requirements
 
+- Git
 - Node.js and npm
 - MongoDB running locally, or a reachable hosted MongoDB database
 
-## Run locally
+## Clone and run locally
 
-1. Install dependencies:
+1. Clone the repository and enter the project folder:
+
+   ```powershell
+   git clone https://github.com/Dharshan7305/clubsphere1.git
+   Set-Location clubsphere1
+   ```
+
+2. Install dependencies:
 
    ```sh
    npm install
    ```
 
-2. Create a local environment file from the example:
+3. Create a local environment file from the example:
 
    ```powershell
    Copy-Item .env.example .env
    ```
 
-   Set `MONGO_URI` to your MongoDB connection string and replace `SESSION_SECRET` with a long, random value. Keep `.env` private; it is excluded from Git.
+   Make sure MongoDB is running. Set `MONGO_URI` to your MongoDB connection string and replace `SESSION_SECRET` with a long, random value. The example uses a local database named `clubsphere`. Keep `.env` private; it is excluded from Git.
 
-3. Start the server:
+4. (Optional) Create sample data:
+
+   ```sh
+   npm run seed
+   ```
+
+   Seeding deletes existing application data in the configured database. Only run it against a disposable development database.
+
+5. Start the server:
 
    ```sh
    npm start
    ```
 
-4. Open [http://localhost:3000](http://localhost:3000).
+6. Open [http://localhost:3000](http://localhost:3000).
+
+## Push changes to GitHub
+
+The clone configures the GitHub repository as the `origin` remote. To commit and push changes from the project folder, use:
+
+```sh
+git status
+git add <files-to-include>
+git commit -m "Describe your changes"
+git push origin main
+```
+
+If you are working on a separate branch, push it with `git push -u origin <branch-name>` and open a pull request. You need write access to push directly to this repository; otherwise, push to your fork.
 
 ## Sample data
 
