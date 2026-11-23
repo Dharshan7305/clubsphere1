@@ -687,6 +687,23 @@ router.get('/events/new', async (req, res) => {
 router.post('/events', async (req, res) => {
   try {
     const club = await getSecretaryClub(req);
+    if (!club) {
+      req.flash('error_msg', 'Club not found.');
+      return res.redirect('/secretary/dashboard');
+    }
+
+    let facultyUser = null;
+    if (club.facultyAdvisor && club.facultyAdvisor.user) {
+      facultyUser = await User.findOne({ _id: club.facultyAdvisor.user, role: 'faculty' });
+    }
+    if (!facultyUser && club.facultyAdvisor && club.facultyAdvisor.email) {
+      facultyUser = await User.findOne({ email: club.facultyAdvisor.email, role: 'faculty' });
+    }
+    if (!facultyUser) {
+      req.flash('error_msg', 'No faculty advisor account is assigned to this club.');
+      return res.redirect('/secretary/events/new');
+    }
+
     const { title, category, description, venue, eventDate, startTime, endTime, registrationDeadline, maxParticipants } = req.body;
 
     const event = new Event({
@@ -701,22 +718,28 @@ router.post('/events', async (req, res) => {
       registrationDeadline: new Date(registrationDeadline),
       maxParticipants: parseInt(maxParticipants, 10) || 100,
       createdBy: req.session.user._id,
-      status: 'Upcoming'
+      status: 'Upcoming',
+      approvalStatus: 'Pending Faculty',
+      isPublished: false,
+      facultyApproval: {
+        status: 'Pending',
+        remarks: 'Submitted for faculty advisor review'
+      }
     });
 
     await event.save();
 
-    // Broadcast notification to all students
     await Notification.create({
-      recipient: null, // broadcast
+      recipient: facultyUser._id,
       club: club._id,
-      title: `New Event Announced: ${title}`,
-      message: `${club.name} is hosting "${title}" on ${new Date(eventDate).toLocaleDateString()} at ${venue}. Registrations now open!`,
-      type: 'event',
-      relatedLink: `/events/${event._id}`
+      title: `Event Approval Needed: ${event.title}`,
+      message: `${club.secretary.name} has submitted "${event.title}" for your approval.`,
+      type: 'approval',
+      relatedId: event._id,
+      relatedLink: '/faculty/events'
     });
 
-    req.flash('success_msg', 'Event published successfully and broadcasted to students!');
+    req.flash('success_msg', 'Event proposal submitted for Faculty Advisor approval.');
     res.redirect('/secretary/events');
   } catch (error) {
     console.error('Create Event Error:', error);

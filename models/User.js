@@ -14,34 +14,6 @@ const UserSchema = new mongoose.Schema({
     lowercase: true,
     trim: true
   },
-  emailVerified: {
-    type: Boolean,
-    default: true
-  },
-  emailOtpHash: {
-    type: String,
-    select: false
-  },
-  emailOtpExpiresAt: {
-    type: Date,
-    default: null
-  },
-  emailOtpAttempts: {
-    type: Number,
-    default: 0
-  },
-  emailOtpSentAt: {
-    type: Date,
-    default: null
-  },
-  emailOtpWindowStartedAt: {
-    type: Date,
-    default: null
-  },
-  emailOtpResends: {
-    type: Number,
-    default: 0
-  },
   password: {
     type: String,
     required: true

@@ -6,7 +6,6 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "start:navigation": "node navigation/app.js",
     "seed": "node seed.js",
     "migrate:club-demo-content": "node scripts/migrateClubDemoContent.js",
     "migrate:faculty-advisors": "node scripts/migrateFacultyAdvisorAccounts.js"
@@ -29,7 +28,6 @@
     "ejs": "^3.1.10",
     "express": "^4.21.2",
     "express-session": "^1.18.1",
-    "mongoose": "^8.9.5",
-    "nodemailer": "^10.6.1"
+    "mongoose": "^8.9.5"
   }
 }

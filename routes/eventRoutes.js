@@ -11,7 +11,7 @@ router.get('/', async (req, res) => {
     const { category, search } = req.query;
     let query = {
       isPublished: { $ne: false },
-      approvalStatus: { $ne: 'Rejected by Faculty' }
+      approvalStatus: { $nin: ['Pending Faculty', 'Rejected by Faculty'] }
     };
 
     if (category && category !== 'All') {
@@ -58,7 +58,9 @@ router.get('/:id', async (req, res) => {
     const event = await Event.findById(req.params.id)
       .populate('club', 'name code category logo facultyAdvisor secretary contactEmail');
 
-    if (!event) {
+    if (!event || event.isPublished === false
+      || event.approvalStatus === 'Pending Faculty'
+      || event.approvalStatus === 'Rejected by Faculty') {
       req.flash('error_msg', 'Event not found.');
       return res.redirect('/events');
     }
@@ -87,8 +89,10 @@ router.get('/:id', async (req, res) => {
 router.post('/:id/register', ensureAuthenticated, async (req, res) => {
   try {
     const event = await Event.findById(req.params.id).populate('club');
-    if (!event) {
-      req.flash('error_msg', 'Event not found.');
+    if (!event || event.isPublished === false
+      || event.approvalStatus === 'Pending Faculty'
+      || event.approvalStatus === 'Rejected by Faculty') {
+      req.flash('error_msg', 'Event is not available for registration.');
       return res.redirect('/events');
     }
 

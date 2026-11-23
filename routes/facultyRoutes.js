@@ -227,6 +227,15 @@ router.post('/events/:id/review', async (req, res) => {
         relatedLink: '/admin/reports'
       });
 
+      await NotificationService.broadcastToStudents({
+        club: event.club._id,
+        title: `New Event: ${event.title}`,
+        message: `${event.club.name} is hosting "${event.title}" on ${new Date(event.eventDate).toLocaleDateString()} at ${event.venue}. Registrations are now open!`,
+        type: 'event',
+        relatedId: event._id,
+        relatedLink: `/events/${event._id}`
+      });
+
       req.flash('success_msg', `Event "${event.title}" approved by faculty and published!`);
     } else {
       // Reject

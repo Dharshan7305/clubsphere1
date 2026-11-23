@@ -60,8 +60,6 @@ ClubSphere is a student club discovery and campus activities platform. Students 
 ### Student registration email
 
 New student registrations require a PSG Tech address in the format `YYccNNN@psgtech.ac.in`, for example `26mx105@psgtech.ac.in` (joining year, course code, and roll number). Seeded demo accounts remain available for login.
-New registrations must also verify the address with a 6-digit code sent by email. Codes expire after 10 minutes, allow up to 5 attempts, and can be resent once per minute (up to 5 resends per hour). Configure `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, and optionally `SMTP_FROM` in `.env` and in the deployment environment. Use an SMTP app password or provider credential; never commit real credentials.
-For Gmail, use `SMTP_HOST=smtp.gmail.com`, `SMTP_PORT=587`, and `SMTP_SECURE=false`; set `SMTP_USER` and `SMTP_FROM` to the sender address and `SMTP_PASS` to a Google App Password (not the account password).
 
 ### Seeded development accounts
 
@@ -144,5 +142,3 @@ views/        EJS page templates and partials
 server.js     Express application entry point
 seed.js       Development sample-data script
 ```
-
-The `navigation/` folder is a standalone preview and is separate from the main application.
