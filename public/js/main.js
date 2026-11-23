@@ -83,48 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // 4. Quick Login Fill for Viva Demonstration
-  window.fillLogin = function (email, pass) {
-    const emailInput = document.getElementById('loginEmail');
-    const passInput = document.getElementById('loginPassword');
-    if (emailInput && passInput) {
-      emailInput.value = email;
-      passInput.value = pass;
-    }
-  };
-
-  const demoAccessToggles = [
-    ['demoAccessToggle', 'demoLoginPanel'],
-    ['homeDemoAccessToggle', 'homeDemoPanel']
-  ];
-  demoAccessToggles.forEach(([toggleId, panelId]) => {
-    const toggle = document.getElementById(toggleId);
-    const panel = document.getElementById(panelId);
-    if (toggle && panel) {
-      toggle.addEventListener('click', () => {
-        const expanded = toggle.getAttribute('aria-expanded') === 'true';
-        toggle.setAttribute('aria-expanded', String(!expanded));
-        panel.hidden = expanded;
-      });
-    }
-  });
-
-  const urlParams = new URLSearchParams(window.location.search);
-  const roleParam = urlParams.get('role');
-  if (roleParam) {
-    const demoAccounts = {
-      student: 'student@college.ac.in',
-      secretary: 'secretary@college.ac.in',
-      core: 'core@college.ac.in',
-      faculty: 'faculty@college.ac.in',
-      admin: 'admin@college.ac.in'
-    };
-    if (demoAccounts[roleParam]) {
-      window.fillLogin(demoAccounts[roleParam], 'password123');
-    }
-  }
-
-  // 5. Mark Notification As Read (Ajax)
+  // 4. Mark Notification As Read (Ajax)
   window.markAsRead = async function (notifId, el) {
     try {
       const res = await fetch(`/student/notifications/${notifId}/read`, {
@@ -143,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // 6. Attendance Toggle (Ajax for Core Member)
+  // 5. Attendance Toggle (Ajax for Core Member)
   window.toggleAttendance = async function (eventId, participantId, btn) {
     try {
       const res = await fetch(`/core/events/${eventId}/attendance/${participantId}`, {

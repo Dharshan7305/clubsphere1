@@ -180,6 +180,6 @@ app.listen(PORT, () => {
   console.log(`====================================================`);
   console.log(`🚀 ClubSphere - ClubSphere Platform is running!`);
   console.log(`📍 URL: http://localhost:${PORT}`);
-  console.log(`🎓 Ready for WAD Project Viva Demonstration`);
+  console.log(`✅ ClubSphere is ready`);
   console.log(`====================================================`);
 });

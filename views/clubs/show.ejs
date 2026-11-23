@@ -1,6 +1,11 @@
 <%- include('../partials/header') %>
 <%- include('../partials/navbar') %>
 <%- include('../partials/alerts') %>
+<%
+  const facultyAdvisor = (club.facultyAdvisor && club.facultyAdvisor.name)
+    ? club.facultyAdvisor
+    : ((club.facultyAdvisors && club.facultyAdvisors[0]) || null);
+%>
 
 <div class="club-details-page">
   <!-- ========================================================
@@ -58,7 +63,7 @@
           <div class="club-hero-meta-item">
             <span>👨‍🏫 Faculty Advisor:</span>
             <strong>
-              <%= (club.facultyAdvisors && club.facultyAdvisors.length > 0) ? club.facultyAdvisors[0].name : (club.facultyAdvisor ? club.facultyAdvisor.name : 'Verified College Faculty') %>
+              <%= facultyAdvisor ? facultyAdvisor.name : 'Verified College Faculty' %>
             </strong>
           </div>
           <div class="club-hero-meta-item">
@@ -371,35 +376,20 @@
           <div class="club-section-header">
             <h3 class="club-section-title" style="font-size: 1.15rem;">
               <span>👨‍🏫</span>
-              <span>
-                Faculty <%= (club.facultyAdvisors && club.facultyAdvisors.length > 1) ? 'Advisors' : 'Advisor' %>
-              </span>
+              <span>Faculty Advisor</span>
             </h3>
           </div>
 
           <div class="advisor-list-wrap">
-            <% if (club.facultyAdvisors && club.facultyAdvisors.length > 0) { %>
-              <% club.facultyAdvisors.forEach(adv => { %>
-                <div class="advisor-card-item">
-                  <div class="advisor-avatar-box">👨‍🏫</div>
-                  <div class="advisor-info-box">
-                    <h4><%= adv.name %></h4>
-                    <% if (adv.department) { %>
-                      <span class="advisor-dept-tag">Dept. of <%= adv.department %></span>
-                    <% } %>
-                    <span class="advisor-role-tag"><%= adv.designation || 'Faculty Advisor' %></span>
-                  </div>
-                </div>
-              <% }) %>
-            <% } else if (club.facultyAdvisor && club.facultyAdvisor.name) { %>
+            <% if (facultyAdvisor) { %>
               <div class="advisor-card-item">
                 <div class="advisor-avatar-box">👨‍🏫</div>
                 <div class="advisor-info-box">
-                  <h4><%= club.facultyAdvisor.name %></h4>
-                  <% if (club.facultyAdvisor.department) { %>
-                    <span class="advisor-dept-tag">Dept. of <%= club.facultyAdvisor.department %></span>
+                  <h4><%= facultyAdvisor.name %></h4>
+                  <% if (facultyAdvisor.department) { %>
+                    <span class="advisor-dept-tag">Dept. of <%= facultyAdvisor.department %></span>
                   <% } %>
-                  <span class="advisor-role-tag"><%= club.facultyAdvisor.designation || 'Faculty Advisor' %></span>
+                  <span class="advisor-role-tag"><%= facultyAdvisor.designation || 'Faculty Advisor' %></span>
                 </div>
               </div>
             <% } else { %>

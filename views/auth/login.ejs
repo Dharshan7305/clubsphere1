@@ -44,28 +44,6 @@
       </button>
     </form>
 
-    <div class="demo-access">
-      <button
-        type="button"
-        class="demo-access-toggle"
-        id="demoAccessToggle"
-        aria-expanded="false"
-        aria-controls="demoLoginPanel"
-      >Demo sign-in</button>
-      <div id="demoLoginPanel" class="demo-login-panel" hidden>
-      <div style="font-size: 0.8rem; font-weight: 700; color: var(--primary); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 4px;">
-        <span>Choose a role to fill demo credentials:</span>
-      </div>
-      <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-        <button type="button" class="btn btn-sm btn-outline" onclick="fillLogin('student@college.ac.in', 'password123')">Student</button>
-        <button type="button" class="btn btn-sm btn-outline" onclick="fillLogin('secretary@college.ac.in', 'password123')">Secretary</button>
-        <button type="button" class="btn btn-sm btn-outline" onclick="fillLogin('core@college.ac.in', 'password123')">Core</button>
-        <button type="button" class="btn btn-sm btn-outline" onclick="fillLogin('faculty@college.ac.in', 'password123')">Faculty</button>
-        <button type="button" class="btn btn-sm btn-outline" onclick="fillLogin('admin@college.ac.in', 'password123')">Admin</button>
-      </div>
-    </div>
-    </div>
-
     <div style="text-align: center; margin-top: 1.5rem; font-size: 0.88rem; color: var(--text-muted);">
       Don't have a student account? <a href="/auth/register" style="font-weight: 600;">Register as Student</a>
     </div>

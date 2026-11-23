@@ -85,7 +85,10 @@
       <% clubs.forEach((club, index) => { %>
         <%
           // Serialize club data safely for modal view
-          const advisorsList = club.facultyAdvisors || (club.facultyAdvisor ? [club.facultyAdvisor] : []);
+          const facultyAdvisor = (club.facultyAdvisor && club.facultyAdvisor.name)
+            ? club.facultyAdvisor
+            : ((club.facultyAdvisors && club.facultyAdvisors[0]) || null);
+          const advisorsList = facultyAdvisor ? [facultyAdvisor] : [];
           const modalData = {
             id: club._id,
             name: club.name,
@@ -220,9 +223,9 @@
         <ul id="modalClubActivities" class="modal-activities-list"></ul>
       </div>
 
-      <!-- Verified Faculty Advisors Section -->
+      <!-- Verified Faculty Advisor Section -->
       <div class="modal-section">
-        <h4 class="modal-section-title">Verified Faculty Advisors</h4>
+        <h4 class="modal-section-title">Verified Faculty Advisor</h4>
         <div id="modalAdvisorsList" class="modal-advisors-grid"></div>
       </div>
 
@@ -410,7 +413,7 @@
         document.getElementById('modalActivitiesSection').style.display = 'none';
       }
 
-      // Verified Faculty Advisors
+      // Verified Faculty Advisor
       const advGrid = document.getElementById('modalAdvisorsList');
       advGrid.innerHTML = '';
       if (data.advisors && data.advisors.length > 0) {

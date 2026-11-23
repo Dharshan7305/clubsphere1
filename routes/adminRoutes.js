@@ -532,7 +532,7 @@ router.get('/reports', async (req, res) => {
     };
 
     res.render('admin/reports', {
-      title: 'Platform Analytics & Viva Reports - ClubSphere',
+      title: 'Platform Analytics & Governance - ClubSphere',
       stats,
       clubs,
       recruitments,

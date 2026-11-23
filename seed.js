@@ -218,7 +218,7 @@ async function seedDatabase() {
       instructions: 'General club membership intake with no role selection.'
     });
 
-    console.log('[Seed] Created recruitment drives (including 1 pending for viva approval demo).');
+    console.log('[Seed] Created recruitment drives, including one pending faculty review.');
 
     // 4. Create Sample Application by Student
     const sampleApp = await Application.create({
@@ -348,7 +348,7 @@ async function seedDatabase() {
     console.log('====================================================');
     console.log('✅ DATABASE SEEDING COMPLETED SUCCESSFULLY!');
     console.log('====================================================');
-    console.log('Demo Credentials for Viva Examination:');
+    console.log('Seeded Development Account Credentials:');
     console.log('1. Student:         student@college.ac.in   / password123');
     console.log('2. Core Member:     core@college.ac.in      / password123');
     console.log('3. Faculty Advisor: faculty@college.ac.in   / password123');

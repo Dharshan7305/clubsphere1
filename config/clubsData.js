@@ -962,6 +962,11 @@ const clubs30 = [
   }
 ];
 
+for (const club of clubs30) {
+  const advisor = club.facultyAdvisor || (club.facultyAdvisors || [])[0];
+  club.facultyAdvisors = advisor ? [advisor] : [];
+}
+
 module.exports = {
   clubs30,
   categoryFilters

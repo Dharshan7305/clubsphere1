@@ -51,7 +51,7 @@ ClubSphere is a student club discovery and campus activities platform. Students 
 
 ## Sample data
 
-`npm run seed` creates sample clubs, events, recruitments, notifications, and demo accounts. **Seeding deletes existing application data in the configured database before creating the samples.** Only run it against a disposable development database.
+`npm run seed` creates sample clubs, events, recruitments, notifications, and development accounts. **Seeding deletes existing application data in the configured database before creating the samples.** Only run it against a disposable development database.
 
 `npm run migrate:club-demo-content` safely updates only the known old Tech Music and Tamil Mandram demo recruitments, events, applications, and notifications. It does not clear collections or alter unrelated records.
 
@@ -60,10 +60,12 @@ ClubSphere is a student club discovery and campus activities platform. Students 
 ### Student registration email
 
 New student registrations require a PSG Tech address in the format `YYccNNN@psgtech.ac.in`, for example `26mx105@psgtech.ac.in` (joining year, course code, and roll number). Seeded demo accounts remain available for login.
+New registrations must also verify the address with a 6-digit code sent by email. Codes expire after 10 minutes, allow up to 5 attempts, and can be resent once per minute (up to 5 resends per hour). Configure `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, and optionally `SMTP_FROM` in `.env` and in the deployment environment. Use an SMTP app password or provider credential; never commit real credentials.
+For Gmail, use `SMTP_HOST=smtp.gmail.com`, `SMTP_PORT=587`, and `SMTP_SECURE=false`; set `SMTP_USER` and `SMTP_FROM` to the sender address and `SMTP_PASS` to a Google App Password (not the account password).
 
-### Demo logins
+### Seeded development accounts
 
-These accounts are created by `npm run seed`. Use the email address as the username.
+These accounts are created by `npm run seed` for local development. Use the email address as the username.
 
 | Role | Username | Password |
 |---|---|---|
@@ -72,8 +74,8 @@ These accounts are created by `npm run seed`. Use the email address as the usern
 | Tech Music Faculty Advisor | `faculty@college.ac.in` | `password123` |
 | Admin | `admin@college.ac.in` | `password123` |
 
-Each club has its own secretary account. The secretary username is `secretary.<club-code>@college.ac.in`, where `<club-code>` is lowercase; all secretary passwords are `password123`.
-Each club also has its own faculty advisor account. Tech Music uses `faculty@college.ac.in`; other clubs use `faculty.<club-code>@college.ac.in`. All demo faculty passwords are `password123`.
+Each club has its own secretary account. The secretary username is `secretary.<club-code>@college.ac.in`, where `<club-code>` is lowercase; all seeded secretary passwords are `password123`.
+Each club also has its own faculty advisor account. Tech Music uses `faculty@college.ac.in`; other clubs use `faculty.<club-code>@college.ac.in`. All seeded faculty passwords are `password123`.
 
 | Club | Username | Password |
 |---|---|---|
@@ -108,7 +110,7 @@ Each club also has its own faculty advisor account. Tech Music uses `faculty@col
 | Yuva Tourism Club (YTC) | `secretary.ytc@college.ac.in` | `password123` |
 | Cyber Security Club (CSC) | `secretary.csc@college.ac.in` | `password123` |
 
-These are development/demo credentials only. Do not use them in production. **Seeding deletes existing application data** in the configured database, so only run it against a disposable development database.
+These seeded development credentials are for local testing only. Do not use them in production. **Seeding deletes existing application data** in the configured database, so only run it against a disposable development database.
 
 ## Main routes
 
@@ -143,4 +145,4 @@ server.js     Express application entry point
 seed.js       Development sample-data script
 ```
 
-The `navigation/` and `review-demo/` folders are standalone previews and are separate from the main application.
+The `navigation/` folder is a standalone preview and is separate from the main application.
