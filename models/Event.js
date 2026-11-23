@@ -69,7 +69,7 @@ const EventSchema = new mongoose.Schema({
   },
   approvalStatus: {
     type: String,
-    enum: ['Pending Faculty', 'Rejected by Faculty', 'Pending Principal', 'Rejected by Principal', 'Changes Requested', 'Approved'],
+    enum: ['Pending Faculty', 'Rejected by Faculty', 'Approved'],
     default: 'Approved'
   },
   isPublished: {
@@ -78,12 +78,6 @@ const EventSchema = new mongoose.Schema({
   },
   facultyApproval: {
     status: { type: String, enum: ['Pending', 'Approved', 'Rejected'], default: 'Approved' },
-    remarks: { type: String, default: '' },
-    reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    reviewedAt: { type: Date }
-  },
-  principalApproval: {
-    status: { type: String, enum: ['Pending', 'Approved', 'Rejected', 'Changes Requested'], default: 'Approved' },
     remarks: { type: String, default: '' },
     reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     reviewedAt: { type: Date }

@@ -6,11 +6,11 @@ ClubSphere is a student club discovery and campus activities platform. Students 
 
 - Browse, search, and filter campus clubs.
 - Let each club secretary manage that club's member roster and assign club-specific Core Member roles, with each student limited to one club's core team.
-- Publish and manage recruitment drives with faculty approval.
+- Let faculty approve recruitment drives and event proposals, with administrators notified for oversight.
 - Submit and review student applications.
-- Create campus events and manage registrations and attendance.
+- Publish faculty-approved campus events and manage registrations and attendance.
 - Send targeted and campus-wide notifications.
-- Provide separate dashboards for students, club secretaries, core members, faculty, principals, and administrators.
+- Provide separate dashboards for students, club secretaries, core members, faculty, and administrators.
 
 ## Technology
 
@@ -122,7 +122,6 @@ These are development/demo credentials only. Do not use them in production. **Se
 | `/secretary` | Club management and recruitment workflows |
 | `/core` | Core team dashboard and event participants |
 | `/faculty` | Faculty review and approval tools |
-| `/principal` | Principal dashboard and approvals |
 | `/admin` | Administrative management and reports |
 | `/notifications` | Notification center |
 

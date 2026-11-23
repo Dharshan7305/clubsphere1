@@ -781,7 +781,6 @@ router.post('/events/:id/revise', async (req, res) => {
     event.approvalStatus = 'Pending Faculty';
     event.isPublished = false;
     event.facultyApproval = { status: 'Pending', remarks: 'Revised by Secretary' };
-    event.principalApproval = { status: 'Pending' };
 
     await event.save();
 

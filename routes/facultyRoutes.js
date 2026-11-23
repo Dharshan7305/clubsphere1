@@ -124,6 +124,15 @@ router.post('/recruitments/:id/review', async (req, res) => {
 
     // 2. If approved, broadcast to all students
     if (action === 'approve') {
+      await NotificationService.notifyRole('admin', {
+        club: recruitment.club._id,
+        title: `Faculty-Approved Recruitment: ${recruitment.title}`,
+        message: `${req.session.user.name} approved and opened "${recruitment.title}" for ${recruitment.club.name}. This is an administrative oversight request; no further approval is required.`,
+        type: 'recruitment',
+        relatedId: recruitment._id,
+        relatedLink: '/admin/reports'
+      });
+
       await NotificationService.broadcastToStudents({
         club: recruitment.club._id,
         title: `Recruitment Open: ${recruitment.club.name}!`,
@@ -180,7 +189,7 @@ router.post('/events/:id/review', async (req, res) => {
     }
 
     const facultyUser = req.session.user;
-    const reviewNote = remarks || (action === 'approve' ? 'Endorsed and forwarded to Principal.' : 'Rejected by Main Faculty.');
+    const reviewNote = remarks || (action === 'approve' ? 'Approved by Faculty Advisor.' : 'Rejected by Faculty Advisor.');
 
     event.facultyApproval = {
       status: action === 'approve' ? 'Approved' : 'Rejected',
@@ -190,8 +199,9 @@ router.post('/events/:id/review', async (req, res) => {
     };
 
     if (action === 'approve') {
-      event.approvalStatus = 'Pending Principal';
-      event.isPublished = false; // Remains unpublished until Principal approves!
+      event.approvalStatus = 'Approved';
+      event.isPublished = true;
+      event.status = 'Upcoming';
       await event.save();
 
       // 1. Notify Secretary
@@ -200,24 +210,24 @@ router.post('/events/:id/review', async (req, res) => {
           recipient: event.club.secretary.user,
           club: event.club._id,
           title: `Event Proposal Approved by Faculty: ${event.title}`,
-          message: `Faculty Advisor ${facultyUser.name} endorsed "${event.title}". It has now been forwarded to the Principal for final approval.`,
+          message: `Faculty Advisor ${facultyUser.name} approved "${event.title}". The event is now published.`,
           type: 'approval',
           relatedId: event._id,
           relatedLink: '/secretary/events'
         });
       }
 
-      // 2. Notify Principal (Role 4 / Principal portal)
-      await NotificationService.notifyRole('principal', {
+      // 2. Notify administrators for oversight; faculty approval is final.
+      await NotificationService.notifyRole('admin', {
         club: event.club._id,
-        title: `Event Awaiting Principal Approval: ${event.title}`,
-        message: `Main Faculty ${facultyUser.name} has endorsed "${event.title}" (${event.club.name}). Pending your executive review.`,
+        title: `Faculty-Approved Event: ${event.title}`,
+        message: `${facultyUser.name} approved and published "${event.title}" for ${event.club.name}. This is an administrative oversight request; no further approval is required.`,
         type: 'approval',
         relatedId: event._id,
-        relatedLink: '/principal/events'
+        relatedLink: '/admin/reports'
       });
 
-      req.flash('success_msg', `Event "${event.title}" endorsed and forwarded to Principal for final approval!`);
+      req.flash('success_msg', `Event "${event.title}" approved by faculty and published!`);
     } else {
       // Reject
       event.approvalStatus = 'Rejected by Faculty';

@@ -159,7 +159,6 @@ app.use('/core', require('./routes/coreRoutes'));
 app.use('/faculty', require('./routes/facultyRoutes'));
 app.use('/admin', require('./routes/adminRoutes'));
 app.use('/notifications', require('./routes/notificationRoutes'));
-app.use('/principal', require('./routes/principalRoutes'));
 
 // 404 Handler
 app.use((req, res) => {

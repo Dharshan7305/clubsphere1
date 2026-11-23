@@ -31,7 +31,7 @@
   <div class="admin-people-summary">
     <a class="admin-people-summary-card" href="#club-members">
       <span class="admin-people-summary-icon">M</span>
-      <span><strong><%= members.length %></strong><small>Members</small></span>
+      <span><strong><%= members.length %></strong><small>Club Students</small></span>
     </a>
     <a class="admin-people-summary-card" href="#core-members">
       <span class="admin-people-summary-icon">C</span>
@@ -48,7 +48,7 @@
   </div>
 
   <nav class="admin-people-tabs" aria-label="Club people sections">
-    <a href="#club-members">Members</a>
+    <a href="#club-members">Club Students</a>
     <a href="#core-members">Core Members</a>
     <a href="#faculty-advisor">Faculty Advisor</a>
     <a href="#club-secretary">Secretary</a>
@@ -57,8 +57,8 @@
   <section class="admin-people-panel" id="club-members">
     <div class="admin-people-panel-heading">
       <div>
-        <h2>Club Members</h2>
-        <p>Students who are approved or accepted members of this club.</p>
+        <h2>Club Students</h2>
+        <p>All students in this club, including Core Members. Core Members are also listed separately below.</p>
       </div>
       <span class="badge badge-category"><%= members.length %></span>
     </div>
@@ -66,16 +66,17 @@
       <div class="table-responsive">
         <table class="table">
           <thead>
-            <tr><th>Name</th><th>Roll Number</th><th>Email</th><th>Department</th><th>Year</th></tr>
+            <tr><th>Name</th><th>Club Role</th><th>Roll Number</th><th>Email</th><th>Department</th><th>Year</th></tr>
           </thead>
           <tbody>
             <% members.forEach(member => { %>
               <tr>
-                <td><strong><%= member.name %></strong></td>
-                <td><%= member.rollNo || '—' %></td>
-                <td><%= member.email %></td>
-                <td><%= member.department || '—' %></td>
-                <td><%= member.year || '—' %></td>
+                <td><strong><%= member.user.name %></strong></td>
+                <td><span class="badge badge-category"><%= member.role %></span></td>
+                <td><%= member.user.rollNo || '—' %></td>
+                <td><%= member.user.email %></td>
+                <td><%= member.user.department || '—' %></td>
+                <td><%= member.user.year || '—' %></td>
               </tr>
             <% }) %>
           </tbody>

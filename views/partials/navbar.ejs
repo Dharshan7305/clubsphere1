@@ -33,9 +33,6 @@
             <li><a href="/faculty/dashboard" class="nav-link <%= typeof currentPage !== 'undefined' && currentPage === 'dashboard' ? 'active' : '' %>">Faculty Portal</a></li>
             <li><a href="/faculty/recruitments" class="nav-link <%= typeof currentPage !== 'undefined' && currentPage === 'recruitments' ? 'active' : '' %>">Approve Drives</a></li>
             <li><a href="/faculty/events" class="nav-link <%= typeof currentPage !== 'undefined' && currentPage === 'events' ? 'active' : '' %>">Event Proposals</a></li>
-          <% } else if (user.role === 'principal') { %>
-            <li><a href="/principal/dashboard" class="nav-link <%= typeof currentPage !== 'undefined' && currentPage === 'principal' ? 'active' : '' %>">Principal Portal</a></li>
-            <li><a href="/principal/events" class="nav-link <%= typeof currentPage !== 'undefined' && currentPage === 'events' ? 'active' : '' %>">Event Approvals</a></li>
           <% } else if (user.role === 'admin') { %>
             <li><a href="/admin/dashboard" class="nav-link <%= typeof currentPage !== 'undefined' && currentPage === 'dashboard' ? 'active' : '' %>">Admin Center</a></li>
             <li><a href="/admin/clubs" class="nav-link <%= typeof currentPage !== 'undefined' && currentPage === 'clubs' ? 'active' : '' %>">Clubs</a></li>

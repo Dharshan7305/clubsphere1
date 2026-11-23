@@ -7,7 +7,7 @@
     <div>
       <span class="badge badge-category" style="margin-bottom: 0.25rem;"><%= club.category %></span>
       <h1 class="section-title">👨‍🏫 Event Proposals & Approvals</h1>
-      <p class="section-subtitle">Review event proposals submitted by <%= club.name %> Secretary before forwarding to Principal.</p>
+      <p class="section-subtitle">Review event proposals from <%= club.name %>. Faculty approval publishes the event; administrators receive an oversight notification.</p>
     </div>
     <a href="/faculty/dashboard" class="btn btn-outline-purple">&larr; Back to Dashboard</a>
   </div>
@@ -27,12 +27,8 @@
                   <!-- Approval Status Badge -->
                   <% if (ev.approvalStatus === 'Pending Faculty') { %>
                     <span style="font-size: 0.78rem; font-weight: 700; background: #FEF3C7; color: #B45309; padding: 2px 8px; border-radius: 6px;">⏳ Pending Faculty Review</span>
-                  <% } else if (ev.approvalStatus === 'Pending Principal') { %>
-                    <span style="font-size: 0.78rem; font-weight: 700; background: #E0E7FF; color: #3730A3; padding: 2px 8px; border-radius: 6px;">🏛️ Forwarded to Principal</span>
                   <% } else if (ev.approvalStatus === 'Approved') { %>
-                    <span style="font-size: 0.78rem; font-weight: 700; background: #DCFCE7; color: #16A34A; padding: 2px 8px; border-radius: 6px;">✓ Officially Approved & Live</span>
-                  <% } else if (ev.approvalStatus === 'Changes Requested') { %>
-                    <span style="font-size: 0.78rem; font-weight: 700; background: #FEF3C7; color: #D97706; padding: 2px 8px; border-radius: 6px;">✎ Revisions Requested</span>
+                    <span style="font-size: 0.78rem; font-weight: 700; background: #DCFCE7; color: #16A34A; padding: 2px 8px; border-radius: 6px;">✓ Faculty Approved & Published</span>
                   <% } else { %>
                     <span style="font-size: 0.78rem; font-weight: 700; background: #FEE2E2; color: #DC2626; padding: 2px 8px; border-radius: 6px;">✕ Rejected</span>
                   <% } %>
@@ -53,9 +49,9 @@
               <div style="display: flex; gap: 10px; justify-content: flex-end; align-items: center; border-top: 1px solid var(--border-color); padding-top: 1rem; margin-top: 1rem;">
                 <form action="/faculty/events/<%= ev._id %>/review" method="POST" style="margin: 0; display: inline-flex; gap: 8px;">
                   <input type="hidden" name="action" value="approve">
-                  <input type="text" name="remarks" placeholder="Endorsement note for Principal..." style="font-size: 0.82rem; padding: 6px 12px; border: 1px solid var(--border-color); border-radius: 6px; min-width: 200px;">
+                  <input type="text" name="remarks" placeholder="Optional approval remarks..." style="font-size: 0.82rem; padding: 6px 12px; border: 1px solid var(--border-color); border-radius: 6px; min-width: 200px;">
                   <button type="submit" class="btn" style="background: #16A34A; color: #fff; font-weight: 600; font-size: 0.85rem; padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer;">
-                    ✓ Endorse & Forward to Principal
+                    ✓ Approve & Publish
                   </button>
                 </form>
 

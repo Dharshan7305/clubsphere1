@@ -133,17 +133,19 @@ router.get('/clubs/:id/people', async (req, res) => {
       ...coreEntriesByUser.keys(),
       ...legacyCoreMembers.map(member => member._id.toString())
     ]);
-    const allUserIds = new Set([...memberIds, ...coreMemberIds]);
-    const rosterUsers = await User.find({ _id: { $in: [...allUserIds] } })
+    const clubStudentIds = new Set([...memberIds, ...coreMemberIds]);
+    const rosterUsers = await User.find({ _id: { $in: [...clubStudentIds] } })
       .select('name email rollNo department year')
       .lean();
     const usersById = new Map(rosterUsers.map(user => [user._id.toString(), user]));
 
-    const members = [...memberIds]
-      .filter(id => !coreMemberIds.has(id))
-      .map(id => usersById.get(id))
-      .filter(Boolean)
-      .sort((a, b) => a.name.localeCompare(b.name));
+    const members = [...clubStudentIds]
+      .map(id => ({
+        user: usersById.get(id) || null,
+        role: coreMemberIds.has(id) ? 'Core Member' : 'Member'
+      }))
+      .filter(member => member.user)
+      .sort((a, b) => a.user.name.localeCompare(b.user.name));
     const coreMembers = [...coreMemberIds]
       .map(id => ({
         user: usersById.get(id) || null,
@@ -275,19 +277,61 @@ router.post('/clubs/:id/delete', async (req, res) => {
 router.get('/users', async (req, res) => {
   try {
     const { role } = req.query;
-    let query = {};
-    if (role && role !== 'All') {
-      query.role = role;
-    }
+    const userRoles = ['student', 'secretary', 'core', 'faculty'];
+    const selectedRole = userRoles.includes(role) ? role : 'All';
+    const query = { role: { $ne: 'admin' } };
+    if (selectedRole !== 'All') query.role = selectedRole;
 
     const users = await User.find(query).populate('club', 'name code').sort({ name: 1 });
-    const clubs = await Club.find().select('name code');
+    const clubs = await Club.find().select('name code').lean();
+    const userIds = users.map(user => user._id);
+    const [clubRosterSources, approvedMemberships, acceptedApplications] = await Promise.all([
+      Club.find({
+        $or: [
+          { members: { $in: userIds } },
+          { 'coreTeam.user': { $in: userIds } }
+        ]
+      }).select('members coreTeam.user').lean(),
+      Membership.find({ student: { $in: userIds }, status: 'Approved' })
+        .select('student club')
+        .lean(),
+      Application.find({ student: { $in: userIds }, status: 'Accepted' })
+        .select('student club')
+        .lean()
+    ]);
+
+    const clubIdsByUser = new Map(users.map(user => [
+      user._id.toString(),
+      new Set(user.club ? [user.club._id.toString()] : [])
+    ]));
+    const addUserClub = (userId, clubId) => {
+      const userClubIds = clubIdsByUser.get(userId.toString());
+      if (userClubIds) userClubIds.add(clubId.toString());
+    };
+
+    clubRosterSources.forEach(club => {
+      (club.members || []).forEach(userId => addUserClub(userId, club._id));
+      (club.coreTeam || []).forEach(member => {
+        if (member.user) addUserClub(member.user, club._id);
+      });
+    });
+    approvedMemberships.forEach(membership => addUserClub(membership.student, membership.club));
+    acceptedApplications.forEach(application => addUserClub(application.student, application.club));
+
+    const clubsById = new Map(clubs.map(club => [club._id.toString(), club]));
+    const usersWithClubMemberships = users.map(user => ({
+      ...user.toObject(),
+      clubMemberships: [...clubIdsByUser.get(user._id.toString())]
+        .map(clubId => clubsById.get(clubId))
+        .filter(Boolean)
+        .sort((a, b) => a.name.localeCompare(b.name))
+    }));
 
     res.render('admin/users', {
       title: 'Manage Users - Admin | ClubSphere',
-      users,
+      users: usersWithClubMemberships,
       clubs,
-      selectedRole: role || 'All',
+      selectedRole,
       currentPage: 'users'
     });
   } catch (error) {
@@ -308,7 +352,7 @@ router.post('/users/:id/role', async (req, res) => {
       return res.redirect('/admin/users');
     }
 
-    if (!['student', 'secretary', 'core', 'faculty', 'principal', 'admin'].includes(role)) {
+    if (!['student', 'secretary', 'core', 'faculty'].includes(role)) {
       req.flash('error_msg', 'Choose a valid user role.');
       return res.redirect('/admin/users');
     }

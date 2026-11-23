@@ -11,7 +11,7 @@ router.get('/', async (req, res) => {
     const { category, search } = req.query;
     let query = {
       isPublished: { $ne: false },
-      approvalStatus: { $nin: ['Rejected by Principal', 'Rejected by Faculty', 'Changes Requested'] }
+      approvalStatus: { $ne: 'Rejected by Faculty' }
     };
 
     if (category && category !== 'All') {

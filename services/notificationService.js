@@ -113,15 +113,6 @@ class NotificationService {
   static async notifyRole(role, payload) {
     try {
       const users = await User.find({ role }).select('_id');
-      if (users.length === 0 && role === 'principal') {
-        // Fallback to admin if principal account is not configured
-        const adminUsers = await User.find({ role: 'admin' }).select('_id');
-        for (const admin of adminUsers) {
-          await this.createNotification({ ...payload, recipient: admin._id });
-        }
-        return;
-      }
-
       for (const u of users) {
         await this.createNotification({ ...payload, recipient: u._id });
       }

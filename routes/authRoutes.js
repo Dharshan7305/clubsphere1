@@ -54,8 +54,6 @@ router.post('/login', ensureGuest, async (req, res) => {
     switch (user.role) {
       case 'admin':
         return res.redirect('/admin/dashboard');
-      case 'principal':
-        return res.redirect('/principal/dashboard');
       case 'secretary':
         return res.redirect('/secretary/dashboard');
       case 'core':
