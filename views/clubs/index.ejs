@@ -13,7 +13,7 @@
         <span>Explore <%= totalClubsCount || 30 %> Student Clubs</span>
       </div>
 
-      <h1 class="clubs-main-heading">Discover Your Clubs</h1>
+      <h1 class="clubs-main-heading">Discover Clubs</h1>
       <p class="clubs-subheading">
         Explore communities, discover your interests and find your place on campus.
       </p>
@@ -42,28 +42,109 @@
         </div>
       </div>
 
-      <!-- Category Filter Buttons -->
-      <div class="clubs-category-filters" role="tablist" aria-label="Club categories">
-        <% categories.forEach(cat => { %>
-          <button 
-            type="button" 
-            class="category-filter-btn <%= selectedCategory === cat ? 'active' : '' %>"
-            data-category="<%= cat %>"
+      <!-- Category Filter Carousel & Track -->
+      <div class="clubs-filter-carousel-wrapper" id="filterCarouselWrapper">
+        <button type="button" class="filter-scroll-btn filter-scroll-prev" id="filterScrollPrev" aria-label="Scroll filters left">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+
+        <div class="clubs-category-filters-track" id="clubsFilterTrack" role="tablist" aria-label="Club categories">
+          <!-- All Clubs Button -->
+          <button
+            type="button"
+            class="category-filter-btn <%= (selectedCategory === 'All Clubs' || selectedCategory === 'All') ? 'active' : '' %>"
+            data-category="All Clubs"
             role="tab"
-            aria-selected="<%= selectedCategory === cat ? 'true' : 'false' %>"
+            aria-selected="<%= (selectedCategory === 'All Clubs' || selectedCategory === 'All') ? 'true' : 'false' %>"
           >
-            <%= cat %>
+            <span class="filter-btn-icon" aria-hidden="true">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="7" height="7"></rect>
+                <rect x="14" y="3" width="7" height="7"></rect>
+                <rect x="14" y="14" width="7" height="7"></rect>
+                <rect x="3" y="14" width="7" height="7"></rect>
+              </svg>
+            </span>
+            <span>All Clubs</span>
           </button>
-        <% }) %>
-      </div>
-      <div class="clubs-category-filters" role="group" aria-label="Recruitment filters" style="margin-top: 0.65rem;">
-        <button
-          type="button"
-          id="recruitingFilterBtn"
-          class="category-filter-btn"
-          aria-pressed="false"
-        >
-          Open for Recruitment
+
+          <!-- Recruitment Filter Toggle (Prominent with Live Pulsing Dot) -->
+          <button
+            type="button"
+            id="recruitingFilterBtn"
+            class="category-filter-btn filter-btn-recruiting"
+            aria-pressed="false"
+          >
+            <span class="recruitment-live-dot" aria-hidden="true"></span>
+            <span class="filter-btn-icon" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+              </svg>
+            </span>
+            <span>Open for Recruitment</span>
+          </button>
+
+          <!-- Recruiting Soon Filter Toggle -->
+          <button
+            type="button"
+            id="recruitingSoonFilterBtn"
+            class="category-filter-btn filter-btn-recruiting-soon"
+            aria-pressed="false"
+          >
+            <span class="recruiting-soon-dot" aria-hidden="true"></span>
+            <span class="filter-btn-icon" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+            </span>
+            <span>Recruiting Soon</span>
+          </button>
+
+          <span class="filter-track-divider" aria-hidden="true"></span>
+
+          <!-- Categories with Domain Icons -->
+          <% categories.filter(c => c !== 'All Clubs' && c !== 'All').forEach(cat => { %>
+            <button
+              type="button"
+              class="category-filter-btn <%= selectedCategory === cat ? 'active' : '' %>"
+              data-category="<%= cat %>"
+              role="tab"
+              aria-selected="<%= selectedCategory === cat ? 'true' : 'false' %>"
+            >
+              <span class="filter-btn-icon" aria-hidden="true">
+                <% if (cat.includes('Technical') || cat.includes('Innovation')) { %>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+                <% } else if (cat.includes('Music') || cat.includes('Performing')) { %>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+                <% } else if (cat.includes('Dance') || cat.includes('Cultural')) { %>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
+                <% } else if (cat.includes('Social') || cat.includes('Community')) { %>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                <% } else if (cat.includes('Literary') || cat.includes('Knowledge')) { %>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                <% } else if (cat.includes('Leadership') || cat.includes('Entrepreneurship')) { %>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path></svg>
+                <% } else if (cat.includes('Sports') || cat.includes('Personal')) { %>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.45 1-1 1H8c-.55 0-1 .45-1 1v1h10v-1c0-.55-.45-1-1-1h-1c-.55 0-1-.45-1-1v-2.34"></path><path d="M6 4h12v5a6 6 0 0 1-12 0V4z"></path></svg>
+                <% } else if (cat.includes('Environment') || cat.includes('Welfare')) { %>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"></path><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"></path></svg>
+                <% } else { %>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polygon points="12 6 12 12 16 14"></polygon></svg>
+                <% } %>
+              </span>
+              <span><%= cat %></span>
+            </button>
+          <% }) %>
+        </div>
+
+        <button type="button" class="filter-scroll-btn filter-scroll-next" id="filterScrollNext" aria-label="Scroll filters right">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
         </button>
       </div>
     </div>
@@ -110,8 +191,10 @@
           data-desc="<%= (club.description || '').toLowerCase() %>"
           data-tagline="<%= (club.tagline || '').toLowerCase() %>"
           data-recruitment-open="<%= club.recruitmentStatus === 'Open' ? 'true' : 'false' %>"
+          data-recruitment-soon="<%= (club.recruitmentStatus === 'Coming Soon' || club.recruitmentStatus === 'Recruiting Soon') ? 'true' : 'false' %>"
+          data-recruitment-status="<%= (club.recruitmentStatus || '').toLowerCase() %>"
         >
-          <!-- Card Image Header with Category Badge -->
+          <!-- Card Image Header with Category Badge & Recruitment Badge -->
           <div class="club-dir-image-wrap">
             <img 
               src="<%= club.banner %>" 
@@ -122,7 +205,9 @@
             >
             <span class="club-dir-cat-badge"><%= club.category %></span>
             <% if (club.recruitmentStatus === 'Open') { %>
-              <span class="club-dir-recruit-badge">Recruiting</span>
+              <span class="club-dir-recruit-badge badge-recruiting-open">Recruiting</span>
+            <% } else if (club.recruitmentStatus === 'Coming Soon' || club.recruitmentStatus === 'Recruiting Soon') { %>
+              <span class="club-dir-recruit-badge badge-recruiting-soon">Recruiting Soon</span>
             <% } %>
           </div>
 
@@ -267,6 +352,7 @@
     const clearBtn = document.getElementById('clearSearchBtn');
     const categoryBtns = document.querySelectorAll('.category-filter-btn[data-category]');
     const recruitingFilterBtn = document.getElementById('recruitingFilterBtn');
+    const recruitingSoonFilterBtn = document.getElementById('recruitingSoonFilterBtn');
     const cards = document.querySelectorAll('.club-dir-card');
     const emptyState = document.getElementById('noClubsFound');
     const visibleCountSpan = document.getElementById('visibleCount');
@@ -275,6 +361,7 @@
     let activeCategory = '<%= selectedCategory || "All Clubs" %>';
     let searchQuery = (searchInput.value || '').trim().toLowerCase();
     let activeRecruitmentOnly = false;
+    let activeRecruitingSoonOnly = false;
 
     function filterClubs() {
       let visible = 0;
@@ -286,6 +373,7 @@
         const category = card.dataset.category || '';
         const desc = card.dataset.desc || '';
         const tagline = card.dataset.tagline || '';
+        const recStatus = card.dataset.recruitmentStatus || '';
 
         // Category match
         const matchesCategory = (activeCategory === 'All Clubs' || activeCategory === 'All') 
@@ -297,9 +385,11 @@
           || code.includes(q) 
           || category.toLowerCase().includes(q) 
           || desc.includes(q) 
-          || tagline.includes(q);
+          || tagline.includes(q)
+          || recStatus.includes(q);
 
-        const matchesRecruitment = !activeRecruitmentOnly || card.dataset.recruitmentOpen === 'true';
+        const matchesRecruitment = (!activeRecruitmentOnly || card.dataset.recruitmentOpen === 'true')
+          && (!activeRecruitingSoonOnly || card.dataset.recruitmentSoon === 'true');
 
         if (matchesCategory && matchesSearch && matchesRecruitment) {
           card.style.display = '';
@@ -350,6 +440,7 @@
         btn.classList.add('active');
         btn.setAttribute('aria-selected', 'true');
         activeCategory = btn.dataset.category;
+        btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
         filterClubs();
       });
     });
@@ -359,8 +450,90 @@
         activeRecruitmentOnly = !activeRecruitmentOnly;
         recruitingFilterBtn.classList.toggle('active', activeRecruitmentOnly);
         recruitingFilterBtn.setAttribute('aria-pressed', String(activeRecruitmentOnly));
+        if (activeRecruitmentOnly && activeRecruitingSoonOnly) {
+          activeRecruitingSoonOnly = false;
+          if (recruitingSoonFilterBtn) {
+            recruitingSoonFilterBtn.classList.remove('active');
+            recruitingSoonFilterBtn.setAttribute('aria-pressed', 'false');
+          }
+        }
+        recruitingFilterBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
         filterClubs();
       });
+    }
+
+    if (recruitingSoonFilterBtn) {
+      recruitingSoonFilterBtn.addEventListener('click', () => {
+        activeRecruitingSoonOnly = !activeRecruitingSoonOnly;
+        recruitingSoonFilterBtn.classList.toggle('active', activeRecruitingSoonOnly);
+        recruitingSoonFilterBtn.setAttribute('aria-pressed', String(activeRecruitingSoonOnly));
+        if (activeRecruitingSoonOnly && activeRecruitmentOnly) {
+          activeRecruitmentOnly = false;
+          if (recruitingFilterBtn) {
+            recruitingFilterBtn.classList.remove('active');
+            recruitingFilterBtn.setAttribute('aria-pressed', 'false');
+          }
+        }
+        recruitingSoonFilterBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        filterClubs();
+      });
+    }
+
+    // Filter carousel scroll handling & arrows
+    const filterTrack = document.getElementById('clubsFilterTrack');
+    const filterWrapper = document.getElementById('filterCarouselWrapper');
+    const filterScrollPrev = document.getElementById('filterScrollPrev');
+    const filterScrollNext = document.getElementById('filterScrollNext');
+
+    function updateFilterScrollUI() {
+      if (!filterTrack || !filterWrapper) return;
+      const scrollLeft = filterTrack.scrollLeft;
+      const maxScroll = filterTrack.scrollWidth - filterTrack.clientWidth;
+      const isScrollable = maxScroll > 4;
+
+      if (!isScrollable) {
+        if (filterScrollPrev) filterScrollPrev.style.display = 'none';
+        if (filterScrollNext) filterScrollNext.style.display = 'none';
+        filterWrapper.classList.remove('has-scroll-left', 'has-scroll-right');
+        return;
+      }
+
+      if (filterScrollPrev) {
+        filterScrollPrev.style.display = scrollLeft > 8 ? 'inline-flex' : 'none';
+      }
+      if (filterScrollNext) {
+        filterScrollNext.style.display = scrollLeft < maxScroll - 8 ? 'inline-flex' : 'none';
+      }
+
+      filterWrapper.classList.toggle('has-scroll-left', scrollLeft > 8);
+      filterWrapper.classList.toggle('has-scroll-right', scrollLeft < maxScroll - 8);
+    }
+
+    if (filterTrack) {
+      filterTrack.addEventListener('scroll', updateFilterScrollUI, { passive: true });
+      window.addEventListener('resize', updateFilterScrollUI);
+
+      // Mouse wheel horizontal scrolling over track
+      filterTrack.addEventListener('wheel', (e) => {
+        if (Math.abs(e.deltaY) > Math.abs(e.deltaX) && filterTrack.scrollWidth > filterTrack.clientWidth) {
+          e.preventDefault();
+          filterTrack.scrollLeft += e.deltaY;
+        }
+      }, { passive: false });
+
+      if (filterScrollPrev) {
+        filterScrollPrev.addEventListener('click', () => {
+          filterTrack.scrollBy({ left: -260, behavior: 'smooth' });
+        });
+      }
+
+      if (filterScrollNext) {
+        filterScrollNext.addEventListener('click', () => {
+          filterTrack.scrollBy({ left: 260, behavior: 'smooth' });
+        });
+      }
+
+      setTimeout(updateFilterScrollUI, 60);
     }
 
     // Reset filters
@@ -369,15 +542,23 @@
         if (searchInput) searchInput.value = '';
         searchQuery = '';
         activeRecruitmentOnly = false;
+        activeRecruitingSoonOnly = false;
         if (recruitingFilterBtn) {
           recruitingFilterBtn.classList.remove('active');
           recruitingFilterBtn.setAttribute('aria-pressed', 'false');
+        }
+        if (recruitingSoonFilterBtn) {
+          recruitingSoonFilterBtn.classList.remove('active');
+          recruitingSoonFilterBtn.setAttribute('aria-pressed', 'false');
         }
         activeCategory = 'All Clubs';
         categoryBtns.forEach(b => {
           b.classList.toggle('active', b.dataset.category === 'All Clubs');
           b.setAttribute('aria-selected', b.dataset.category === 'All Clubs' ? 'true' : 'false');
         });
+        if (filterTrack) {
+          filterTrack.scrollTo({ left: 0, behavior: 'smooth' });
+        }
         filterClubs();
       });
     }
@@ -440,6 +621,10 @@
         if (statusBox) statusBox.style.display = 'flex';
         statusBadge.textContent = 'Recruiting';
         statusBadge.className = 'status-badge status-open';
+      } else if (data.recruitmentStatus === 'Coming Soon' || data.recruitmentStatus === 'Recruiting Soon') {
+        if (statusBox) statusBox.style.display = 'flex';
+        statusBadge.textContent = 'Recruiting Soon';
+        statusBadge.className = 'status-badge status-soon';
       } else if (data.recruitmentStatus === 'Closed') {
         if (statusBox) statusBox.style.display = 'flex';
         statusBadge.textContent = 'Closed';

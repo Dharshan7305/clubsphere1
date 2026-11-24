@@ -36,7 +36,18 @@ router.get('/', async (req, res) => {
     const mergedClubs = clubs30.map((masterClub) => {
       const existing = dbClubs.find(dbC => normalize(dbC.name) === normalize(masterClub.name));
       if (existing) {
-        const recruitmentStatus = activeClubIds.has(existing._id.toString()) ? 'Open' : null;
+        let recruitmentStatus = null;
+        if (activeClubIds.has(existing._id.toString())) {
+          recruitmentStatus = 'Open';
+        } else if (existing.recruitmentStatus === 'Coming Soon' || existing.recruitmentStatus === 'Recruiting Soon') {
+          recruitmentStatus = 'Recruiting Soon';
+        } else if (existing.recruitmentStatus === 'Open') {
+          recruitmentStatus = 'Open';
+        } else if (existing.recruitmentStatus) {
+          recruitmentStatus = existing.recruitmentStatus;
+        } else if (masterClub.recruitmentStatus) {
+          recruitmentStatus = masterClub.recruitmentStatus;
+        }
 
         return {
           _id: existing._id,
@@ -57,7 +68,9 @@ router.get('/', async (req, res) => {
       return {
         _id: masterClub.code.toLowerCase(),
         ...masterClub,
-        recruitmentStatus: null,
+        recruitmentStatus: (masterClub.recruitmentStatus === 'Coming Soon' || masterClub.recruitmentStatus === 'Recruiting Soon')
+          ? 'Recruiting Soon'
+          : (masterClub.recruitmentStatus || null),
         membersCount: 0
       };
     });
@@ -92,7 +105,7 @@ router.get('/', async (req, res) => {
     }
 
     res.render('clubs/index', {
-      title: 'Discover Your Clubs | ClubSphere',
+      title: 'Discover Clubs | ClubSphere',
       clubs: filteredClubs,
       allClubs: mergedClubs,
       categories: categoryFilters,
@@ -213,8 +226,10 @@ router.get('/:id', async (req, res) => {
     const isRecruitmentOpen = recruitments.length > 0;
     if (isRecruitmentOpen) {
       club.recruitmentStatus = 'Open';
+    } else if (club.recruitmentStatus === 'Coming Soon' || club.recruitmentStatus === 'Recruiting Soon') {
+      club.recruitmentStatus = 'Recruiting Soon';
     } else {
-      club.recruitmentStatus = null;
+      club.recruitmentStatus = club.recruitmentStatus || null;
     }
 
     res.render('clubs/show', {

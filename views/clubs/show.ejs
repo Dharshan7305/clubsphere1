@@ -47,6 +47,8 @@
           <% } %>
           <% if (club.recruitmentStatus === 'Open') { %>
             <span class="club-hero-status-badge badge-status-open">● Membership Open</span>
+          <% } else if (club.recruitmentStatus === 'Coming Soon' || club.recruitmentStatus === 'Recruiting Soon') { %>
+            <span class="club-hero-status-badge badge-status-soon">⏳ Recruiting Soon</span>
           <% } else { %>
             <span class="club-hero-status-badge badge-status-closed">Membership Currently Closed</span>
           <% } %>
@@ -176,6 +178,8 @@
             </h2>
             <% if (club.recruitmentStatus === 'Open') { %>
               <span class="join-status-pill pill-open">Membership Open</span>
+            <% } else if (club.recruitmentStatus === 'Coming Soon' || club.recruitmentStatus === 'Recruiting Soon') { %>
+              <span class="join-status-pill pill-soon">Recruiting Soon</span>
             <% } else { %>
               <span class="join-status-pill pill-closed">Membership Currently Closed</span>
             <% } %>
@@ -185,8 +189,8 @@
           <div class="join-status-banner">
             <div class="join-status-row">
               <span class="join-status-label">Membership Status:</span>
-              <span class="join-status-pill <%= club.recruitmentStatus === 'Open' ? 'pill-open' : 'pill-closed' %>">
-                <%= club.recruitmentStatus === 'Open' ? 'Currently Accepting Members' : 'Membership Currently Closed' %>
+              <span class="join-status-pill <%= club.recruitmentStatus === 'Open' ? 'pill-open' : (club.recruitmentStatus === 'Coming Soon' || club.recruitmentStatus === 'Recruiting Soon' ? 'pill-soon' : 'pill-closed') %>">
+                <%= club.recruitmentStatus === 'Open' ? 'Currently Accepting Members' : ((club.recruitmentStatus === 'Coming Soon' || club.recruitmentStatus === 'Recruiting Soon') ? 'Recruitment Starting Soon' : 'Membership Currently Closed') %>
               </span>
             </div>
 
