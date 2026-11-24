@@ -96,7 +96,7 @@ These accounts are created by `npm run seed` for local development. Use the emai
 
 | Role | Username | Password |
 |---|---|---|
-| Student | `student@college.ac.in` | `password123` |
+| Student | `26mx105@psgtech.ac.in` | `password123` |
 | Core Member | `core@college.ac.in` | `password123` |
 | Tech Music Faculty Advisor | `faculty@college.ac.in` | `password123` |
 | Admin | `admin@college.ac.in` | `password123` |

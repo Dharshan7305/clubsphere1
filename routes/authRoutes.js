@@ -5,6 +5,7 @@ const Club = require('../models/Club');
 const NotificationService = require('../services/notificationService');
 const { ensureGuest } = require('../middleware/auth');
 const PSG_EMAIL_PATTERN = /^\d{2}[a-z]{2}\d{3}@psgtech\.ac\.in$/i;
+const COLLEGE_STAFF_PATTERN = /^[a-z0-9._%+-]+@college\.ac\.in$/i;
 
 // Render Login Page
 router.get('/login', ensureGuest, (req, res) => {
@@ -24,7 +25,17 @@ router.post('/login', ensureGuest, async (req, res) => {
       return res.redirect('/auth/login');
     }
 
-    const user = await User.findOne({ email: email.toLowerCase().trim() }).populate('club');
+    const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
+
+    if (!PSG_EMAIL_PATTERN.test(normalizedEmail) && !COLLEGE_STAFF_PATTERN.test(normalizedEmail)) {
+      req.flash(
+        'error_msg',
+        'Invalid email format. Please use your official PSG Tech email (format: YYdeptNNN@psgtech.ac.in).'
+      );
+      return res.redirect('/auth/login');
+    }
+
+    const user = await User.findOne({ email: normalizedEmail }).populate('club');
     if (!user) {
       req.flash('error_msg', 'Invalid email or password.');
       return res.redirect('/auth/login');
@@ -90,7 +101,20 @@ router.post('/register', ensureGuest, async (req, res) => {
 
     const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
     if (!PSG_EMAIL_PATTERN.test(normalizedEmail)) {
-      req.flash('error_msg', 'Use your PSG Tech email in the format 26mx105@psgtech.ac.in.');
+      req.flash(
+        'error_msg',
+        'Email must be in the official PSG Tech format: YYdeptNNN@psgtech.ac.in (2-digit year + 2-letter department + 3-digit roll number).'
+      );
+      return res.redirect('/auth/register');
+    }
+
+    const emailPrefix = normalizedEmail.split('@')[0];
+    const normalizedRoll = rollNo.trim().toLowerCase();
+    if (normalizedRoll !== emailPrefix && !emailPrefix.endsWith(normalizedRoll)) {
+      req.flash(
+        'error_msg',
+        `Roll number (${rollNo.trim().toUpperCase()}) must match your email (${emailPrefix.toUpperCase()}).`
+      );
       return res.redirect('/auth/register');
     }
 

@@ -57,10 +57,10 @@ async function seedDatabase() {
 
     const studentUser = await User.create({
       name: 'Dharshan R',
-      email: 'student@college.ac.in',
+      email: '26mx105@psgtech.ac.in',
       password: 'password123',
       role: 'student',
-      rollNo: '24MX108',
+      rollNo: '26MX105',
       department: 'Computer Applications',
       year: 1,
       phone: '9842100005'
@@ -227,10 +227,10 @@ async function seedDatabase() {
       student: studentUser._id,
       appliedRole: 'Club Member',
       studentName: 'Dharshan R',
-      rollNo: '24MX108',
+      rollNo: '26MX105',
       department: 'Computer Applications',
       year: 1,
-      email: 'student@college.ac.in',
+      email: '26mx105@psgtech.ac.in',
       phone: '9842100005',
       cgpa: 8.8,
       skills: 'Singing and acoustic guitar',
@@ -259,8 +259,8 @@ async function seedDatabase() {
         {
           student: studentUser._id,
           name: 'Dharshan R',
-          rollNo: '24MX108',
-          email: 'student@college.ac.in',
+          rollNo: '26MX105',
+          email: '26mx105@psgtech.ac.in',
           department: 'Computer Applications',
           phone: '9842100005',
           attended: false
@@ -349,7 +349,7 @@ async function seedDatabase() {
     console.log('✅ DATABASE SEEDING COMPLETED SUCCESSFULLY!');
     console.log('====================================================');
     console.log('Seeded Development Account Credentials:');
-    console.log('1. Student:         student@college.ac.in   / password123');
+    console.log('1. Student:         26mx105@psgtech.ac.in   / password123');
     console.log('2. Core Member:     core@college.ac.in      / password123');
     console.log('3. Faculty Advisor: faculty@college.ac.in   / password123');
     console.log('4. Admin:           admin@college.ac.in     / password123');
