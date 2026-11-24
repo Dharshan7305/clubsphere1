@@ -41,12 +41,8 @@ router.get('/', async (req, res) => {
           recruitmentStatus = 'Open';
         } else if (existing.recruitmentStatus === 'Coming Soon' || existing.recruitmentStatus === 'Recruiting Soon') {
           recruitmentStatus = 'Recruiting Soon';
-        } else if (existing.recruitmentStatus === 'Open') {
-          recruitmentStatus = 'Open';
-        } else if (existing.recruitmentStatus) {
-          recruitmentStatus = existing.recruitmentStatus;
-        } else if (masterClub.recruitmentStatus) {
-          recruitmentStatus = masterClub.recruitmentStatus;
+        } else {
+          recruitmentStatus = 'Closed';
         }
 
         return {
@@ -70,7 +66,7 @@ router.get('/', async (req, res) => {
         ...masterClub,
         recruitmentStatus: (masterClub.recruitmentStatus === 'Coming Soon' || masterClub.recruitmentStatus === 'Recruiting Soon')
           ? 'Recruiting Soon'
-          : (masterClub.recruitmentStatus || null),
+          : 'Closed',
         membersCount: 0
       };
     });
@@ -229,7 +225,7 @@ router.get('/:id', async (req, res) => {
     } else if (club.recruitmentStatus === 'Coming Soon' || club.recruitmentStatus === 'Recruiting Soon') {
       club.recruitmentStatus = 'Recruiting Soon';
     } else {
-      club.recruitmentStatus = club.recruitmentStatus || null;
+      club.recruitmentStatus = 'Closed';
     }
 
     res.render('clubs/show', {
