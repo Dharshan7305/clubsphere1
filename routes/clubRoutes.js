@@ -493,7 +493,6 @@ router.post('/:id/apply', async (req, res) => {
       year: year ? parseInt(year) : (studentUser.year || 1),
       email: email.trim(),
       phone: (phone && phone.trim()) || (studentUser && studentUser.phone) || 'Not provided',
-      cgpa: 8.0,
       skills: skills ? skills.trim() : 'General member',
       whyJoin: whyJoin.trim(),
       status: 'Submitted',

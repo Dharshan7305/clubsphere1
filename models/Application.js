@@ -45,8 +45,7 @@ const ApplicationSchema = new mongoose.Schema({
     default: 'Not provided'
   },
   cgpa: {
-    type: Number,
-    default: 8.0
+    type: Number
   },
   skills: {
     type: String,

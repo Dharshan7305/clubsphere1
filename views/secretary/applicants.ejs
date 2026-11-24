@@ -69,7 +69,6 @@
             <th>Candidate</th>
             <th>Roll No & Dept</th>
             <th>Membership / Role</th>
-            <th>CGPA</th>
             <th>Skills</th>
             <th>Status</th>
             <th>Actions</th>
@@ -88,9 +87,6 @@
               </td>
               <td>
                 <span style="font-weight: 600; color: var(--text-dark);"><%= app.appliedRole %></span>
-              </td>
-              <td>
-                <strong style="color: #047857;"><%= app.cgpa || 'N/A' %></strong>
               </td>
               <td style="max-width: 200px; font-size: 0.825rem; color: #475569;">
                 <%= app.skills.length > 50 ? app.skills.substring(0, 50) + '...' : app.skills %>
@@ -143,10 +139,6 @@
             <div>
               <span style="color: var(--text-muted); font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Dept & Year</span>
               <div id="mDeptYear" style="font-weight: 600;"></div>
-            </div>
-            <div>
-              <span style="color: var(--text-muted); font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">CGPA</span>
-              <div id="mCgpa" style="font-weight: 700; color: #047857;"></div>
             </div>
             <div>
               <span style="color: var(--text-muted); font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Contact</span>
@@ -236,7 +228,6 @@ function openApplicantModal(id) {
   document.getElementById('mCandidateName').innerText = `Review: ${app.studentName}`;
   document.getElementById('mRollNo').innerText = app.rollNo;
   document.getElementById('mDeptYear').innerText = `${app.department} (${app.year} Year)`;
-  document.getElementById('mCgpa').innerText = app.cgpa || 'N/A';
   document.getElementById('mContact').innerText = `${app.phone || ''} | ${app.email || ''}`;
   document.getElementById('mRole').innerText = app.appliedRole;
   document.getElementById('mSkills').innerText = app.skills;
