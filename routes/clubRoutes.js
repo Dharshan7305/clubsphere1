@@ -14,7 +14,7 @@ const { clubs30, categoryFilters } = require('../config/clubsData');
 
 const normalize = str => (str || '').toLowerCase().trim();
 
-// GET /clubs - Discover Clubs Directory
+// GET /clubs - Explore Clubs Directory
 router.get('/', async (req, res) => {
   try {
     const { category, search } = req.query;
@@ -101,7 +101,7 @@ router.get('/', async (req, res) => {
     }
 
     res.render('clubs/index', {
-      title: 'Discover Clubs | ClubSphere',
+      title: 'Explore Clubs | ClubSphere',
       clubs: filteredClubs,
       allClubs: mergedClubs,
       categories: categoryFilters,

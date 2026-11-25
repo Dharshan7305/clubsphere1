@@ -3532,7 +3532,7 @@ textarea.form-control {
 }
 
 /* ========================================================
-   Discover Clubs Page Styling (ClubSphere Purple & White)
+   Explore Clubs Page Styling (ClubSphere Purple & White)
    ======================================================== */
 
 .clubs-discovery-page {
@@ -4556,7 +4556,7 @@ textarea.form-control {
   transform: translateY(-1px);
 }
 
-/* ── Dark Mode for Discover Clubs ── */
+/* ── Dark Mode for Explore Clubs ── */
 [data-theme="dark"] .clubs-discovery-page {
   background: #0B0E17;
   color: #F8FAFC;
