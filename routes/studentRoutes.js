@@ -130,7 +130,7 @@ router.post('/recruitments/:id/apply', async (req, res) => {
     } = req.body;
     const roles = Array.isArray(recruitment.roles) ? recruitment.roles : [];
     const hasRoles = roles.length > 0;
-    const appliedRole = hasRoles ? String(submittedRole || '').trim() : 'Club Member';
+    const appliedRole = hasRoles ? String(submittedRole || '').trim() : 'Executive Member';
     const selectedRoleExists = !hasRoles || roles.some(role => role.roleName === appliedRole);
     const applicantInterests = (skills && skills.trim()) || '';
 

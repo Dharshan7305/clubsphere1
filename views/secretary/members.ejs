@@ -5,7 +5,7 @@
 <main class="container" style="padding-top: 2rem; padding-bottom: 4rem;">
   <div class="section-header">
     <div>
-      <h1 class="section-title">Club Members &amp; Requests</h1>
+      <h1 class="section-title">Executive Members &amp; Requests</h1>
       <p class="section-subtitle">
         Manage members and review join requests for <strong><%= club.name %></strong>. Approved members: <%= club.members.length %> / <%= club.teamLimit %>. Roster entries: <%= members.length %>.
       </p>
@@ -18,7 +18,7 @@
 
   <section class="card" style="margin-bottom: 2rem;">
     <div class="card-header">
-      <h2 style="font-size: 1.05rem; font-weight: 700; color: var(--primary);">Current Club Members</h2>
+      <h2 style="font-size: 1.05rem; font-weight: 700; color: var(--primary);">Current Executive Members</h2>
       <span class="badge badge-category"><%= members.length %></span>
     </div>
     <% if (members.length === 0) { %>
@@ -47,7 +47,7 @@
                 <td><%= member.department || '—' %> · Year <%= member.year || '—' %></td>
                 <td>
                   <span class="badge <%= isCoreMember ? 'badge-category' : 'badge-submitted' %>">
-                    <%= isCoreMember ? 'Core Member' : 'Member' %>
+                    <%= isCoreMember ? 'Core Member' : 'Executive Member' %>
                   </span>
                 </td>
                 <td>
@@ -57,7 +57,7 @@
                         <input type="hidden" name="clubId" value="<%= club._id %>">
                       <% } %>
                       <select name="role" class="form-control" aria-label="Role for <%= member.name %>" required>
-                        <option value="member" <%= isCoreMember ? '' : 'selected' %>>Member</option>
+                        <option value="member" <%= isCoreMember ? '' : 'selected' %>>Executive Member</option>
                         <option value="core" <%= isCoreMember ? 'selected' : '' %>>Core Member</option>
                       </select>
                       <button type="submit" class="btn btn-sm btn-primary">Save</button>

@@ -154,7 +154,7 @@ async function migrateClubDemoContent() {
         email: 'student@college.ac.in'
       }, {
         $set: {
-          appliedRole: 'Club Member',
+          appliedRole: 'Executive Member',
           skills: 'Singing and acoustic guitar',
           priorExperience: 'Performed at college cultural events.',
           whyJoin: 'I enjoy singing and playing music and would like to participate in Tech Music performances.',

@@ -266,11 +266,11 @@ router.post('/members/:memberId/role', async (req, res) => {
 
     const { role } = req.body;
     if (!['member', 'core'].includes(role)) {
-      req.flash('error_msg', 'Choose either Member or Core Member.');
+      req.flash('error_msg', 'Choose either Executive Member or Core Member.');
       return res.redirect('/secretary/members');
     }
     if (!mongoose.Types.ObjectId.isValid(req.params.memberId)) {
-      req.flash('error_msg', 'Club member not found.');
+      req.flash('error_msg', 'Executive member not found.');
       return res.redirect('/secretary/members');
     }
 
@@ -294,7 +294,7 @@ router.post('/members/:memberId/role', async (req, res) => {
     }
 
     if (!['student', 'core'].includes(member.role)) {
-      req.flash('error_msg', 'Only student accounts can be assigned club member roles.');
+      req.flash('error_msg', 'Only student accounts can be assigned executive member roles.');
       return res.redirect('/secretary/members');
     }
 
@@ -355,11 +355,11 @@ router.post('/members/:memberId/role', async (req, res) => {
 
     req.flash(
       'success_msg',
-      `${member.name} is now a ${role === 'core' ? 'Core Member' : 'Member'} of ${currentClub.name}.`
+      `${member.name} is now a ${role === 'core' ? 'Core Member' : 'Executive Member'} of ${currentClub.name}.`
     );
     res.redirect('/secretary/members');
   } catch (error) {
-    console.error('Club Member Role Update Error:', error);
+    console.error('Executive Member Role Update Error:', error);
     req.flash('error_msg', "Could not update this member's club role.");
     res.redirect('/secretary/members');
   }
@@ -601,7 +601,7 @@ router.post('/applications/:id/status', async (req, res) => {
     }
 
     if (application.status === 'Accepted' && status !== 'Accepted') {
-      req.flash('error_msg', 'An accepted student is already a club member and cannot be removed by changing the application status.');
+      req.flash('error_msg', 'An accepted student is already an executive member and cannot be removed by changing the application status.');
       return res.redirect('/secretary/applications');
     }
 

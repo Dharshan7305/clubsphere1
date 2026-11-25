@@ -497,7 +497,7 @@ router.post('/:id/apply', async (req, res) => {
       recruitment: activeRecruitment._id,
       club: club._id,
       student: studentUser._id,
-      appliedRole: (activeRecruitment.roles && activeRecruitment.roles[0] && activeRecruitment.roles[0].roleName) || 'Club Member',
+      appliedRole: (activeRecruitment.roles && activeRecruitment.roles[0] && activeRecruitment.roles[0].roleName) || 'Executive Member',
       studentName: studentName.trim(),
       rollNo: rollNo.trim(),
       department: department || studentUser.department || 'General',

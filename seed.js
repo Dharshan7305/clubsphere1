@@ -225,7 +225,7 @@ async function seedDatabase() {
       recruitment: techMusicRecruitment._id,
       club: techMusicClub._id,
       student: studentUser._id,
-      appliedRole: 'Club Member',
+      appliedRole: 'Executive Member',
       studentName: 'Dharshan R',
       rollNo: '26MX105',
       department: 'Computer Applications',

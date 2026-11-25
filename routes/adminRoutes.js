@@ -142,7 +142,7 @@ router.get('/clubs/:id/people', async (req, res) => {
     const members = [...clubStudentIds]
       .map(id => ({
         user: usersById.get(id) || null,
-        role: coreMemberIds.has(id) ? 'Core Member' : 'Member'
+        role: coreMemberIds.has(id) ? 'Core Member' : 'Executive Member'
       }))
       .filter(member => member.user)
       .sort((a, b) => a.user.name.localeCompare(b.user.name));
