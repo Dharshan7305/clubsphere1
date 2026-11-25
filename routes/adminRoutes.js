@@ -358,6 +358,14 @@ router.post('/users/:id/role', async (req, res) => {
     }
 
     let assignedClub = null;
+    if (role === 'student' && clubId) {
+      assignedClub = await Club.findById(clubId);
+      if (!assignedClub) {
+        req.flash('error_msg', 'Selected club was not found.');
+        return res.redirect('/admin/users');
+      }
+    }
+
     if (role === 'core') {
       if (!clubId) {
         req.flash('error_msg', 'Select a club when assigning a core member.');
@@ -463,6 +471,49 @@ router.post('/users/:id/role', async (req, res) => {
       }
     }
 
+    if (role === 'student' && assignedClub) {
+      const [existingMembership, acceptedApplication] = await Promise.all([
+        Membership.findOne({ club: assignedClub._id, student: user._id }),
+        Application.exists({ club: assignedClub._id, student: user._id, status: 'Accepted' })
+      ]);
+      const alreadyMember = assignedClub.members.some(
+        memberId => memberId.toString() === user._id.toString()
+      ) || (existingMembership && existingMembership.status === 'Approved') || acceptedApplication;
+      const memberLimitFilter = alreadyMember
+        ? {}
+        : {
+          $expr: {
+            $lt: [
+              { $size: { $ifNull: ['$members', []] } },
+              { $ifNull: ['$teamLimit', 50] }
+            ]
+          }
+        };
+      const updatedClub = await Club.findOneAndUpdate(
+        { _id: assignedClub._id, ...memberLimitFilter },
+        { $addToSet: { members: user._id } },
+        { new: true }
+      );
+
+      if (!updatedClub) {
+        req.flash('error_msg', `${assignedClub.name} has reached its member limit of ${assignedClub.teamLimit}.`);
+        return res.redirect('/admin/users');
+      }
+
+      await Membership.findOneAndUpdate(
+        { club: assignedClub._id, student: user._id },
+        {
+          $set: {
+            status: 'Approved',
+            reviewedBy: req.session.user._id,
+            reviewedAt: new Date()
+          },
+          $setOnInsert: { message: 'Added directly by an administrator.' }
+        },
+        { upsert: true, new: true, setDefaultsOnInsert: true }
+      );
+    }
+
     const previousSecretaryClubs = await Club.find({ 'secretary.user': user._id });
     for (const previousClub of previousSecretaryClubs) {
       if (role !== 'secretary' || previousClub._id.toString() !== clubId) {
@@ -503,7 +554,12 @@ router.post('/users/:id/role', async (req, res) => {
       await assignedClub.save();
     }
 
-    req.flash('success_msg', `Role for ${user.name} updated to ${role}.`);
+    req.flash(
+      'success_msg',
+      role === 'student' && assignedClub
+        ? `${user.name} was added to ${assignedClub.name} and their role was updated to student.`
+        : `Role for ${user.name} updated to ${role}.`
+    );
     res.redirect('/admin/users');
   } catch (error) {
     console.error('Update User Error:', error);
